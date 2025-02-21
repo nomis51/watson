@@ -1,3 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Microsoft.Extensions.DependencyInjection;
+using Watson.Abstractions;
+using Watson.Extensions;
 
-Console.WriteLine("Hello, World!");
+var services = new ServiceCollection();
+services.AddAppResources()
+    .BuildServiceProvider()
+    .GetService<ICli>()!
+    .Run();
