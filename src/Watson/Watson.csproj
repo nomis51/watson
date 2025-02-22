@@ -9,7 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Watson.Core\Watson.Core.csproj" />
+        <ProjectReference Include="..\Watson.Core\Watson.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
     </ItemGroup>
 
 </Project>

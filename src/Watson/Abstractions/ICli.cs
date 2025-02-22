@@ -2,5 +2,5 @@
 
 public interface ICli
 {
-   void Run();
+   Task<int> Run(string[] args);
 }

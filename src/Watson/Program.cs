@@ -3,7 +3,7 @@ using Watson.Abstractions;
 using Watson.Extensions;
 
 var services = new ServiceCollection();
-services.AddAppResources()
+return await services.AddAppResources()
     .BuildServiceProvider()
     .GetService<ICli>()!
-    .Run();
+    .Run(args);
