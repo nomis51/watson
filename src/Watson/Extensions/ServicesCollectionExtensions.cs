@@ -53,6 +53,7 @@ public static class ServicesCollectionExtensions
         services.AddSingleton<DependencyResolver>();
         services.AddSingleton<IFrameRepository, FrameRepository>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
+        services.AddSingleton<ITagRepository, TagRepository>();
     }
 
     #endregion

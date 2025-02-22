@@ -24,6 +24,7 @@ public class CreateCommand : Command<CreateOptions>
         return options.Resource switch
         {
             "project" => await CreateProject(options.Name),
+            "tag" => await CreateTag(options.Name),
             _ => 1
         };
     }
@@ -31,6 +32,16 @@ public class CreateCommand : Command<CreateOptions>
     #endregion
 
     #region Private methods
+
+    private async Task<int> CreateTag(string name)
+    {
+        var tag = new Tag
+        {
+            Name = name
+        };
+
+        return await DependencyResolver.TagRepository.InsertAsync(tag) ? 0 : 1;
+    }
 
     private async Task<int> CreateProject(string name)
     {
