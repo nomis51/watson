@@ -75,5 +75,17 @@ public abstract class Repository<TModel> : IRepository<TModel>
     protected abstract void InitializeTable();
     protected abstract string BuildInsertQuery();
 
+    protected void CreateIndexIfNotExists(string indexName, string statement)
+    {
+        var result = DbContext.Connection.QuerySingleOrDefault<string>(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name=@IndexName",
+            new { IndexName = indexName }
+        );
+
+        if (!string.IsNullOrEmpty(result)) return;
+
+        DbContext.Connection.Execute(statement);
+    }
+
     #endregion
 }
