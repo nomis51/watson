@@ -1,6 +1,6 @@
 ﻿namespace Watson.Commands.Abstractions;
 
-public interface ICommand<TOptions>
+public interface ICommand<in TOptions>
 {
-   Task<int> Run(TOptions options);
+    Task<int> Run(TOptions options);
 }

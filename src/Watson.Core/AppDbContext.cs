@@ -20,7 +20,7 @@ public class AppDbContext : IAppDbContext
             $".{nameof(Watson).ToLower()}",
             "data.db"
         );
-        Connection = new SqliteConnection($"Data Source={filePath}; Version=3;");
+        Connection = new SqliteConnection($"Data Source={filePath};");
     }
 
     #endregion

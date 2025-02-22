@@ -6,48 +6,54 @@ using Watson.Core;
 using Watson.Core.Abstractions;
 using Watson.Core.Helpers;
 using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Models;
 
 namespace Watson.Extensions;
 
 public static class ServicesCollectionExtensions
 {
-   #region Public methods
+    #region Public methods
 
-   public static IServiceCollection AddAppResources(this IServiceCollection services)
-   {
-      ConfigureLogging(services);
-      RegisterServices(services);
-      
-      services.AddSingleton<ICli, Cli>();
-      return services;
-   }
+    public static IServiceCollection AddAppResources(this IServiceCollection services)
+    {
+        ConfigureLogging(services);
+        RegisterServices(services);
 
-   #endregion
+        services.AddSingleton<ICli, Cli>();
+        return services;
+    }
 
-   #region Private methods
-   
-   private  static void ConfigureLogging(IServiceCollection services)
-   {
-      Log.Logger = new LoggerConfiguration()
-         .WriteTo.File(
-            Path.Join(
-               Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-               $".{nameof(Watson).ToLower()}",
-               "logs",
-               ".txt"
+    #endregion
+
+    #region Private methods
+
+    private static void ConfigureLogging(IServiceCollection services)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(
+                Path.Join(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    $".{nameof(Watson).ToLower()}",
+                    "logs",
+                    ".txt"
+                )
             )
-         )
-         .CreateLogger();
+            .CreateLogger();
 
-      services.AddLogging();
-      services.AddSerilog();
-   }
+        services.AddLogging();
+        services.AddSerilog();
+    }
 
-   private static void RegisterServices(IServiceCollection services)
-   {
-      services.AddSingleton<IAppDbContext, AppDbContext>();
-      services.AddSingleton<IIdHelper, IdHelper>();
-   }
+    private static void RegisterServices(IServiceCollection services)
+    {
+        services.AddSingleton<IAppDbContext, AppDbContext>();
+        services.AddSingleton<IIdHelper, IdHelper>();
+        services.AddSingleton<DependencyResolver>();
+        services.AddSingleton<IFrameRepository, FrameRepository>();
+        services.AddSingleton<IProjectRepository, ProjectRepository>();
+    }
 
-   #endregion
+    #endregion
 }

@@ -1,0 +1,46 @@
+﻿using Watson.Core.Models;
+using Watson.Models;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class CreateCommand : Command<CreateOptions>
+{
+    #region Constructors
+
+    public CreateCommand(DependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task<int> Run(CreateOptions options)
+    {
+        if (string.IsNullOrEmpty(options.Resource)) return 1;
+        if (string.IsNullOrEmpty(options.Name)) return 1;
+
+        return options.Resource switch
+        {
+            "project" => await CreateProject(options.Name),
+            _ => 1
+        };
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task<int> CreateProject(string name)
+    {
+        var project = new Project
+        {
+            Name = name
+        };
+
+        return await DependencyResolver.ProjectRepository.InsertAsync(project) ? 0 : 1;
+    }
+
+    #endregion
+}

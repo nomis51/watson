@@ -6,19 +6,18 @@ namespace Watson.Core.Helpers;
 
 public class IdHelper : IIdHelper
 {
-   #region Constants
+    #region Constants
 
-  private const string Base36Chars = "0123456789abcdefghijklmnopqrstuvwxyz"; 
+    private const string Base36Chars = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-   #endregion
-   
-   #region Public methods
+    #endregion
 
-   public string GenerateId(int length = 8)
+    #region Public methods
+
+    public string GenerateId(int length = 8)
     {
         var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
-        return ToBase36(bytes, length);
-
+        return ToBase36(bytes, length)[..length];
     }
 
     #endregion
@@ -26,19 +25,18 @@ public class IdHelper : IIdHelper
     #region Private methods
 
     private static string ToBase36(byte[] bytes, int length)
-   {
-       var value = BitConverter.ToUInt64(bytes.Take(length).ToArray(), 0);
-       StringBuilder sb = new();
+    {
+        var value = BitConverter.ToUInt64(bytes.Take(length).ToArray(), 0);
+        StringBuilder sb = new();
 
-       while (value > 0)
-       {
-           sb.Append(Base36Chars[(int)(value % 36)]);
-           value /= 36;
-       }
+        while (value > 0)
+        {
+            sb.Append(Base36Chars[(int)(value % 36)]);
+            value /= 36;
+        }
 
-       return sb.ToString().PadLeft(length, '0');
+        return sb.ToString().PadLeft(length, '0');
+    }
 
-   } 
-
-   #endregion
+    #endregion
 }

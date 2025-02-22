@@ -2,6 +2,7 @@
 using System.Reflection;
 using Dapper;
 using Watson.Core.Abstractions;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Models;
 using Watson.Core.Repositories.Abstractions;
 
@@ -9,25 +10,100 @@ namespace Watson.Core.Repositories;
 
 public class FrameRepository : Repository<Frame>, IFrameRepository
 {
+    #region Props
+
+    private static string ProjectTableName => typeof(Project).GetCustomAttribute<DescriptionAttribute>()!.Description;
+    private static string TagTableName => typeof(Tag).GetCustomAttribute<DescriptionAttribute>()!.Description;
+
+    private string FrameTagTableName => string.Join(
+        "_",
+        TableName,
+        TagTableName
+    );
+
+    #endregion
+
     #region Constructors
 
-    public FrameRepository(IAppDbContext dbContext) : base(dbContext)
+    public FrameRepository(IAppDbContext dbContext, IIdHelper idHelper) : base(dbContext, idHelper)
     {
-        InitializeTable();
     }
 
     #endregion
 
     #region Protected methods
 
+    public override async Task<Frame?> GetByIdAsync(string id)
+    {
+        var frame = await base.GetByIdAsync(id);
+        if (frame is null) return null;
+
+        var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+            $"SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId",
+            new { frame.ProjectId }
+        );
+        frame.Project = project;
+
+        var tags = await DbContext.Connection.QueryAsync<Tag>(
+            $"SELECT * FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE FrameId = @FrameId",
+            new { FrameId = id }
+        );
+        frame.Tags = tags.ToList();
+
+        return frame;
+    }
+
+    public override async Task<IEnumerable<Frame>> GetAsync()
+    {
+        var frames = await base.GetAsync();
+        var framesList = frames.ToList();
+
+        foreach (var frame in framesList)
+        {
+            var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+                $"SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId",
+                new { frame.ProjectId }
+            );
+            frame.Project = project;
+
+            var tags = await DbContext.Connection.QueryAsync<Tag>(
+                $"SELECT {TagTableName}.* FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE FrameId = @FrameId",
+                new { FrameId = frame.Id }
+            );
+            frame.Tags = tags.ToList();
+        }
+
+        return framesList;
+    }
+
     protected override void InitializeTable()
     {
         var sql = $"""
-                   CREATE TABLE IF NOT EXISTS {typeof(Frame).GetCustomAttribute<DescriptionAttribute>()!.Description} (
-                      Id TEXT NOT NULL PRIMARY KEY,
-                   )
+                   CREATE TABLE IF NOT EXISTS {TableName} (
+                      Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                      Timestamp INTEGER NOT NULL,
+                      ProjectId TEXT NOT NULL
+                   );
+                   CREATE UNIQUE INDEX idx_{TableName}_pk ON {TableName} (Id);
                    """;
-        var result = DbContext.Connection.Execute(sql);
+        DbContext.Connection.Execute(sql);
+
+        sql = $"""
+               CREATE TABLE IF NOT EXISTS {FrameTagTableName} (
+                  Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                  FrameId TEXT NOT NULL,
+                  TagId TEXT NOT NULL
+               );
+               CREATE UNIQUE INDEX idx_{FrameTagTableName}_pk ON {FrameTagTableName} (Id);
+               CREATE INDEX idx_{FrameTagTableName}_FrameId_fk ON {FrameTagTableName} (FrameId);
+               CREATE INDEX idx_{FrameTagTableName}_TagId_fk ON {FrameTagTableName} (TagId);
+               """;
+        DbContext.Connection.Execute(sql);
+    }
+
+    protected override string BuildInsertQuery()
+    {
+        return $"INSERT INTO {TableName} (Id, Timestamp, ProjectId) VALUES (@Id, @Timestamp, @ProjectId)";
     }
 
     #endregion
