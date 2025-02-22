@@ -2,6 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
 
 namespace Watson.Extensions;
 
@@ -27,7 +31,8 @@ public static class ServicesCollectionExtensions
       Log.Logger = new LoggerConfiguration()
          .WriteTo.File(
             Path.Join(
-               Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+               Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+               $".{nameof(Watson).ToLower()}",
                "logs",
                ".txt"
             )
@@ -40,7 +45,8 @@ public static class ServicesCollectionExtensions
 
    private static void RegisterServices(IServiceCollection services)
    {
-      
+      services.AddSingleton<IAppDbContext, AppDbContext>();
+      services.AddSingleton<IIdHelper, IdHelper>();
    }
 
    #endregion
