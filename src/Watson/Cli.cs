@@ -1,8 +1,6 @@
 ﻿using CommandLine;
 using Watson.Abstractions;
 using Watson.Commands;
-using Watson.Core.Repositories.Abstractions;
-using Watson.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 

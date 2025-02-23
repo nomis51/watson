@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
 using Watson.Core;
@@ -8,6 +7,8 @@ using Watson.Core.Helpers;
 using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Helpers.Abstractions;
 using Watson.Models;
 using Watson.Models.Abstractions;
 
@@ -50,8 +51,12 @@ public static class ServicesCollectionExtensions
     private static void RegisterServices(IServiceCollection services)
     {
         services.AddSingleton<IAppDbContext, AppDbContext>();
+
         services.AddSingleton<IIdHelper, IdHelper>();
+        services.AddSingleton<ITimeHelper, TimeHelper>();
+        services.AddSingleton<IFrameHelper, FrameHelper>();
         services.AddSingleton<IDependencyResolver, DependencyResolver>();
+
         services.AddSingleton<IFrameRepository, FrameRepository>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
         services.AddSingleton<ITagRepository, TagRepository>();

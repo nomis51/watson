@@ -36,6 +36,20 @@ public class TagRepository : Repository<Tag>, ITagRepository
             );
     }
 
+    public async Task<bool> EnsureTagsExists(IEnumerable<string> tags)
+    {
+        foreach (var tag in tags)
+        {
+            var existingTag = await GetByNameAsync(tag);
+            if (existingTag is not null) continue;
+
+            var tagEntity = new Tag { Name = tag };
+            if (!InsertAsync(tagEntity).Result) return false;
+        }
+
+        return true;
+    }
+
     #endregion
 
     #region Protected methods

@@ -6,4 +6,5 @@ public interface IProjectRepository : IRepository<Project>
 {
     Task<bool> DoesNameExistAsync(string name);
     Task<Project?> GetByNameAsync(string name);
+    Task<Project?> EnsureNameExistsAsync(string name);
 }

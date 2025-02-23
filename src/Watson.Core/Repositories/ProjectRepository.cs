@@ -36,8 +36,22 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
             );
     }
 
-    #endregion
+    public async Task<Project?> EnsureNameExistsAsync(string name)
+    {
+        var existingProject = await GetByNameAsync(name);
+        if (existingProject is not null) return existingProject;
 
+        var project = new Project
+        {
+            Name = name
+        };
+
+        if (!await InsertAsync(project)) return null;
+
+        return project;
+    }
+
+    #endregion
 
     #region Protected methods
 

@@ -1,9 +1,9 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using NSubstitute;
+﻿using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core.Models;
 using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -31,9 +31,19 @@ public class AddCommandTests
             .Returns(_tagRepository);
         dependencyResolver.ProjectRepository
             .Returns(_projectRepository);
+        dependencyResolver.FrameHelper
+            .Returns(new FrameHelper(_frameRepository));
+        dependencyResolver.TimeHelper
+            .Returns(new TimeHelper());
 
         _projectRepository.GetByNameAsync(Arg.Any<string>())
             .Returns(new Project { Id = "sut" });
+        _projectRepository.EnsureNameExistsAsync(Arg.Any<string>())
+            .Returns(new Project());
+
+        _tagRepository.EnsureTagsExists(Arg.Any<IEnumerable<string>>())
+            .Returns(true);
+
         _frameRepository.InsertAsync(Arg.Any<Frame>())
             .Returns(true);
         _frameRepository.UpdateAsync(Arg.Any<Frame>())
@@ -88,14 +98,6 @@ public class AddCommandTests
         {
             Project = "sut"
         };
-        _projectRepository.GetByNameAsync(Arg.Any<string>())
-            .Returns(default(Project));
-        _projectRepository.InsertAsync(Arg.Any<Project>())
-            .Returns(e =>
-            {
-                e.Arg<Project>().Id = "id";
-                return true;
-            });
 
         // Act
         var result = await _sut.Run(options);
@@ -103,7 +105,7 @@ public class AddCommandTests
         // Assert
         result.ShouldBe(0);
         await _projectRepository.Received()
-            .InsertAsync(Arg.Is<Project>(p => p.Name == "sut"));
+            .EnsureNameExistsAsync(options.Project);
     }
 
     [Fact]
@@ -115,20 +117,16 @@ public class AddCommandTests
             Project = "sut",
             Tags = ["a", "b"]
         };
-        _tagRepository.GetByNameAsync("a")
-            .Returns(default(Tag));
-        _tagRepository.GetByNameAsync("b")
-            .Returns(new Tag());
-        _tagRepository.InsertAsync(Arg.Any<Tag>())
+        _tagRepository.EnsureTagsExists(Arg.Any<IEnumerable<string>>())
             .Returns(true);
-        
+
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
         await _tagRepository.Received()
-            .InsertAsync(Arg.Is<Tag>(t => t.Name == "a"));
+            .EnsureTagsExists(Arg.Is<IEnumerable<string>>(e => e.Contains("a") && e.Contains("b")));
     }
 
     [InlineData("3-27 1345", "$year-03-27 13:45")]
@@ -262,6 +260,7 @@ public class AddCommandTests
             .Returns(new Frame());
         _frameRepository.GetPreviousFrameAsync(toTime)
             .Returns(default(Frame));
+
 
         // Act
         var result = await _sut.Run(options);
@@ -425,10 +424,8 @@ public class AddCommandTests
         {
             Project = "sut"
         };
-        _projectRepository.GetByNameAsync(Arg.Any<string>())
+        _projectRepository.EnsureNameExistsAsync(Arg.Any<string>())
             .Returns(default(Project));
-        _projectRepository.InsertAsync(Arg.Any<Project>())
-            .Returns(false);
 
         // Act
         var result = await _sut.Run(options);
@@ -633,6 +630,6 @@ public class AddCommandTests
         // Assert
         result.ShouldBe(1);
     }
-    
+
     #endregion
 }

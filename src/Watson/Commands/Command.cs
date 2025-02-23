@@ -1,5 +1,4 @@
 ﻿using Watson.Commands.Abstractions;
-using Watson.Models;
 using Watson.Models.Abstractions;
 
 namespace Watson.Commands;

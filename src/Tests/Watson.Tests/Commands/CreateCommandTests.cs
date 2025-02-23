@@ -3,7 +3,6 @@ using Shouldly;
 using Watson.Commands;
 using Watson.Core.Models;
 using Watson.Core.Repositories.Abstractions;
-using Watson.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
