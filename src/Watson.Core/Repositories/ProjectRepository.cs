@@ -27,6 +27,15 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
             );
     }
 
+    public Task<Project?> GetByNameAsync(string name)
+    {
+        return DbContext.Connection
+            .QueryFirstOrDefaultAsync<Project>(
+                $"SELECT * FROM {TableName} WHERE Name = @Name",
+                new { Name = name }
+            );
+    }
+
     #endregion
 
 
@@ -49,6 +58,11 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
     protected override string BuildInsertQuery()
     {
         return $"INSERT INTO {TableName} (Id, Name) VALUES (@Id, @Name)";
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $"UPDATE {TableName} SET Name = @Name WHERE Id = @Id";
     }
 
     #endregion

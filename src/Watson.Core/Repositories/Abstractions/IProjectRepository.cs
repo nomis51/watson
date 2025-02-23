@@ -5,4 +5,5 @@ namespace Watson.Core.Repositories.Abstractions;
 public interface IProjectRepository : IRepository<Project>
 {
     Task<bool> DoesNameExistAsync(string name);
+    Task<Project?> GetByNameAsync(string name);
 }

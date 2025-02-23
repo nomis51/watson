@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices.JavaScript;
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
@@ -32,7 +32,11 @@ public class AddCommandTests
         dependencyResolver.ProjectRepository
             .Returns(_projectRepository);
 
+        _projectRepository.GetByNameAsync(Arg.Any<string>())
+            .Returns(new Project { Id = "sut" });
         _frameRepository.InsertAsync(Arg.Any<Frame>())
+            .Returns(true);
+        _frameRepository.UpdateAsync(Arg.Any<Frame>())
             .Returns(true);
 
         _sut = new AddCommand(dependencyResolver);
@@ -74,6 +78,57 @@ public class AddCommandTests
 
         // Assert
         result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Run_ShouldInsertProject_WhenMissing()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            Project = "sut"
+        };
+        _projectRepository.GetByNameAsync(Arg.Any<string>())
+            .Returns(default(Project));
+        _projectRepository.InsertAsync(Arg.Any<Project>())
+            .Returns(e =>
+            {
+                e.Arg<Project>().Id = "id";
+                return true;
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _projectRepository.Received()
+            .InsertAsync(Arg.Is<Project>(p => p.Name == "sut"));
+    }
+
+    [Fact]
+    public async Task Run_ShouldInsertTags_WhenMissing()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            Project = "sut",
+            Tags = ["a", "b"]
+        };
+        _tagRepository.GetByNameAsync("a")
+            .Returns(default(Tag));
+        _tagRepository.GetByNameAsync("b")
+            .Returns(new Tag());
+        _tagRepository.InsertAsync(Arg.Any<Tag>())
+            .Returns(true);
+        
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _tagRepository.Received()
+            .InsertAsync(Arg.Is<Tag>(t => t.Name == "a"));
     }
 
     [InlineData("3-27 1345", "$year-03-27 13:45")]
@@ -121,5 +176,463 @@ public class AddCommandTests
         actualFromTime.ShouldBe(expectedTime);
     }
 
+    [Fact]
+    public async Task Run_ShouldInsertNormally_WhenNoToTime()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            Project = "sut"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(f => f.ProjectId == "sut"));
+    }
+
+    [Fact]
+    public async Task Run_ShouldInsertNormally_WhenFromTimeDoesntMeetAnyFrames()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            Project = "sut",
+            ToTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(Arg.Any<DateTimeOffset>())
+            .Returns(default(Frame));
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "sut"));
+    }
+
+    [Fact]
+    public async Task Run_ShouldInsertNormally_WhenFromTimeDoesntMeetAnyPreviousFrame_BeginningOfTheDay()
+    {
+        // Arrange
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = DateTimeOffset.UtcNow.Date.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(Arg.Any<DateTimeOffset>())
+            .Returns(new Frame
+            {
+                ProjectId = "next frame",
+                Timestamp = new DateTimeOffset(DateTimeOffset.UtcNow.Date.AddMinutes(1)).ToUnixTimeSeconds()
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "sut"));
+        await _frameRepository.Received()
+            .UpdateAsync(Arg.Is<Frame>(e => e.ProjectId == "next frame" &&
+                                            e.Timestamp == new DateTimeOffset(toTime).ToUnixTimeSeconds()
+            ));
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeMeetsPrevious_AndToTimeDoesntMeetAnyPreviousFrame()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame());
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(default(Frame));
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldNotBe(1);
+    }
+
+    [Fact]
+    public async Task
+        Run_ShouldInsertAndCopyFromTimePreviousFrameToCreateNewNextFrame_WhenFromTimeAndToTimeHaveTheSamePreviousFrame()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(Arg.Any<DateTimeOffset>())
+            .Returns(new Frame());
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "toTime previous frame"
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "sut"));
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "fromTime previous frame" &&
+                                            e.Timestamp == new DateTimeOffset(toTime).ToUnixTimeSeconds()
+            ));
+    }
+
+    [Fact]
+    public async Task Run_ShouldInsertAndUpdateFromTimeNextFrameToToTime_WhenFromTimeAndToTimeAreOverTwoFrames()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime next frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime previous frame"
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "sut"));
+        await _frameRepository.Received()
+            .UpdateAsync(Arg.Is<Frame>(e => e.ProjectId == "toTime previous frame" &&
+                                            e.Timestamp == new DateTimeOffset(toTime).ToUnixTimeSeconds()
+            ));
+    }
+
+    [Fact]
+    public async Task
+        Run_ShouldInsertAndUpdateToTimeNextFrameAndDeleteMiddleFrames_WhenFromAndToTimeAreOverMultipleFrames()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+            .Returns([
+                new Frame
+                {
+                    Id = "id1"
+                },
+                new Frame
+                {
+                    Id = "id2"
+                }
+            ]);
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime next frame",
+                Timestamp = 0
+            });
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id2",
+                ProjectId = "toTime previous frame",
+                Timestamp = 0
+            });
+        _frameRepository.DeleteManyAsync(Arg.Any<IEnumerable<string>>())
+            .Returns(true);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _frameRepository.Received()
+            .InsertAsync(Arg.Is<Frame>(e => e.ProjectId == "sut"));
+        await _frameRepository.Received()
+            .UpdateAsync(Arg.Is<Frame>(e => e.ProjectId == "toTime next frame" &&
+                                            e.Timestamp == new DateTimeOffset(toTime).ToUnixTimeSeconds()
+            ));
+        await _frameRepository.Received()
+            .DeleteManyAsync(Arg.Is<IEnumerable<string>>(e => e.Contains("id1") && e.Contains("id2")));
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenProjectFailToExists()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            Project = "sut"
+        };
+        _projectRepository.GetByNameAsync(Arg.Any<string>())
+            .Returns(default(Project));
+        _projectRepository.InsertAsync(Arg.Any<Project>())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeDoesntMeetAnyPreviousFrame_BeginningOfTheDay_ButFailToInsert()
+    {
+        // Arrange
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = DateTimeOffset.UtcNow.Date.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(Arg.Any<DateTimeOffset>())
+            .Returns(new Frame
+            {
+                ProjectId = "next frame",
+                Timestamp = new DateTimeOffset(DateTimeOffset.UtcNow.Date.AddMinutes(1)).ToUnixTimeSeconds()
+            });
+        _frameRepository.InsertAsync(Arg.Any<Frame>())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeHasPreviousFrame_ButToTimeDont()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame());
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(default(Frame));
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame());
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenInsertFailOverTwoFrames()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime next frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime previous frame"
+            });
+        _frameRepository.InsertAsync(Arg.Any<Frame>())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenInsertFailsOverMultipleFrames()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+            .Returns([
+                new Frame
+                {
+                    Id = "id1"
+                },
+                new Frame
+                {
+                    Id = "id2"
+                }
+            ]);
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime next frame",
+                Timestamp = 0
+            });
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id2",
+                ProjectId = "toTime previous frame",
+                Timestamp = 0
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenDeletingMiddleFramesFails()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.Date;
+        var toTime = DateTimeOffset.UtcNow.Date.AddMinutes(2);
+        var options = new AddOptions
+        {
+            Project = "sut",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+            .Returns([
+                new Frame
+                {
+                    Id = "id1"
+                },
+                new Frame
+                {
+                    Id = "id2"
+                }
+            ]);
+        _frameRepository.GetNextFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id1",
+                ProjectId = "toTime next frame",
+                Timestamp = 0
+            });
+        _frameRepository.GetPreviousFrameAsync(fromTime)
+            .Returns(new Frame
+            {
+                Id = "id",
+                ProjectId = "fromTime previous frame"
+            });
+        _frameRepository.GetPreviousFrameAsync(toTime)
+            .Returns(new Frame
+            {
+                Id = "id2",
+                ProjectId = "toTime previous frame",
+                Timestamp = 0
+            });
+        _frameRepository.DeleteManyAsync(Arg.Any<IEnumerable<string>>())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+    
     #endregion
 }

@@ -188,13 +188,121 @@ public partial class AddCommand : Command<AddOptions>
         IEnumerable<string> tags
     )
     {
+        var projectId = await EnsureProjectExists(project);
+        if (string.IsNullOrEmpty(projectId)) return 1;
+
+        if (!await EnsureTagsExists(tags)) return 1;
+
+        fromTime ??= DateTimeOffset.UtcNow;
         var frame = new Frame
         {
             ProjectId = project,
-            Timestamp = fromTime?.ToUnixTimeSeconds() ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            Timestamp = fromTime.Value.ToUnixTimeSeconds()
         };
 
-        return await DependencyResolver.FrameRepository.InsertAsync(frame) ? 0 : 1;
+        if (toTime is null)
+        {
+            return await DependencyResolver.FrameRepository.InsertAsync(frame) ? 0 : 1;
+        }
+
+        var toTimeNextFrame = await DependencyResolver.FrameRepository.GetNextFrameAsync(toTime.Value);
+        if (toTimeNextFrame is null)
+        {
+            return await DependencyResolver.FrameRepository.InsertAsync(frame) ? 0 : 1;
+        }
+
+        var fromTimePreviousFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(fromTime.Value);
+        if (fromTimePreviousFrame is null)
+        {
+            // we're at the beginning of the day
+            var result = await DependencyResolver.FrameRepository.InsertAsync(frame);
+            if (!result) return 1;
+
+            toTimeNextFrame.Timestamp = toTime.Value.ToUnixTimeSeconds();
+            result = await DependencyResolver.FrameRepository.UpdateAsync(toTimeNextFrame);
+
+            return result ? 0 : 1;
+        }
+
+        var toTimePreviousFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(toTime.Value);
+        if (toTimePreviousFrame is null)
+        {
+            // we have a problem, toTime cannot not have a previous if fromTime does
+            return 1;
+        }
+
+        if (fromTimePreviousFrame.Id == toTimePreviousFrame.Id)
+        {
+            // same previous frame, means the frame is contained in a single frame
+            // we add the new one, and cloned the previous frame and add it after the new frame with toTime
+            var result = await DependencyResolver.FrameRepository.InsertAsync(frame);
+            if (!result) return 1;
+
+            fromTimePreviousFrame.Timestamp = toTime.Value.ToUnixTimeSeconds();
+            fromTimePreviousFrame.Id = string.Empty;
+            result = await DependencyResolver.FrameRepository.InsertAsync(fromTimePreviousFrame);
+            return result ? 0 : 1;
+        }
+
+        // if not the same previous frame, but toTime previous frame is fromTime next frame
+        if (toTimePreviousFrame.Id == toTimeNextFrame.Id)
+        {
+            // we're over 2 frames
+            var result = await DependencyResolver.FrameRepository.InsertAsync(frame);
+            if (!result) return 1;
+
+            toTimePreviousFrame.Timestamp = toTime.Value.ToUnixTimeSeconds();
+            result = await DependencyResolver.FrameRepository.UpdateAsync(toTimePreviousFrame);
+
+            return result ? 0 : 1;
+        }
+
+        // we're over multiple frames, so we delete the middle frames
+        var framesToDelete = await DependencyResolver.FrameRepository.GetAsync(
+            DateTimeOffset.FromUnixTimeSeconds(toTimeNextFrame.Timestamp),
+            DateTimeOffset.FromUnixTimeSeconds(toTimePreviousFrame.Timestamp)
+        );
+
+        var result2 = await DependencyResolver.FrameRepository.DeleteManyAsync(
+            framesToDelete.Select(e => e.Id)
+        );
+        if (!result2) return 1;
+
+        result2 = await DependencyResolver.FrameRepository.InsertAsync(frame);
+        if (!result2) return 1;
+
+        toTimeNextFrame.Timestamp = toTime.Value.ToUnixTimeSeconds();
+        result2 = await DependencyResolver.FrameRepository.UpdateAsync(toTimeNextFrame);
+        return result2 ? 0 : 1;
+    }
+
+    private async Task<string> EnsureProjectExists(string name)
+    {
+        var existingProject = await DependencyResolver.ProjectRepository.GetByNameAsync(name);
+        if (existingProject is not null) return existingProject.Id;
+
+        var project = new Project
+        {
+            Name = name
+        };
+
+        if (!await DependencyResolver.ProjectRepository.InsertAsync(project)) return string.Empty;
+
+        return project.Id;
+    }
+
+    private async Task<bool> EnsureTagsExists(IEnumerable<string> tags)
+    {
+        foreach (var tag in tags)
+        {
+            var existingTag = await DependencyResolver.TagRepository.GetByNameAsync(tag);
+            if (existingTag is not null) continue;
+
+            var tagEntity = new Tag { Name = tag };
+            if (!await DependencyResolver.TagRepository.InsertAsync(tagEntity)) return false;
+        }
+
+        return true;
     }
 
     #endregion

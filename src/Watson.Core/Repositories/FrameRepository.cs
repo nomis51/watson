@@ -31,7 +31,7 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
     #endregion
 
-    #region Protected methods
+    #region Public methods
 
     public override async Task<Frame?> GetByIdAsync(string id)
     {
@@ -75,6 +75,38 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
         return framesList;
     }
+
+    public Task<Frame?> GetNextFrameAsync(DateTimeOffset time)
+    {
+        var timestamp = time.ToUnixTimeSeconds();
+        return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+            $"SELECT * FROM {TableName} WHERE Timestamp > @Timestamp ORDER BY Timestamp DESC LIMIT 1",
+            new { Timestamp = timestamp }
+        );
+    }
+
+    public Task<Frame?> GetPreviousFrameAsync(DateTimeOffset time)
+    {
+        var timestamp = time.ToUnixTimeSeconds();
+        return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+            $"SELECT * FROM {TableName} WHERE Timestamp < @Timestamp ORDER BY Timestamp ASC LIMIT 1",
+            new { Timestamp = timestamp }
+        );
+    }
+
+    public Task<IEnumerable<Frame>> GetAsync(DateTimeOffset fromTime, DateTimeOffset toTime)
+    {
+        var fromTimestamp = fromTime.ToUnixTimeSeconds();
+        var toTimestamp = toTime.ToUnixTimeSeconds();
+        return DbContext.Connection.QueryAsync<Frame>(
+            $"SELECT * FROM {TableName} WHERE Timestamp >= @FromTimestamp AND Timestamp <= @ToTimestamp ORDER BY Timestamp ASC",
+            new { FromTimestamp = fromTimestamp, ToTimestamp = toTimestamp }
+        );
+    }
+
+    #endregion
+
+    #region Protected methods
 
     protected override void InitializeTable()
     {
@@ -120,6 +152,11 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     protected override string BuildInsertQuery()
     {
         return $"INSERT INTO {TableName} (Id, Timestamp, ProjectId) VALUES (@Id, @Timestamp, @ProjectId)";
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $"UPDATE {TableName} SET Timestamp = @Timestamp, ProjectId = @ProjectId WHERE Id = @Id";
     }
 
     #endregion

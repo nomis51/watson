@@ -27,6 +27,15 @@ public class TagRepository : Repository<Tag>, ITagRepository
             );
     }
 
+    public Task<Tag?> GetByNameAsync(string name)
+    {
+        return DbContext.Connection
+            .QueryFirstOrDefaultAsync<Tag>(
+                $"SELECT * FROM {TableName} WHERE Name = @Name",
+                new { Name = name }
+            );
+    }
+
     #endregion
 
     #region Protected methods
@@ -51,6 +60,11 @@ public class TagRepository : Repository<Tag>, ITagRepository
     protected override string BuildInsertQuery()
     {
         return $"INSERT INTO {TableName} (Id, Name) VALUES (@Id, @Name)";
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $"UPDATE {TableName} SET Name = @Name WHERE Id = @Id";
     }
 
     #endregion

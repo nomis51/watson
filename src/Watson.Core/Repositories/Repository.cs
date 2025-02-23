@@ -68,12 +68,30 @@ public abstract class Repository<TModel> : IRepository<TModel>
         return result > 0;
     }
 
+    public async Task<bool> UpdateAsync(TModel model)
+    {
+        if (string.IsNullOrEmpty(model.Id)) return false;
+
+        var sql = BuildUpdateQuery();
+
+        var result = await DbContext.Connection.ExecuteAsync(sql, model);
+        return result > 0;
+    }
+
+    public async Task<bool> DeleteManyAsync(IEnumerable<string> ids)
+    {
+        var lstIds = ids.ToList();
+        var sql = $"DELETE FROM {TableName} WHERE Id IN @Ids";
+        return await DbContext.Connection.ExecuteAsync(sql, new { Ids = lstIds }) == lstIds.Count;
+    }
+
     #endregion
 
     #region Protected methods
 
     protected abstract void InitializeTable();
     protected abstract string BuildInsertQuery();
+    protected abstract string BuildUpdateQuery();
 
     protected void CreateIndexIfNotExists(string indexName, string statement)
     {
