@@ -1,5 +1,6 @@
 ﻿using Watson.Commands.Abstractions;
 using Watson.Models;
+using Watson.Models.Abstractions;
 
 namespace Watson.Commands;
 
@@ -7,13 +8,13 @@ public abstract class Command<TOptions> : ICommand<TOptions>
 {
     #region Members
 
-    protected readonly DependencyResolver DependencyResolver;
+    protected readonly IDependencyResolver DependencyResolver;
 
     #endregion
 
     #region Constructors
 
-    protected Command(DependencyResolver dependencyResolver)
+    protected Command(IDependencyResolver dependencyResolver)
     {
         DependencyResolver = dependencyResolver;
     }

@@ -9,6 +9,7 @@ using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Models;
+using Watson.Models.Abstractions;
 
 namespace Watson.Extensions;
 
@@ -50,7 +51,7 @@ public static class ServicesCollectionExtensions
     {
         services.AddSingleton<IAppDbContext, AppDbContext>();
         services.AddSingleton<IIdHelper, IdHelper>();
-        services.AddSingleton<DependencyResolver>();
+        services.AddSingleton<IDependencyResolver, DependencyResolver>();
         services.AddSingleton<IFrameRepository, FrameRepository>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
         services.AddSingleton<ITagRepository, TagRepository>();

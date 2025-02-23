@@ -1,8 +1,9 @@
 ﻿using Watson.Core.Repositories.Abstractions;
+using Watson.Models.Abstractions;
 
 namespace Watson.Models;
 
-public class DependencyResolver
+public class DependencyResolver : IDependencyResolver
 {
     public IProjectRepository ProjectRepository { get; }
     public ITagRepository TagRepository { get; }

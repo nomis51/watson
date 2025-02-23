@@ -3,6 +3,7 @@ using Watson.Abstractions;
 using Watson.Commands;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Models;
+using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson;
@@ -11,13 +12,13 @@ public class Cli : ICli
 {
     #region Members
 
-    private readonly DependencyResolver _dependencyResolver;
+    private readonly IDependencyResolver _dependencyResolver;
 
     #endregion
 
     #region Constructors
 
-    public Cli(DependencyResolver dependencyResolver)
+    public Cli(IDependencyResolver dependencyResolver)
     {
         _dependencyResolver = dependencyResolver;
     }

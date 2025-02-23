@@ -1,5 +1,6 @@
 ﻿using Watson.Core.Models;
 using Watson.Models;
+using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
@@ -8,7 +9,7 @@ public class CreateCommand : Command<CreateOptions>
 {
     #region Constructors
 
-    public CreateCommand(DependencyResolver dependencyResolver) : base(dependencyResolver)
+    public CreateCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
     {
     }
 
