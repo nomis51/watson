@@ -51,6 +51,15 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
         return project;
     }
 
+    public Task<bool> RenameAsync(string id, string name)
+    {
+        return UpdateAsync(new Project
+        {
+            Id = id,
+            Name = name
+        });
+    }
+
     #endregion
 
     #region Protected methods

@@ -1,4 +1,5 @@
-﻿using Watson.Models.Abstractions;
+﻿using SQLitePCL;
+using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
@@ -22,17 +23,17 @@ public class ListCommand : Command<ListOptions>
         var resources = options.Resource switch
         {
             "project" => (await DependencyResolver.ProjectRepository.GetAsync())
-                .Select(e => e.Name),
+                .Select(e => (e.Id, e.Name)),
             "tag" => (await DependencyResolver.TagRepository.GetAsync())
-                .Select(e => e.Name),
+                .Select(e => (e.Id, e.Name)),
             _ => null
         };
 
         if (resources is null) return 1;
 
-        foreach (var resource in resources)
+        foreach (var (id, name) in resources)
         {
-            Console.WriteLine(resource);
+            Console.WriteLine("{0}: {1}", id, name);
         }
 
         return 0;

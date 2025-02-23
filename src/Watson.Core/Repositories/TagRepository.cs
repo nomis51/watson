@@ -50,6 +50,15 @@ public class TagRepository : Repository<Tag>, ITagRepository
         return true;
     }
 
+    public Task<bool> RenameAsync(string id, string name)
+    {
+        return UpdateAsync(new Tag
+        {
+            Id = id,
+            Name = name
+        });
+    }
+
     #endregion
 
     #region Protected methods

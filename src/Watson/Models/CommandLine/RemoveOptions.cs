@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 
 namespace Watson.Models.CommandLine;
+
 [Verb("remove", HelpText = "Remove a project, tag or frame")]
 public class RemoveOptions
 {
