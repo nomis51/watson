@@ -76,6 +76,12 @@ public abstract class Repository<TModel> : IRepository<TModel>
         return result > 0;
     }
 
+    public async Task<bool> DeleteAsync(string id)
+    {
+        var sql = $"DELETE FROM {TableName} WHERE Id = @Id";
+        return await DbContext.Connection.ExecuteAsync(sql, new { Id = id }) > 0;
+    }
+
     public async Task<bool> DeleteManyAsync(IEnumerable<string> ids)
     {
         var lstIds = ids.ToList();

@@ -9,5 +9,6 @@ public interface IRepository<TModel>
     Task<IEnumerable<TModel>> GetAsync();
     Task<bool> InsertAsync(TModel model);
     Task<bool> UpdateAsync(TModel model);
+    Task<bool> DeleteAsync(string id);
     Task<bool> DeleteManyAsync(IEnumerable<string> ids);
 }
