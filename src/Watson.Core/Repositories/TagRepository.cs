@@ -44,7 +44,7 @@ public class TagRepository : Repository<Tag>, ITagRepository
             if (existingTag is not null) continue;
 
             var tagEntity = new Tag { Name = tag };
-            if (!InsertAsync(tagEntity).Result) return false;
+            if (!await InsertAsync(tagEntity)) return false;
         }
 
         return true;

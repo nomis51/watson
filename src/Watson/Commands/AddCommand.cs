@@ -50,7 +50,8 @@ public partial class AddCommand : Command<AddOptions>
         var projectModel = await DependencyResolver.ProjectRepository.EnsureNameExistsAsync(project);
         if (projectModel is null) return 1;
 
-        if (!await DependencyResolver.TagRepository.EnsureTagsExists(tags)) return 1;
+        var tagslst = tags.ToList();
+        if (!await DependencyResolver.TagRepository.EnsureTagsExists(tagslst)) return 1;
 
         fromTime ??= DateTimeOffset.UtcNow;
         var frame = new Frame
@@ -59,7 +60,11 @@ public partial class AddCommand : Command<AddOptions>
             Timestamp = fromTime.Value.ToUnixTimeSeconds()
         };
 
-        return await DependencyResolver.FrameHelper.CreateFrame(frame, toTime) ? 0 : 1;
+        var ok = await DependencyResolver.FrameHelper.CreateFrame(frame, toTime);
+        if (!ok) return 1;
+
+        await DependencyResolver.FrameRepository.AssociateTagsAsync(projectModel.Id, tagslst);
+        return 0;
     }
 
     #endregion

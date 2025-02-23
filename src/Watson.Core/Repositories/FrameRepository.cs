@@ -104,6 +104,22 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         );
     }
 
+    public async Task AssociateTagsAsync(string frameId, IEnumerable<string> tags)
+    {
+        var tagModels = await DbContext.Connection.QueryAsync<Tag>(
+            $"SELECT * FROM {TagTableName} WHERE Name IN @Names",
+            new { Names = tags }
+        );
+
+        foreach (var tagModel in tagModels)
+        {
+            await DbContext.Connection.ExecuteAsync(
+                $"INSERT INTO {FrameTagTableName} (Id, FrameId, TagId) VALUES (@Id, @FrameId, @TagId)",
+                new { Id = IdHelper.GenerateId(), FrameId = frameId, TagId = tagModel.Id }
+            );
+        }
+    }
+
     #endregion
 
     #region Protected methods
