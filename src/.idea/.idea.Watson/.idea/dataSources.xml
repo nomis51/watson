@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:$USER_HOME$/.watson/data.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="tmpdv2pks.tmp" uuid="affdbe4c-5dc6-4ce8-ae79-57d64118bb0e">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$USER_HOME$/AppData/Local/Temp/tmpdv2pks.tmp</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
