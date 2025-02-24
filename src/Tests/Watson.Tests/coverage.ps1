@@ -1,2 +1,2 @@
-dotnet dotcover cover-dotnet --ReportType=HTML --Output=./.coverage/report.html --HideAutoProperties --Filters="+:module=Watson;+:module=Watson.Core" -- test --no-build --filter "FullyQualifiedName~Watson.Tests"
+dotnet dotcover cover-dotnet --ReportType=HTML --Output=./.coverage/report.html --HideAutoProperties --Filters="+:module=Watson*;-:module=Watson*.Tests" -- test --no-build --filter "FullyQualifiedName~Watson.Tests"
 Invoke-Item ./.coverage/report.html

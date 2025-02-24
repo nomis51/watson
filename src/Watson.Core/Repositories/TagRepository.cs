@@ -36,7 +36,7 @@ public class TagRepository : Repository<Tag>, ITagRepository
             );
     }
 
-    public async Task<bool> EnsureTagsExists(IEnumerable<string> tags)
+    public async Task<bool> EnsureTagsExistsAsync(IEnumerable<string> tags)
     {
         foreach (var tag in tags)
         {

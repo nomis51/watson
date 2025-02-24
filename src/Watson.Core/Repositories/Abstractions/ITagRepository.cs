@@ -6,6 +6,6 @@ public interface ITagRepository : IRepository<Tag>
 {
     Task<bool> DoesNameExistAsync(string name);
     Task<Tag?> GetByNameAsync(string name);
-    Task<bool> EnsureTagsExists(IEnumerable<string> tags);
+    Task<bool> EnsureTagsExistsAsync(IEnumerable<string> tags);
     Task<bool> RenameAsync(string id, string name);
 }

@@ -51,7 +51,7 @@ public partial class AddCommand : Command<AddOptions>
         if (projectModel is null) return 1;
 
         var tagslst = tags.ToList();
-        if (!await DependencyResolver.TagRepository.EnsureTagsExists(tagslst)) return 1;
+        if (!await DependencyResolver.TagRepository.EnsureTagsExistsAsync(tagslst)) return 1;
 
         fromTime ??= DateTimeOffset.UtcNow;
         var frame = new Frame
