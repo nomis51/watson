@@ -161,6 +161,19 @@ public class RepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ShouldReturnFalse_WhenIdNotSet()
+    {
+        // Arrange
+        var model = new TestModel { Name = "name" };
+
+        // Act
+        var result = await _sut.UpdateAsync(model);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task DeleteAsync_ShouldDeleteItem()
     {
         // Arrange
