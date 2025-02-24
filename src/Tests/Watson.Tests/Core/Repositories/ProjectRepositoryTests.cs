@@ -160,6 +160,19 @@ public class ProjectRepositoryTests : IDisposable
         (await _dbContext.Connection.QueryFirstAsync<string>("SELECT Name FROM Projects"))
             .ShouldBe(newName);
     }
+    
+    [Fact]
+    public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = "name";
+        
+        // Act
+        var result = await _sut.RenameAsync("id", name);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
 
     #endregion
 }
