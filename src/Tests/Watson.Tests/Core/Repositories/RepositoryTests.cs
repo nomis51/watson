@@ -53,7 +53,7 @@ public class RepositoryTests : IDisposable
             .QueryFirstOrDefault("SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'Tests'");
 
         // Assert
-        result.ShouldNotBeNull();
+        result!.ShouldNotBeNull();
     }
 
     [Fact]
