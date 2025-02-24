@@ -106,6 +106,9 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
     public async Task AssociateTagsAsync(string frameId, IEnumerable<string> tags)
     {
+        var frame = await GetByIdAsync(frameId);
+        if (frame is null) return;
+
         var tagModels = await DbContext.Connection.QueryAsync<Tag>(
             $"SELECT * FROM {TagTableName} WHERE Name IN @Names",
             new { Names = tags }

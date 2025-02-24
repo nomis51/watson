@@ -3,6 +3,7 @@ using Shouldly;
 using Watson.Core;
 using Watson.Core.Abstractions;
 using Watson.Core.Helpers;
+using Watson.Core.Models;
 using Watson.Core.Repositories;
 
 namespace Watson.Tests.Core.Repositories;
@@ -245,7 +246,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.ShouldNotBeNull();
         resultLst.Count.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task GetAsync_ShoudReturnEmptyList_WhenFramesDoesNotExist()
     {
@@ -266,6 +267,99 @@ public class FrameRepositoryTests : IDisposable
         var resultLst = result.ToList();
         resultLst.ShouldNotBeNull();
         resultLst.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task AssociateTagsAsync_ShouldCreateManyRelationships_WhenTagsExists()
+    {
+        // Arrange
+        const string id = "id";
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            {
+                Id = id,
+                ProjectId = "id",
+                Timestamp = 1
+            });
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)", new
+        {
+            Id = "id",
+            Name = "name"
+        });
+
+        // Act
+        await _sut.AssociateTagsAsync(id, ["name"]);
+
+        // Assert
+        var result =
+            await _dbContext.Connection.QueryAsync(
+                "SELECT * FROM Frames_Tags WHERE FrameId = @Id", new { Id = id });
+        var resultLst = result.ToList();
+        resultLst.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task AssociateTagsAsync_ShouldDoNothing_WhenFrameDoesNotExist()
+    {
+        // Arrange
+
+        // Act
+        await _sut.AssociateTagsAsync("id", ["name"]);
+
+        // Assert    
+        var result =
+            await _dbContext.Connection.QueryAsync(
+                "SELECT * FROM Frames_Tags WHERE FrameId = @Id", new { Id = "id" });
+        var resultLst = result.ToList();
+        resultLst.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task InsertAsync_ShouldInsertFrame()
+    {
+        // Arrange
+        var frame = new Frame
+        {
+            ProjectId = "id",
+            Timestamp = 1
+        };
+
+        // Act
+        await _sut.InsertAsync(frame);
+
+        // Assert
+        var result = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+            "SELECT * FROM Frames WHERE Id = @Id", new { frame.Id });
+        result.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateFrame()
+    {
+        // Arrange
+        const string id = "id";
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            {
+                Id = id,
+                ProjectId = "id",
+                Timestamp = 1
+            });
+        var frame = new Frame
+        {
+            Id = id,
+            ProjectId = "id",
+            Timestamp = 2
+        };
+
+        // Act
+        await _sut.UpdateAsync(frame);
+
+        // Assert
+        var result = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+            "SELECT * FROM Frames WHERE Id = @Id", new { frame.Id });
+        result.ShouldNotBeNull();
+        result.Timestamp.ShouldBe(2);
     }
 
     #endregion

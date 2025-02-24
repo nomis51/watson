@@ -41,5 +41,20 @@ public class FrameTests
         );
     }
 
+    [Fact]
+    public void CreateEmptyFrame_ShouldCreateEmptyFrame_WithProvidedTimestamp()
+    {
+        // Arrange
+        var time = DateTimeOffset.UtcNow.AddMinutes(-2).ToUnixTimeSeconds();
+
+        // Act
+        var sut = Frame.CreateEmpty(time);
+
+        // Assert
+        sut.ProjectId.ShouldBeEmpty();
+        sut.Id.ShouldBeNull();
+        sut.Timestamp.ShouldBe(time);
+    }
+
     #endregion
 }
