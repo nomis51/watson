@@ -16,6 +16,8 @@ public class IdHelper : IIdHelper
 
     public string GenerateId(int length = 8)
     {
+        if (length < 8) throw new ArgumentException("Length must be at least 8", nameof(length));
+
         var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
         return ToBase36(bytes, length)[..length];
     }

@@ -13,14 +13,16 @@ public class AppDbContext : IAppDbContext
 
     #region Constructors
 
-    public AppDbContext()
+    public AppDbContext(string? connectionString = null)
     {
         var filePath = Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             $".{nameof(Watson).ToLower()}",
             "data.db"
         );
-        Connection = new SqliteConnection($"Data Source={filePath};");
+        Connection = new SqliteConnection(
+            string.IsNullOrEmpty(connectionString) ? $"Data Source={filePath};" : connectionString
+        );
     }
 
     #endregion
