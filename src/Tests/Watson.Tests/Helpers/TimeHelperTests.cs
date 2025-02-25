@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Shouldly;
+﻿using Shouldly;
 using Watson.Helpers;
 
 namespace Watson.Tests.Helpers;

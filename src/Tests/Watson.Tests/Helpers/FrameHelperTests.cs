@@ -1,7 +1,5 @@
-﻿using System.Net.Security;
-using System.Reflection;
+﻿using System.Reflection;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 using Shouldly;
 using Watson.Core.Models;
 using Watson.Core.Repositories.Abstractions;

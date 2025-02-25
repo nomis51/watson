@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Dapper;
-using NSubstitute;
 using Shouldly;
 using Watson.Core;
 using Watson.Core.Abstractions;

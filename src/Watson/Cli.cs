@@ -27,11 +27,41 @@ public class Cli : ICli
 
     public Task<int> Run(string[] args)
     {
-        return Parser.Default.ParseArguments<AddOptions, CancelOptions, CreateOptions>(args)
-            .MapResult<AddOptions, CancelOptions, CreateOptions, Task<int>>(
+        return Parser.Default.ParseArguments<
+                AddOptions,
+                CancelOptions,
+                CreateOptions,
+                EditOptions,
+                ListOptions,
+                RemoveOptions,
+                RenameOptions,
+                RestartOptions,
+                StatusOptions,
+                StopOptions
+            >(args)
+            .MapResult<
+                AddOptions,
+                CancelOptions,
+                CreateOptions,
+                EditOptions,
+                ListOptions,
+                RemoveOptions,
+                RenameOptions,
+                RestartOptions,
+                StatusOptions,
+                StopOptions,
+                Task<int>
+            >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new CreateCommand(_dependencyResolver).Run(options),
+                async options => await new EditCommand(_dependencyResolver).Run(options),
+                async options => await new ListCommand(_dependencyResolver).Run(options),
+                async options => await new RemoveCommand(_dependencyResolver).Run(options),
+                async options => await new RenameCommand(_dependencyResolver).Run(options),
+                async options => await new RestartCommand(_dependencyResolver).Run(options),
+                async options => await new StatusCommand(_dependencyResolver).Run(options),
+                async options => await new StopCommand(_dependencyResolver).Run(options),
                 errors => Task.FromResult(1));
     }
 

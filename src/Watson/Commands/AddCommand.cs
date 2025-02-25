@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Watson.Core.Models;
+﻿using Watson.Core.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -7,16 +6,6 @@ namespace Watson.Commands;
 
 public partial class AddCommand : Command<AddOptions>
 {
-    #region Constants
-
-    private static readonly Regex RegMonthAndDay = RegMonthAndDayRegex();
-
-    [GeneratedRegex("(1[0-2]|0[1-9]|[1-9])\\-(3[0-1]|2[0-9]|1[0-9]|0[1-9]|[1-9])",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-CA")]
-    private static partial Regex RegMonthAndDayRegex();
-
-    #endregion
-
     #region Constructors
 
     public AddCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
