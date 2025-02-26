@@ -20,11 +20,9 @@ public class CancelCommand : Command<CancelOptions>
     {
         var lastFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
         if (lastFrame is null) return 1;
+        if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 
-        var emptyFrame = Frame.CreateEmpty(lastFrame.Timestamp);
-        emptyFrame.Id = lastFrame.Id;
-
-        return await DependencyResolver.FrameRepository.UpdateAsync(emptyFrame) ? 0 : 1;
+        return await DependencyResolver.FrameRepository.DeleteAsync(lastFrame.Id) ? 0 : 1;
     }
 
     #endregion
