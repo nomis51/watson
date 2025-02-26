@@ -45,7 +45,7 @@ public class AddCommand : Command<AddOptions>
         fromTime ??= DateTimeOffset.UtcNow;
         var frame = new Frame
         {
-            ProjectId = project,
+            ProjectId = projectModel.Id,
             Timestamp = fromTime.Value.ToUnixTimeSeconds()
         };
 

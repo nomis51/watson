@@ -1,23 +1,27 @@
-﻿using NSubstitute;
+﻿using Dapper;
+using Microsoft.AspNetCore.Components.Forms;
+using NSubstitute;
 using Shouldly;
 using Watson.Commands;
+using Watson.Core;
+using Watson.Core.Helpers;
 using Watson.Core.Models;
+using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
+using Watson.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Tests.Commands;
 
-public class AddCommandTests
+public class AddCommandTests : IDisposable
 {
     #region Members
 
-    private readonly IFrameRepository _frameRepository = Substitute.For<IFrameRepository>();
-    private readonly IProjectRepository _projectRepository = Substitute.For<IProjectRepository>();
-    private readonly ITagRepository _tagRepository = Substitute.For<ITagRepository>();
+    private readonly AppDbContext _dbContext;
+    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly AddCommand _sut;
-    private readonly List<Frame> _frames = [];
 
     #endregion
 
@@ -25,36 +29,31 @@ public class AddCommandTests
 
     public AddCommandTests()
     {
-        _frameRepository.InsertAsync(Arg.Any<Frame>())
-            .Returns(e =>
-            {
-                _frames.Add(e.Arg<Frame>());
-                return true;
-            });
+        var idHelper = new IdHelper();
+        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        _projectRepository.EnsureNameExistsAsync(Arg.Any<string>())
-            .Returns(e => new Project
-            {
-                Id = "idProject",
-                Name = e.Arg<string>()
-            });
+        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        _sut = new AddCommand(
+            new DependencyResolver(
+                new ProjectRepository(_dbContext, idHelper),
+                frameRepository,
+                new TagRepository(_dbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository)
+            )
+        );
+    }
 
-        _tagRepository.EnsureTagsExistsAsync(Arg.Any<IEnumerable<string>>())
-            .Returns(e => true);
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dbContext.Connection.Close();
+        _dbContext.Connection.Dispose();
 
-        var dependencyResolver = Substitute.For<IDependencyResolver>();
-        dependencyResolver.FrameRepository
-            .Returns(_frameRepository);
-        dependencyResolver.TimeHelper
-            .Returns(new TimeHelper());
-        dependencyResolver.FrameHelper
-            .Returns(new FrameHelper(_frameRepository));
-        dependencyResolver.ProjectRepository
-            .Returns(_projectRepository);
-        dependencyResolver.TagRepository
-            .Returns(_tagRepository);
-
-        _sut = new AddCommand(dependencyResolver);
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
     }
 
     #endregion
@@ -74,9 +73,14 @@ public class AddCommandTests
         await _sut.Run(options);
 
         // Assert
-        _frames.Count.ShouldBe(1);
-        _frames[0].ProjectId.ShouldBe("project");
-        (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _frames[0].Timestamp).ShouldBeLessThan(2);
+        var project = await _dbContext.Connection.QueryFirstAsync<Project>("SELECT * FROM Projects");
+        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        var tag = await _dbContext.Connection.QueryFirstOrDefaultAsync<Tag>("SELECT * FROM Tags");
+
+        tag.ShouldBeNull();
+        project.Name.ShouldBe("project");
+        frame.ProjectId.ShouldBe(project.Id);
+        (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
     #endregion
