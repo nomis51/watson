@@ -22,25 +22,16 @@ public class RestartCommand : Command<RestartOptions>
         {
             var lastFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
             if (lastFrame is null) return 1;
-            if (!string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
+            if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 
-            var lastNonEmptyFrame =
-                await DependencyResolver.FrameRepository.GetPreviousFrameAsync(lastFrame.TimestampAsDateTime);
-            if (lastNonEmptyFrame is null) return 1;
-
-            var frame = new Frame
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                ProjectId = lastNonEmptyFrame.ProjectId
-            };
+            var frame = Frame.CreateEmpty(lastFrame.Timestamp);
 
             var ok = await DependencyResolver.FrameRepository.InsertAsync(frame);
             if (!ok) return 1;
 
-            await DependencyResolver.FrameRepository.AssociateTagsAsync(frame.Id,
-                lastNonEmptyFrame.Tags.Select(e => e.Name));
-
-            return 0;
+            lastFrame.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            ok = await DependencyResolver.FrameRepository.UpdateAsync(lastFrame);
+            return !ok ? 1 : 0;
         }
 
         var existingFrame = await DependencyResolver.FrameRepository.GetByIdAsync(options.FrameId);
