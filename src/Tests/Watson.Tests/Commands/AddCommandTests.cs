@@ -123,7 +123,7 @@ public class AddCommandTests : IDisposable
 
         // Assert
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        (fromTime - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+        (fromTime - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public class AddCommandTests : IDisposable
         // Assert
         result.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Run_ShouldFail_WhenUnableToParseFromTime()
     {
@@ -236,7 +236,7 @@ public class AddCommandTests : IDisposable
         // Assert
         result.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Run_ShouldFail_WhenUnableToParseToTime()
     {

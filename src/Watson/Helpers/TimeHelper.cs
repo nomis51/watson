@@ -130,21 +130,22 @@ public class TimeHelper : ITimeHelper
         // only day
         if (int.TryParse(input, out var day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, day));
+            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, day),
+                TimeSpan.Zero);
         }
 
         // month and day
         var parts = input.Split('-');
         if (parts.Length == 2 && int.TryParse(parts[0], out var month) && int.TryParse(parts[1], out day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, month, day));
+            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, month, day), TimeSpan.Zero);
         }
 
         // year, month and day
         if (parts.Length == 3 && int.TryParse(parts[0], out var year) &&
             int.TryParse(parts[1], out month) && int.TryParse(parts[2], out day))
         {
-            return new DateTimeOffset(new DateTime(year, month, day));
+            return new DateTimeOffset(new DateTime(year, month, day), TimeSpan.Zero);
         }
 
         return null;

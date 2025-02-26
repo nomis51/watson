@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:sqlite:$USER_HOME$/AppData/Local/Temp/tmpdv2pks.tmp</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="tmpbu1231.tmp" uuid="3631036d-a217-4f82-bec1-0da6d6867327">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$USER_HOME$/AppData/Local/Temp/tmpbu1231.tmp</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
