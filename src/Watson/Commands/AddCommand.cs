@@ -4,7 +4,7 @@ using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
 
-public partial class AddCommand : Command<AddOptions>
+public class AddCommand : Command<AddOptions>
 {
     #region Constructors
 

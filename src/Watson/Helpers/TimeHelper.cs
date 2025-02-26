@@ -8,6 +8,12 @@ public class TimeHelper : ITimeHelper
 
     public bool ParseDateTime(string? timeStr, out DateTimeOffset? dateTime)
     {
+        if (timeStr is null)
+        {
+            dateTime = null;
+            return true;
+        }
+
         if (string.IsNullOrEmpty(timeStr))
         {
             dateTime = null;

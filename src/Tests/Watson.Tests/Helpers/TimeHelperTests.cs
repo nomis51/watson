@@ -99,7 +99,6 @@ public class TimeHelperTests
     [InlineData("13 13 13", null)]
     [InlineData("nope", null)]
     [InlineData("", null)]
-    [InlineData(null, null)]
     [InlineData("2024-02-01 aa", null)]
     [Theory]
     public void ParseDateTime_ShouldParseDateTimeToExpected(string? input, string? expected)
