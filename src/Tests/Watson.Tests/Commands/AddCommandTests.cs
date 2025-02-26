@@ -83,5 +83,176 @@ public class AddCommandTests : IDisposable
         (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
+    [Fact]
+    public async Task Run_ShouldAddFrameAtNow_WithTags()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = "project",
+            Tags = ["tag1", "tag2"]
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var project = await _dbContext.Connection.QueryFirstAsync<Project>("SELECT * FROM Projects");
+        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        var tags = await _dbContext.Connection.QueryAsync<Tag>("SELECT * FROM Tags");
+
+        tags.Count().ShouldBe(2);
+        project.Name.ShouldBe("project");
+        frame.ProjectId.ShouldBe(project.Id);
+        (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+    }
+
+    [Fact]
+    public async Task Run_ShouldAddFrameAtSpecifedTime_WhenFromTimeSpecified()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = "project",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        (fromTime - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenToTimeProvidedWithoutFromTime()
+    {
+        // Arrange
+        var toTime = DateTimeOffset.UtcNow.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = "project",
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenToTimeIsBeforeFromTime()
+    {
+        // Arrange
+        var fromTime = DateTimeOffset.UtcNow.AddMinutes(-1);
+        var toTime = DateTimeOffset.UtcNow.AddMinutes(-2);
+        AddOptions options = new()
+        {
+            Project = "project",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm"),
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenToTimeIsInTheFuture()
+    {
+        // Arrange
+        var toTime = DateTimeOffset.UtcNow.AddMinutes(5);
+        var fromTime = DateTimeOffset.UtcNow.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = "project",
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm"),
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeIsInTheFuture()
+    {
+        // Arrange
+        var toTime = DateTimeOffset.UtcNow.AddMinutes(7);
+        var fromTime = DateTimeOffset.UtcNow.AddMinutes(5);
+        AddOptions options = new()
+        {
+            Project = "project",
+            ToTime = toTime.ToString("yyyy-MM-dd HH:mm"),
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenProjectNotSpecified()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = ""
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+    
+    [Fact]
+    public async Task Run_ShouldFail_WhenUnableToParseFromTime()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = "project",
+            FromTime = "invalid"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+    
+    [Fact]
+    public async Task Run_ShouldFail_WhenUnableToParseToTime()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = "project",
+            ToTime = "invalid"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
     #endregion
 }

@@ -21,6 +21,9 @@ public class AddCommand : Command<AddOptions>
         if (string.IsNullOrEmpty(options.Project)) return 1;
         if (!DependencyResolver.TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
         if (!DependencyResolver.TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
+        if (toTime is not null && fromTime is null) return 1;
+        if(toTime <= fromTime) return 1;
+        if (toTime >= DateTimeOffset.UtcNow) return 1;
 
         return await CreateFrame(options.Project, fromTime, toTime, options.Tags);
     }
