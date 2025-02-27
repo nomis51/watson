@@ -16,6 +16,7 @@ public class TimeHelperTests
     [InlineData("13", "$year-$month-13")]
     [InlineData("12-13", "$year-12-13")]
     [InlineData("2022-12-13", "2022-12-13")]
+    [InlineData("0001-01-01", "0001-01-01")]
     [InlineData("nope", null!)]
     [Theory]
     public void ParseDate_ShouldParseDateToExpected(string input, string? expected)

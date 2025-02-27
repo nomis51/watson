@@ -1,4 +1,5 @@
-﻿using Watson.Core.Models;
+﻿using Spectre.Console;
+using Watson.Core.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -50,10 +51,75 @@ public class LogCommand : Command<LogOptions>
 
     private void DisplayFrames(IEnumerable<Frame> frames)
     {
-        foreach (var frame in frames)
+        // TODO: get from settings
+        var dayEndHour = new TimeSpan(21, 0, 0);
+
+        var groupedFrames = frames.GroupBy(e => e.TimestampAsDateTime.Date);
+        foreach (var group in groupedFrames)
         {
-            Console.WriteLine(frame);
+            var groupFrames = group.OrderByDescending(e => e.Timestamp)
+                .ToList();
+            var totalTime = GetTotalTime(groupFrames);
+            AnsiConsole.WriteLine(
+                "{0} ({1})",
+                group.Key.ToLocalTime().Date.ToString("dddd dd MMMM yyyy"),
+                $"{totalTime.Hours}h {totalTime.Minutes}m"
+            );
+
+            var grid = new Grid();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+
+            for (var i = 0; i < groupFrames.Count; ++i)
+            {
+                var frame = groupFrames[i];
+                var fromTime = DateTimeOffset.FromUnixTimeSeconds(frame.Timestamp).TimeOfDay;
+                var toTime = i + 1 < groupFrames.Count
+                    ? DateTimeOffset.FromUnixTimeSeconds(groupFrames[i + 1].Timestamp).TimeOfDay
+                    : dayEndHour;
+                var duration = toTime - fromTime;
+
+                grid.AddRow(
+                    frame.Id,
+                    $"{fromTime.Hours.ToString().PadLeft(2, '0')}:{fromTime.Minutes.ToString().PadLeft(2, '0')} to {toTime.Hours.ToString().PadLeft(2, '0')}:{toTime.Minutes.ToString().PadLeft(2, '0')}",
+                    $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m",
+                    frame.Project?.Name ?? "-",
+                    frame.Tags.Count == 0 ? string.Empty : $"[[{string.Join(", ", frame.Tags.Select(e => e.Name))}]]"
+                );
+            }
+
+            var panel = new Panel(grid);
+            panel.NoBorder();
+            panel.PadLeft(5);
+            AnsiConsole.Write(panel);
         }
+    }
+
+    private static TimeSpan GetTotalTime(List<Frame> frames)
+    {
+        // TODO: get from settings
+        var dayEndHour = new TimeSpan(21, 0, 0);
+
+        var totalSeconds = 0L;
+
+        for (var i = frames.Count - 1; i >= 0; --i)
+        {
+            if (i == frames.Count - 1)
+            {
+                totalSeconds += Convert.ToInt64(dayEndHour.TotalSeconds) -
+                                Convert.ToInt64(DateTimeOffset.FromUnixTimeSeconds(frames[i].Timestamp).TimeOfDay
+                                    .TotalSeconds);
+            }
+            else
+            {
+                totalSeconds += frames[i - 1].Timestamp - frames[i].Timestamp;
+            }
+        }
+
+        return TimeSpan.FromSeconds(totalSeconds);
     }
 
     private async Task<IEnumerable<Frame>> RetrieveFrames(

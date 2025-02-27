@@ -6,7 +6,7 @@ namespace Watson.Models.CommandLine;
 public class LogOptions
 {
     [Option('f', "from", HelpText = "From time")]
-    public string FromTime { get; set; } = DateTimeOffset.MinValue.ToString("yyyy-MM-dd HH:mm");
+    public string FromTime { get; set; } = DateTimeOffset.MinValue.AddMinutes(1).ToString("yyyy-MM-dd HH:mm");
 
     [Option('t', "to", HelpText = "To time")]
     public string ToTime { get; set; } = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm");
@@ -34,10 +34,10 @@ public class LogOptions
 
     [Option('t', "tag", HelpText = "Display frames of the tag(s) only")]
     public string? Tags { get; set; }
-    
+
     [Option('i', "ignore-project", HelpText = "Ignore frames of the project(s)")]
     public string? IgnoredProjects { get; set; }
-    
+
     [Option('g', "ignore-tag", HelpText = "Ignore frames of the tag(s)")]
     public string? IgnoredTags { get; set; }
 }

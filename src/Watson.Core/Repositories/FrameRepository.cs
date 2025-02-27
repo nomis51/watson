@@ -38,17 +38,8 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         var frame = await base.GetByIdAsync(id);
         if (frame is null) return null;
 
-        var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
-            $"SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId",
-            new { frame.ProjectId }
-        );
-        frame.Project = project;
-
-        var tags = await DbContext.Connection.QueryAsync<Tag>(
-            $"SELECT * FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE {FrameTagTableName}.FrameId = @FrameId",
-            new { FrameId = id }
-        );
-        frame.Tags = tags.ToList();
+        await InjectProject(frame);
+        await InjectTags(frame);
 
         return frame;
     }
@@ -60,17 +51,8 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
         foreach (var frame in framesList)
         {
-            var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
-                $"SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId",
-                new { frame.ProjectId }
-            );
-            frame.Project = project;
-
-            var tags = await DbContext.Connection.QueryAsync<Tag>(
-                $"SELECT {TagTableName}.* FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE {FrameTagTableName}.FrameId = @FrameId",
-                new { FrameId = frame.Id }
-            );
-            frame.Tags = tags.ToList();
+            await InjectProject(frame);
+            await InjectTags(frame);
         }
 
         return framesList;
@@ -100,13 +82,53 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         var toTimestamp = toTime.ToUnixTimeSeconds();
         return DbContext.Connection.QueryAsync<Frame>(
             $"SELECT * FROM {TableName} WHERE Timestamp >= @FromTimestamp AND Timestamp <= @ToTimestamp ORDER BY Timestamp ASC",
-            new { FromTimestamp = fromTimestamp, ToTimestamp = toTimestamp }
+            new
+            {
+                FromTimestamp = fromTimestamp,
+                ToTimestamp = toTimestamp
+            }
         );
     }
 
-    public Task<IEnumerable<Frame>> GetAsync(DateTimeOffset fromTime, DateTimeOffset toTime, List<string> projectIds, List<string> tagIds)
+    public async Task<IEnumerable<Frame>> GetAsync(
+        DateTimeOffset fromTime,
+        DateTimeOffset toTime,
+        List<string> projectIds,
+        List<string> tagIds
+    )
     {
-        throw new NotImplementedException();
+        var fromTimestamp = fromTime.ToUnixTimeSeconds();
+        var toTimestamp = toTime.ToUnixTimeSeconds();
+        var sql = $"SELECT * FROM {TableName} WHERE Timestamp >= @FromTimestamp AND Timestamp <= @ToTimestamp";
+
+        if (projectIds.Count != 0)
+        {
+            sql += $" AND ProjectId IN ('{string.Join("','", projectIds)}')";
+        }
+
+        if (tagIds.Count != 0)
+        {
+            sql +=
+                $" AND Id IN (SELECT FrameId FROM {FrameTagTableName} WHERE TagId IN ('{string.Join("','", tagIds)}'))";
+        }
+
+        var frames = await DbContext.Connection.QueryAsync<Frame>(
+            sql,
+            new
+            {
+                FromTimestamp = fromTimestamp,
+                ToTimestamp = toTimestamp,
+            }
+        );
+
+        var framesLst = frames.ToList();
+        foreach (var frame in framesLst)
+        {
+            await InjectProject(frame);
+            await InjectTags(frame);
+        }
+
+        return framesLst;
     }
 
     public async Task AssociateTagsAsync(string frameId, IEnumerable<string> tags)
@@ -181,6 +203,28 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     protected override string BuildUpdateQuery()
     {
         return $"UPDATE {TableName} SET Timestamp = @Timestamp, ProjectId = @ProjectId WHERE Id = @Id";
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task InjectProject(Frame frame)
+    {
+        var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+            $"SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId",
+            new { frame.ProjectId }
+        );
+        frame.Project = project;
+    }
+
+    private async Task InjectTags(Frame frame)
+    {
+        var tags = await DbContext.Connection.QueryAsync<Tag>(
+            $"SELECT {TagTableName}.* FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE {FrameTagTableName}.FrameId = @FrameId",
+            new { FrameId = frame.Id }
+        );
+        frame.Tags = tags.ToList();
     }
 
     #endregion
