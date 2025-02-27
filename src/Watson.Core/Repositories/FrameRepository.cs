@@ -104,6 +104,11 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         );
     }
 
+    public Task<IEnumerable<Frame>> GetAsync(DateTimeOffset fromTime, DateTimeOffset toTime, List<string> projectIds, List<string> tagIds)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task AssociateTagsAsync(string frameId, IEnumerable<string> tags)
     {
         var frame = await GetByIdAsync(frameId);
