@@ -47,7 +47,7 @@ public class FrameHelperTests
             Timestamp = 0,
             ProjectId = "to time next frame"
         };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -77,7 +77,7 @@ public class FrameHelperTests
             Id = "id2",
             Timestamp = 0,
         };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -102,7 +102,7 @@ public class FrameHelperTests
             Id = "id2",
             Timestamp = 0,
         };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -122,7 +122,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -153,7 +153,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -178,7 +178,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -204,7 +204,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -235,7 +235,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -261,7 +261,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -287,7 +287,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -351,7 +351,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -397,7 +397,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -443,7 +443,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -489,7 +489,7 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
@@ -556,7 +556,7 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenNoNextFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame { Id = "id" };
 
         // Act
@@ -576,7 +576,7 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenNoPreviousFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
@@ -617,7 +617,7 @@ public class FrameHelperTests
         // technically impossible case, but anyway
 
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
@@ -657,7 +657,7 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenFromTimePreviousFrameIsToTimePreviousFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
@@ -694,7 +694,7 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimePreviousFrameIsFromTimeNextFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
@@ -733,7 +733,7 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimeFramesAndFromTimeFramesAreSparse()
     {
         // Arrange
-        var toTime = DateTimeOffset.UtcNow.AddSeconds(-1);
+        var toTime = DateTimeOffset.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",

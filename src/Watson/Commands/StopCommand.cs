@@ -20,7 +20,7 @@ public class StopCommand : Command<StopOptions>
     {
         if (string.IsNullOrEmpty(options.AtTime))
         {
-            var frame = Frame.CreateEmpty(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            var frame = Frame.CreateEmpty(DateTimeOffset.Now.ToUnixTimeSeconds());
             return await FrameRepository.InsertAsync(frame) ? 0 : 1;
         }
 

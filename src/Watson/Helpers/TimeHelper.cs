@@ -82,7 +82,7 @@ public class TimeHelper : ITimeHelper
 
         if (time is not null)
         {
-            dateTime = DateTimeOffset.UtcNow.Date.Add(time.Value);
+            dateTime = DateTimeOffset.Now.Date.Add(time.Value);
             return true;
         }
 
@@ -171,7 +171,7 @@ public class TimeHelper : ITimeHelper
         // only day
         if (int.TryParse(input, out var day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, day),
+            return new DateTimeOffset(new DateTime(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, day),
                 TimeSpan.Zero);
         }
 
@@ -179,7 +179,7 @@ public class TimeHelper : ITimeHelper
         var parts = input.Split('-');
         if (parts.Length == 2 && int.TryParse(parts[0], out var month) && int.TryParse(parts[1], out day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.UtcNow.Year, month, day), TimeSpan.Zero);
+            return new DateTimeOffset(new DateTime(DateTimeOffset.Now.Year, month, day), TimeSpan.Zero);
         }
 
         // year, month and day

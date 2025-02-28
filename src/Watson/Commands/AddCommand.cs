@@ -23,7 +23,7 @@ public class AddCommand : Command<AddOptions>
         if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
         if (toTime is not null && fromTime is null) return 1;
         if (toTime <= fromTime) return 1;
-        if (toTime >= DateTimeOffset.UtcNow) return 1;
+        if (toTime >= DateTimeOffset.Now) return 1;
 
         return await CreateFrame(options.Project, fromTime, toTime, options.Tags);
     }
@@ -45,7 +45,7 @@ public class AddCommand : Command<AddOptions>
         var tagslst = tags.ToList();
         if (!await TagRepository.EnsureTagsExistsAsync(tagslst)) return 1;
 
-        fromTime ??= DateTimeOffset.UtcNow;
+        fromTime ??= DateTimeOffset.Now;
         var frame = new Frame
         {
             ProjectId = projectModel.Id,

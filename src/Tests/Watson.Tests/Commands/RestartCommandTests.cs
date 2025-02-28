@@ -71,7 +71,7 @@ public class RestartCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class RestartCommandTests : IDisposable
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>(
             "SELECT * FROM Frames WHERE Id <> 'id'"
         );
-        (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
 
         var frameTag = await _dbContext.Connection.QueryFirstAsync<int>(
             $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}'"

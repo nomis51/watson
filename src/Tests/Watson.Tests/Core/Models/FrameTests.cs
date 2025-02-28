@@ -11,7 +11,7 @@ public class FrameTests
     public void Ctor_ShouldHaveDateTimeFieldOfTimestamp()
     {
         // Arrange
-        var time = DateTimeOffset.UtcNow.AddMinutes(-2);
+        var time = DateTimeOffset.Now.AddMinutes(-2);
 
         // Act
         var sut = new Frame
@@ -35,9 +35,9 @@ public class FrameTests
         // Assert
         sut.Timestamp.ShouldBeGreaterThan(0);
         sut.Timestamp.ShouldSatisfyAllConditions(
-            e => e.ShouldBeGreaterThanOrEqualTo(DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+            e => e.ShouldBeGreaterThanOrEqualTo(DateTimeOffset.Now.ToUnixTimeSeconds()),
             e => e.ShouldBeLessThanOrEqualTo(
-                new DateTimeOffset(DateTime.UtcNow.AddSeconds(gracePeriod)).ToUnixTimeSeconds())
+                new DateTimeOffset(DateTime.Now.AddSeconds(gracePeriod)).ToUnixTimeSeconds())
         );
     }
 
@@ -45,7 +45,7 @@ public class FrameTests
     public void CreateEmptyFrame_ShouldCreateEmptyFrame_WithProvidedTimestamp()
     {
         // Arrange
-        var time = DateTimeOffset.UtcNow.AddMinutes(-2).ToUnixTimeSeconds();
+        var time = DateTimeOffset.Now.AddMinutes(-2).ToUnixTimeSeconds();
 
         // Act
         var sut = Frame.CreateEmpty(time);

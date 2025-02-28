@@ -22,7 +22,7 @@ public class TimeHelperTests
     public void ParseDate_ShouldParseDateToExpected(string input, string? expected)
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.Now;
         expected = expected?.Replace("$year", now.Year.ToString())
             .Replace("$month", now.Month.ToString().PadLeft(2, '0'))
             .Replace("$day", now.Day.ToString().PadLeft(2, '0')) ?? expected;
@@ -105,7 +105,7 @@ public class TimeHelperTests
     public void ParseDateTime_ShouldParseDateTimeToExpected(string? input, string? expected)
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.Now;
         expected = expected?.Replace("$year", now.Year.ToString())
             .Replace("$month", now.Month.ToString().PadLeft(2, '0'))
             .Replace("$day", now.Day.ToString().PadLeft(2, '0'))

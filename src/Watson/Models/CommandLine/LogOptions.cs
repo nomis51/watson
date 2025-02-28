@@ -9,7 +9,7 @@ public class LogOptions
     public string FromTime { get; set; } = DateTimeOffset.MinValue.AddMinutes(1).ToString("yyyy-MM-dd HH:mm");
 
     [Option('t', "to", HelpText = "To time")]
-    public string ToTime { get; set; } = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm");
+    public string ToTime { get; set; } = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm");
 
     [Option('r', "reverse", HelpText = "Display in reverse order")]
     public bool Reverse { get; set; }

@@ -117,7 +117,7 @@ public class EditCommandTests : IDisposable
     public async Task Run_ShouldUpdateTime_WhenFromTimeIsSpecified()
     {
         // Arrange
-        var fromTime = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var fromTime = DateTimeOffset.Now.AddMinutes(-5);
         var options = new EditOptions
         {
             FrameId = "id",

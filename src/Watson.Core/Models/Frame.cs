@@ -6,7 +6,7 @@ namespace Watson.Core.Models;
 [Description("Frames")]
 public class Frame : DbModel
 {
-    public long Timestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public long Timestamp { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
     public string ProjectId { get; set; } = null!;
     public Project? Project { get; set; } = null!;
     public List<Tag> Tags { get; set; } = [];

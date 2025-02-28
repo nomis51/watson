@@ -29,7 +29,7 @@ public class RestartCommand : Command<RestartOptions>
             var ok = await FrameRepository.InsertAsync(frame);
             if (!ok) return 1;
 
-            lastFrame.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            lastFrame.Timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             ok = await FrameRepository.UpdateAsync(lastFrame);
             return !ok ? 1 : 0;
         }
@@ -39,7 +39,7 @@ public class RestartCommand : Command<RestartOptions>
 
         var newFrame = new Frame
         {
-            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            Timestamp = DateTimeOffset.Now.ToUnixTimeSeconds(),
             ProjectId = existingFrame.ProjectId
         };
 

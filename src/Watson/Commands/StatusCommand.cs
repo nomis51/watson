@@ -26,7 +26,7 @@ public class StatusCommand : Command<StatusOptions>
             frame.Project?.Name,
             frame.Tags.Count,
             frame.TimestampAsDateTime,
-            (DateTimeOffset.UtcNow - frame.TimestampAsDateTime).Duration()
+            (DateTimeOffset.Now - frame.TimestampAsDateTime).Duration()
         );
 
         return 0;

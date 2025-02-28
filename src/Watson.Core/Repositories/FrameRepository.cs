@@ -221,7 +221,7 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     private async Task InjectTags(Frame frame)
     {
         var tags = await DbContext.Connection.QueryAsync<Tag>(
-            $"SELECT {TagTableName}.* FROM {FrameTagTableName} LEFT OUTER JOIN {TagTableName} WHERE {FrameTagTableName}.FrameId = @FrameId",
+            $"SELECT * FROM {TagTableName} WHERE Id IN (SELECT TagId FROM {FrameTagTableName} WHERE FrameId = @FrameId)",
             new { FrameId = frame.Id }
         );
         frame.Tags = tags.ToList();
