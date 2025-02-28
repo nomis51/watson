@@ -70,14 +70,14 @@ public class StopCommandTests : IDisposable
         var frame = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
         frame.ShouldNotBeNull();
         frame.ProjectId.ShouldBeEmpty();
-        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
     public async Task Run_ShouldStopFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
-        var atTime = DateTimeOffset.Now.AddMinutes(-1);
+        var atTime = DateTime.Now.AddMinutes(-1);
         var options = new StopOptions
         {
             AtTime = atTime.ToString("yyyy-MM-dd HH:mm")
@@ -91,7 +91,7 @@ public class StopCommandTests : IDisposable
         var frame = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
         frame.ShouldNotBeNull();
         frame.ProjectId.ShouldBeEmpty();
-        (atTime - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (atTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     #endregion

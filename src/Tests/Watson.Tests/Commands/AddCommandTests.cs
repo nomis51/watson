@@ -80,7 +80,7 @@ public class AddCommandTests : IDisposable
         tag.ShouldBeNull();
         project.Name.ShouldBe("project");
         frame.ProjectId.ShouldBe(project.Id);
-        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+        (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
     [Fact]
@@ -104,14 +104,14 @@ public class AddCommandTests : IDisposable
         tags.Count().ShouldBe(2);
         project.Name.ShouldBe("project");
         frame.ProjectId.ShouldBe(project.Id);
-        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+        (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
     [Fact]
     public async Task Run_ShouldAddFrameAtSpecifedTime_WhenFromTimeSpecified()
     {
         // Arrange
-        var fromTime = DateTimeOffset.Now.AddMinutes(-1);
+        var fromTime = DateTime.Now.AddMinutes(-1);
         AddOptions options = new()
         {
             Project = "project",
@@ -123,14 +123,14 @@ public class AddCommandTests : IDisposable
 
         // Assert
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        (fromTime - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
     public async Task Run_ShouldFail_WhenToTimeProvidedWithoutFromTime()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddMinutes(-1);
+        var toTime = DateTime.Now.AddMinutes(-1);
         AddOptions options = new()
         {
             Project = "project",
@@ -148,8 +148,8 @@ public class AddCommandTests : IDisposable
     public async Task Run_ShouldFail_WhenToTimeIsBeforeFromTime()
     {
         // Arrange
-        var fromTime = DateTimeOffset.Now.AddMinutes(-1);
-        var toTime = DateTimeOffset.Now.AddMinutes(-2);
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        var toTime = DateTime.Now.AddMinutes(-2);
         AddOptions options = new()
         {
             Project = "project",
@@ -168,8 +168,8 @@ public class AddCommandTests : IDisposable
     public async Task Run_ShouldFail_WhenToTimeIsInTheFuture()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddMinutes(5);
-        var fromTime = DateTimeOffset.Now.AddMinutes(-1);
+        var toTime = DateTime.Now.AddMinutes(5);
+        var fromTime = DateTime.Now.AddMinutes(-1);
         AddOptions options = new()
         {
             Project = "project",
@@ -188,8 +188,8 @@ public class AddCommandTests : IDisposable
     public async Task Run_ShouldFail_WhenFromTimeIsInTheFuture()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddMinutes(7);
-        var fromTime = DateTimeOffset.Now.AddMinutes(5);
+        var toTime = DateTime.Now.AddMinutes(7);
+        var fromTime = DateTime.Now.AddMinutes(5);
         AddOptions options = new()
         {
             Project = "project",

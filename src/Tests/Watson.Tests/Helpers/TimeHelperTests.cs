@@ -22,7 +22,7 @@ public class TimeHelperTests
     public void ParseDate_ShouldParseDateToExpected(string input, string? expected)
     {
         // Arrange
-        var now = DateTimeOffset.Now;
+        var now = DateTime.Now;
         expected = expected?.Replace("$year", now.Year.ToString())
             .Replace("$month", now.Month.ToString().PadLeft(2, '0'))
             .Replace("$day", now.Day.ToString().PadLeft(2, '0')) ?? expected;
@@ -105,26 +105,26 @@ public class TimeHelperTests
     public void ParseDateTime_ShouldParseDateTimeToExpected(string? input, string? expected)
     {
         // Arrange
-        var now = DateTimeOffset.Now;
+        var now = DateTime.Now;
         expected = expected?.Replace("$year", now.Year.ToString())
             .Replace("$month", now.Month.ToString().PadLeft(2, '0'))
             .Replace("$day", now.Day.ToString().PadLeft(2, '0'))
             .Replace("$second", now.Second.ToString().PadLeft(2, '0')) ?? expected;
 
         // Act
-        var result = _sut.ParseDateTime(input, out var dateTimeOffset);
+        var result = _sut.ParseDateTime(input, out var dateTime);
 
         // Assert
         if (expected is null)
         {
             result.ShouldBeFalse();
-            dateTimeOffset.ShouldBeNull();
+            dateTime.ShouldBeNull();
         }
         else
         {
             result.ShouldBeTrue();
-            dateTimeOffset.ShouldNotBeNull();
-            dateTimeOffset.Value.ToString("yyyy-MM-dd HH:mm").ShouldBe(expected);
+            dateTime.ShouldNotBeNull();
+            dateTime.Value.ToString("yyyy-MM-dd HH:mm").ShouldBe(expected);
         }
     }
 

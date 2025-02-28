@@ -23,7 +23,7 @@ public class FrameHelper : IFrameHelper
 
     #region Public methods
 
-    public async Task<bool> CreateFrame(Frame frame, DateTimeOffset? toTime = null)
+    public async Task<bool> CreateFrame(Frame frame, DateTime? toTime = null)
     {
         if (toTime is null)
         {
@@ -36,7 +36,7 @@ public class FrameHelper : IFrameHelper
             return await _frameRepository.InsertAsync(frame);
         }
 
-        var fromTimePreviousFrame = await _frameRepository.GetPreviousFrameAsync(frame.TimestampAsDateTime);
+        var fromTimePreviousFrame = await _frameRepository.GetPreviousFrameAsync(frame.TimeAsDateTime);
         if (fromTimePreviousFrame is null)
         {
             return await CreateFrameAtTheBeginningOfTheDay(frame, toTime.Value, toTimeNextFrame);
@@ -55,7 +55,7 @@ public class FrameHelper : IFrameHelper
         }
 
         // if not the same previous frame, but toTime previous frame is fromTime next frame
-        var fromTimeNextFrame = await _frameRepository.GetNextFrameAsync(frame.TimestampAsDateTime);
+        var fromTimeNextFrame = await _frameRepository.GetNextFrameAsync(frame.TimeAsDateTime);
         if (fromTimeNextFrame is not null && toTimePreviousFrame.Id == fromTimeNextFrame.Id)
         {
             return await CreateFrameOverTwoFrames(frame, toTime.Value, toTimePreviousFrame);
@@ -70,14 +70,14 @@ public class FrameHelper : IFrameHelper
 
     private async Task<bool> CreateFrameOverMultipleFrames(
         Frame frame,
-        DateTimeOffset toTime,
+        DateTime toTime,
         Frame toTimeNextFrame,
         Frame toTimePreviousFrame
     )
     {
         var framesToDelete = await _frameRepository.GetAsync(
-            DateTimeOffset.FromUnixTimeSeconds(toTimeNextFrame.Timestamp),
-            DateTimeOffset.FromUnixTimeSeconds(toTimePreviousFrame.Timestamp)
+            new DateTime(toTimeNextFrame.Time),
+            new DateTime(toTimePreviousFrame.Time)
         );
         var framesToDeleteIds = framesToDelete.Select(e => e.Id).ToList();
 
@@ -92,17 +92,17 @@ public class FrameHelper : IFrameHelper
         var result3 = await _frameRepository.InsertAsync(frame);
         if (!result3) return false;
 
-        toTimeNextFrame.Timestamp = toTime.ToUnixTimeSeconds();
+        toTimeNextFrame.Time = toTime.Ticks;
         result3 = await _frameRepository.UpdateAsync(toTimeNextFrame);
         return result3;
     }
 
-    private async Task<bool> CreateFrameOverTwoFrames(Frame frame, DateTimeOffset toTime, Frame toTimePreviousFrame)
+    private async Task<bool> CreateFrameOverTwoFrames(Frame frame, DateTime toTime, Frame toTimePreviousFrame)
     {
         var result = await _frameRepository.InsertAsync(frame);
         if (!result) return false;
 
-        toTimePreviousFrame.Timestamp = toTime.ToUnixTimeSeconds();
+        toTimePreviousFrame.Time = toTime.Ticks;
         result = await _frameRepository.UpdateAsync(toTimePreviousFrame);
 
         return result;
@@ -110,7 +110,7 @@ public class FrameHelper : IFrameHelper
 
     private async Task<bool> CreateFrameContainedInAFrame(
         Frame frame,
-        DateTimeOffset toTime,
+        DateTime toTime,
         Frame fromTimePreviousFrame
     )
     {
@@ -118,7 +118,7 @@ public class FrameHelper : IFrameHelper
         var result = await _frameRepository.InsertAsync(frame);
         if (!result) return false;
 
-        fromTimePreviousFrame.Timestamp = toTime.ToUnixTimeSeconds();
+        fromTimePreviousFrame.Time = toTime.Ticks;
         fromTimePreviousFrame.Id = string.Empty;
         result = await _frameRepository.InsertAsync(fromTimePreviousFrame);
         return result;
@@ -126,14 +126,14 @@ public class FrameHelper : IFrameHelper
 
     private async Task<bool> CreateFrameAtTheBeginningOfTheDay(
         Frame frame,
-        DateTimeOffset toTime,
+        DateTime toTime,
         Frame toTimeNextFrame
     )
     {
         var result = await _frameRepository.InsertAsync(frame);
         if (!result) return false;
 
-        toTimeNextFrame.Timestamp = toTime.ToUnixTimeSeconds();
+        toTimeNextFrame.Time = toTime.Ticks;
         result = await _frameRepository.UpdateAsync(toTimeNextFrame);
 
         return result;

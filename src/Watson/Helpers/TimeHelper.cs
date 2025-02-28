@@ -16,12 +16,12 @@ public class TimeHelper : ITimeHelper
             if (i == frames.Count - 1)
             {
                 totalSeconds += Convert.ToInt64(dayEndHour.TotalSeconds) -
-                                Convert.ToInt64(DateTimeOffset.FromUnixTimeSeconds(frames[i].Timestamp).TimeOfDay
+                                Convert.ToInt64(new DateTime(frames[i].Time).TimeOfDay
                                     .TotalSeconds);
             }
             else
             {
-                totalSeconds += frames[i + 1].Timestamp - frames[i].Timestamp;
+                totalSeconds += frames[i + 1].Time - frames[i].Time;
             }
         }
 
@@ -47,7 +47,7 @@ public class TimeHelper : ITimeHelper
         return $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m";
     }
 
-    public bool ParseDateTime(string? timeStr, out DateTimeOffset? dateTime)
+    public bool ParseDateTime(string? timeStr, out DateTime? dateTime)
     {
         if (timeStr is null)
         {
@@ -82,7 +82,7 @@ public class TimeHelper : ITimeHelper
 
         if (time is not null)
         {
-            dateTime = DateTimeOffset.Now.Date.Add(time.Value);
+            dateTime = DateTime.Now.Date.Add(time.Value);
             return true;
         }
 
@@ -166,27 +166,26 @@ public class TimeHelper : ITimeHelper
     }
 
 
-    public DateTimeOffset? ParseDate(string input)
+    public DateTime? ParseDate(string input)
     {
         // only day
         if (int.TryParse(input, out var day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, day),
-                TimeSpan.Zero);
+            return new DateTime(DateTime.Now.Year, DateTime.Now.Month, day);
         }
 
         // month and day
         var parts = input.Split('-');
         if (parts.Length == 2 && int.TryParse(parts[0], out var month) && int.TryParse(parts[1], out day))
         {
-            return new DateTimeOffset(new DateTime(DateTimeOffset.Now.Year, month, day), TimeSpan.Zero);
+            return new DateTime(DateTime.Now.Year, month, day);
         }
 
         // year, month and day
         if (parts.Length == 3 && int.TryParse(parts[0], out var year) &&
             int.TryParse(parts[1], out month) && int.TryParse(parts[2], out day))
         {
-            return new DateTimeOffset(new DateTime(year, month, day), TimeSpan.Zero);
+            return new DateTime(year, month, day);
         }
 
         return null;

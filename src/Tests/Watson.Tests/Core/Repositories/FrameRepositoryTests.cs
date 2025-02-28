@@ -52,11 +52,11 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
         await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)", new
         {
@@ -107,11 +107,11 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
         await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)", new
         {
@@ -151,15 +151,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetNextFrameAsync(DateTimeOffset.FromUnixTimeSeconds(0));
+        var result = await _sut.GetNextFrameAsync(new DateTime(0));
 
         // Assert
         result.ShouldNotBeNull();
@@ -171,15 +171,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetNextFrameAsync(DateTimeOffset.FromUnixTimeSeconds(2));
+        var result = await _sut.GetNextFrameAsync(new DateTime(2));
 
         // Assert
         result.ShouldBeNull();
@@ -191,15 +191,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetPreviousFrameAsync(DateTimeOffset.FromUnixTimeSeconds(2));
+        var result = await _sut.GetPreviousFrameAsync(new DateTime(2));
 
         // Assert
         result.ShouldNotBeNull();
@@ -211,15 +211,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetPreviousFrameAsync(DateTimeOffset.FromUnixTimeSeconds(0));
+        var result = await _sut.GetPreviousFrameAsync(new DateTime(0));
 
         // Assert
         result.ShouldBeNull();
@@ -231,15 +231,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetAsync(DateTimeOffset.FromUnixTimeSeconds(0), DateTimeOffset.FromUnixTimeSeconds(2));
+        var result = await _sut.GetAsync(new DateTime(0), new DateTime(2));
 
         // Assert
         var resultLst = result.ToList();
@@ -253,15 +253,15 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
 
         // Act
-        var result = await _sut.GetAsync(DateTimeOffset.FromUnixTimeSeconds(2), DateTimeOffset.FromUnixTimeSeconds(4));
+        var result = await _sut.GetAsync(new DateTime(2), new DateTime(4));
 
         // Assert
         var resultLst = result.ToList();
@@ -275,11 +275,11 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
         await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)", new
         {
@@ -321,7 +321,7 @@ public class FrameRepositoryTests : IDisposable
         var frame = new Frame
         {
             ProjectId = "id",
-            Timestamp = 1
+            Time = 1
         };
 
         // Act
@@ -339,17 +339,17 @@ public class FrameRepositoryTests : IDisposable
         // Arrange
         const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
-            "INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES (@Id,@ProjectId,@Timestamp)", new
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
                 Id = id,
                 ProjectId = "id",
-                Timestamp = 1
+                Time = 1
             });
         var frame = new Frame
         {
             Id = id,
             ProjectId = "id",
-            Timestamp = 2
+            Time = 2
         };
 
         // Act
@@ -359,7 +359,7 @@ public class FrameRepositoryTests : IDisposable
         var result = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
             "SELECT * FROM Frames WHERE Id = @Id", new { frame.Id });
         result.ShouldNotBeNull();
-        result.Timestamp.ShouldBe(2);
+        result.Time.ShouldBe(2);
     }
 
     #endregion

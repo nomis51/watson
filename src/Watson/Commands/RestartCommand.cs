@@ -20,16 +20,16 @@ public class RestartCommand : Command<RestartOptions>
     {
         if (string.IsNullOrEmpty(options.FrameId))
         {
-            var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+            var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
             if (lastFrame is null) return 1;
             if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 
-            var frame = Frame.CreateEmpty(lastFrame.Timestamp);
+            var frame = Frame.CreateEmpty(lastFrame.Time);
 
             var ok = await FrameRepository.InsertAsync(frame);
             if (!ok) return 1;
 
-            lastFrame.Timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+            lastFrame.Time = DateTime.Now.Ticks;
             ok = await FrameRepository.UpdateAsync(lastFrame);
             return !ok ? 1 : 0;
         }
@@ -39,7 +39,7 @@ public class RestartCommand : Command<RestartOptions>
 
         var newFrame = new Frame
         {
-            Timestamp = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            Time = DateTime.Now.Ticks,
             ProjectId = existingFrame.ProjectId
         };
 

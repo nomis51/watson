@@ -18,7 +18,7 @@ public class CancelCommand : Command<CancelOptions>
 
     public override async Task<int> Run(CancelOptions options)
     {
-        var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+        var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
         if (lastFrame is null) return 1;
         if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 

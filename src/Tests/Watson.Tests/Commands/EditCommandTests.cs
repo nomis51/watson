@@ -65,7 +65,7 @@ public class EditCommandTests : IDisposable
             FrameId = "id",
             Project = "newName"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
         // Act
         var result = await _sut.Run(options);
@@ -117,14 +117,14 @@ public class EditCommandTests : IDisposable
     public async Task Run_ShouldUpdateTime_WhenFromTimeIsSpecified()
     {
         // Arrange
-        var fromTime = DateTimeOffset.Now.AddMinutes(-5);
+        var fromTime = DateTime.Now.AddMinutes(-5);
         var options = new EditOptions
         {
             FrameId = "id",
             Project = "newName",
             FromTime = fromTime.ToString("yyyy-MM-dd HH:mm")
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
         // Act
         var result = await _sut.Run(options);
@@ -132,7 +132,7 @@ public class EditCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        (frame.TimestampAsDateTime - fromTime).TotalMinutes.ShouldBeLessThan(1);
+        (frame.TimeAsDateTime - fromTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     #endregion

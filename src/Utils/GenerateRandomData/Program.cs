@@ -26,8 +26,8 @@ var tags = new[]
     "beatles",
 };
 
-var startTime = DateTimeOffset.Now.AddDays(-14);
-var endTime = DateTimeOffset.Now;
+var startTime = DateTime.Now.AddDays(-14);
+var endTime = DateTime.Now;
 var startDayHour = new TimeSpan(8, 0, 0);
 var endDayHour = new TimeSpan(16, 0, 0);
 
@@ -58,7 +58,7 @@ while (currentDate < endTime.Date)
         var project = await projectRepository.EnsureNameExistsAsync(projectName);
         var frame = new Frame
         {
-            Timestamp = new DateTimeOffset(currentDate.Add(currentTime)).ToUnixTimeSeconds(),
+            Time = currentDate.Add(currentTime).Ticks,
             ProjectId = project!.Id,
         };
         await frameRepository.InsertAsync(frame);

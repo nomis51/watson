@@ -44,10 +44,10 @@ public class FrameHelperTests
         var toTimeNextFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "to time next frame"
         };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -62,7 +62,7 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .UpdateAsync(Arg.Is<Frame>(f =>
                 f.Id == toTimeNextFrame.Id &&
-                f.Timestamp == toTime.ToUnixTimeSeconds() &&
+                f.Time == toTime.Ticks &&
                 f.ProjectId == "to time next frame"
             ));
     }
@@ -75,9 +75,9 @@ public class FrameHelperTests
         var toTimeNextFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
         };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -100,9 +100,9 @@ public class FrameHelperTests
         var toTimeNextFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
         };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var sut = _sut.GetType()
             .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
@@ -122,11 +122,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "from time previous frame"
         };
         var sut = _sut.GetType()
@@ -143,7 +143,7 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .InsertAsync(Arg.Is<Frame>(f =>
                 f.Id == string.Empty &&
-                f.Timestamp == toTime.ToUnixTimeSeconds() &&
+                f.Time == toTime.Ticks &&
                 f.ProjectId == "from time previous frame"
             ));
     }
@@ -153,11 +153,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
         };
         var sut = _sut.GetType()
             .GetMethod("CreateFrameContainedInAFrame", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -178,11 +178,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var fromTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "from time previous frame"
         };
         var sut = _sut.GetType()
@@ -204,11 +204,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "to time previous frame"
         };
         var sut = _sut.GetType()
@@ -225,7 +225,7 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .UpdateAsync(Arg.Is<Frame>(f =>
                 f.Id == "id2" &&
-                f.Timestamp == toTime.ToUnixTimeSeconds() &&
+                f.Time == toTime.Ticks &&
                 f.ProjectId == "to time previous frame"
             ));
     }
@@ -235,11 +235,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "to time previous frame"
         };
         var sut = _sut.GetType()
@@ -261,11 +261,11 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 0,
+            Time = 0,
             ProjectId = "to time previous frame"
         };
         var sut = _sut.GetType()
@@ -287,17 +287,17 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 2,
+            Time = 2,
             ProjectId = "to time previous frame"
         };
         var toTimeNextFrame = new Frame
         {
             Id = "id3",
-            Timestamp = 3,
+            Time = 3,
             ProjectId = "to time next frame"
         };
         var framesToDelete = new[]
@@ -315,7 +315,7 @@ public class FrameHelperTests
             .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
 
         // Act
@@ -325,11 +325,11 @@ public class FrameHelperTests
         result.ShouldBeTrue();
         await _frameRepository.Received()
             .GetAsync(
-                Arg.Is<DateTimeOffset>(d =>
-                    d.ToUnixTimeSeconds() == 3
+                Arg.Is<DateTime>(d =>
+                    d.Ticks == 3
                 ),
-                Arg.Is<DateTimeOffset>(d =>
-                    d.ToUnixTimeSeconds() == 2
+                Arg.Is<DateTime>(d =>
+                    d.Ticks == 2
                 )
             );
         await _frameRepository.Received()
@@ -341,7 +341,7 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .UpdateAsync(Arg.Is<Frame>(f =>
                 f.Id == "id3" &&
-                f.Timestamp == toTime.ToUnixTimeSeconds() &&
+                f.Time == toTime.Ticks &&
                 f.ProjectId == "to time next frame"
             ));
     }
@@ -351,17 +351,17 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 2,
+            Time = 2,
             ProjectId = "to time previous frame"
         };
         var toTimeNextFrame = new Frame
         {
             Id = "id3",
-            Timestamp = 3,
+            Time = 3,
             ProjectId = "to time next frame"
         };
         var framesToDelete = new[]
@@ -379,7 +379,7 @@ public class FrameHelperTests
             .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
 
         _frameRepository.DeleteManyAsync(Arg.Any<IEnumerable<string>>())
@@ -397,17 +397,17 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 2,
+            Time = 2,
             ProjectId = "to time previous frame"
         };
         var toTimeNextFrame = new Frame
         {
             Id = "id3",
-            Timestamp = 3,
+            Time = 3,
             ProjectId = "to time next frame"
         };
         var framesToDelete = new[]
@@ -425,7 +425,7 @@ public class FrameHelperTests
             .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
 
         _frameRepository.InsertAsync(Arg.Any<Frame>())
@@ -443,17 +443,17 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 2,
+            Time = 2,
             ProjectId = "to time previous frame"
         };
         var toTimeNextFrame = new Frame
         {
             Id = "id3",
-            Timestamp = 3,
+            Time = 3,
             ProjectId = "to time next frame"
         };
         var framesToDelete = new[]
@@ -471,7 +471,7 @@ public class FrameHelperTests
             .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
 
         _frameRepository.UpdateAsync(Arg.Any<Frame>())
@@ -489,24 +489,24 @@ public class FrameHelperTests
     {
         // Arrange
         var frame = new Frame { Id = "id" };
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var toTimePreviousFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 2,
+            Time = 2,
             ProjectId = "to time previous frame"
         };
         var toTimeNextFrame = new Frame
         {
             Id = "id3",
-            Timestamp = 3,
+            Time = 3,
             ProjectId = "to time next frame"
         };
         var sut = _sut.GetType()
             .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
         sut.ShouldNotBeNull();
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns([]);
 
         // Act
@@ -516,11 +516,11 @@ public class FrameHelperTests
         result.ShouldBeTrue();
         await _frameRepository.Received()
             .GetAsync(
-                Arg.Is<DateTimeOffset>(d =>
-                    d.ToUnixTimeSeconds() == 3
+                Arg.Is<DateTime>(d =>
+                    d.Ticks == 3
                 ),
-                Arg.Is<DateTimeOffset>(d =>
-                    d.ToUnixTimeSeconds() == 2
+                Arg.Is<DateTime>(d =>
+                    d.Ticks == 2
                 )
             );
         await _frameRepository.Received(0)
@@ -530,7 +530,7 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .UpdateAsync(Arg.Is<Frame>(f =>
                 f.Id == "id3" &&
-                f.Timestamp == toTime.ToUnixTimeSeconds() &&
+                f.Time == toTime.Ticks &&
                 f.ProjectId == "to time next frame"
             ));
     }
@@ -549,14 +549,14 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received(0)
-            .GetNextFrameAsync(Arg.Any<DateTimeOffset>());
+            .GetNextFrameAsync(Arg.Any<DateTime>());
     }
 
     [Fact]
     public async Task CreateFrame_ShouldReturnTrue_WhenNoNextFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame { Id = "id" };
 
         // Act
@@ -569,24 +569,24 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .GetNextFrameAsync(toTime);
         await _frameRepository.Received(0)
-            .GetPreviousFrameAsync(Arg.Any<DateTimeOffset>());
+            .GetPreviousFrameAsync(Arg.Any<DateTime>());
     }
 
     [Fact]
     public async Task CreateFrame_ShouldReturnTrue_WhenNoPreviousFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
-            Timestamp = 123
+            Time = 123
         };
 
         var toTimeNextFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 45,
+            Time = 45,
             ProjectId = "to time next frame"
         };
 
@@ -601,13 +601,13 @@ public class FrameHelperTests
         await _frameRepository.Received()
             .GetNextFrameAsync(toTime);
         await _frameRepository.Received()
-            .GetPreviousFrameAsync(frame.TimestampAsDateTime);
+            .GetPreviousFrameAsync(frame.TimeAsDateTime);
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received()
             .UpdateAsync(Arg.Is<Frame>(f =>
                 f.Id == toTimeNextFrame.Id &&
-                f.Timestamp == toTime.ToUnixTimeSeconds()
+                f.Time == toTime.Ticks
             ));
     }
 
@@ -617,31 +617,31 @@ public class FrameHelperTests
         // technically impossible case, but anyway
 
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
-            Timestamp = 123
+            Time = 123
         };
 
 
         var toTimeNextFrame = new Frame
         {
             Id = "id2",
-            Timestamp = 45,
+            Time = 45,
             ProjectId = "to time next frame"
         };
 
         var fromTimePreviousFrame = new Frame
         {
             Id = "id4",
-            Timestamp = 67,
+            Time = 67,
             ProjectId = "from time previous frame"
         };
 
         _frameRepository.GetNextFrameAsync(toTime)
             .Returns(toTimeNextFrame);
-        _frameRepository.GetPreviousFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetPreviousFrameAsync(frame.TimeAsDateTime)
             .Returns(fromTimePreviousFrame);
         _frameRepository.GetPreviousFrameAsync(toTime)
             .Returns(default(Frame));
@@ -657,23 +657,23 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenFromTimePreviousFrameIsToTimePreviousFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
-            Timestamp = 123
+            Time = 123
         };
 
         var previousFrame = new Frame
         {
             Id = "id4",
-            Timestamp = 67,
+            Time = 67,
             ProjectId = "from time previous frame"
         };
 
-        _frameRepository.GetNextFrameAsync(Arg.Any<DateTimeOffset>())
+        _frameRepository.GetNextFrameAsync(Arg.Any<DateTime>())
             .Returns(new Frame());
-        _frameRepository.GetPreviousFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetPreviousFrameAsync(frame.TimeAsDateTime)
             .Returns(previousFrame);
         _frameRepository.GetPreviousFrameAsync(toTime)
             .Returns(previousFrame);
@@ -694,27 +694,27 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimePreviousFrameIsFromTimeNextFrame()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
-            Timestamp = 123
+            Time = 123
         };
 
         var previousFrame = new Frame
         {
             Id = "id4",
-            Timestamp = 67,
+            Time = 67,
             ProjectId = "from time previous frame"
         };
 
         _frameRepository.GetNextFrameAsync(toTime)
             .Returns(new Frame { Id = "id2" });
-        _frameRepository.GetPreviousFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetPreviousFrameAsync(frame.TimeAsDateTime)
             .Returns(new Frame { Id = "id1" });
         _frameRepository.GetPreviousFrameAsync(toTime)
             .Returns(previousFrame);
-        _frameRepository.GetNextFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetNextFrameAsync(frame.TimeAsDateTime)
             .Returns(previousFrame);
 
         // Act
@@ -733,30 +733,30 @@ public class FrameHelperTests
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimeFramesAndFromTimeFramesAreSparse()
     {
         // Arrange
-        var toTime = DateTimeOffset.Now.AddSeconds(-1);
+        var toTime = DateTime.Now.AddSeconds(-1);
         var frame = new Frame
         {
             Id = "id",
-            Timestamp = 123
+            Time = 123
         };
 
         var previousFrame = new Frame
         {
             Id = "id4",
-            Timestamp = 67,
+            Time = 67,
             ProjectId = "from time previous frame"
         };
 
         _frameRepository.GetNextFrameAsync(toTime)
             .Returns(new Frame { Id = "id2" });
-        _frameRepository.GetPreviousFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetPreviousFrameAsync(frame.TimeAsDateTime)
             .Returns(new Frame { Id = "id1" });
         _frameRepository.GetPreviousFrameAsync(toTime)
             .Returns(new Frame { Id = "id3" });
-        _frameRepository.GetNextFrameAsync(frame.TimestampAsDateTime)
+        _frameRepository.GetNextFrameAsync(frame.TimeAsDateTime)
             .Returns(previousFrame);
 
-        _frameRepository.GetAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+        _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns([
                 new Frame
                 {

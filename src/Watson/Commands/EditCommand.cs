@@ -22,7 +22,7 @@ public class EditCommand : Command<EditOptions>
             string.IsNullOrEmpty(options.FromTime)) return 1;
 
         var frame = string.IsNullOrEmpty(options.FrameId)
-            ? await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now)
+            ? await FrameRepository.GetPreviousFrameAsync(DateTime.Now)
             : await FrameRepository.GetByIdAsync(options.FrameId);
         if (frame is null) return 1;
 
@@ -37,7 +37,7 @@ public class EditCommand : Command<EditOptions>
         if (!string.IsNullOrEmpty(options.FromTime))
         {
             if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
-            frame.Timestamp = fromTime!.Value.ToUnixTimeSeconds();
+            frame.Time = fromTime!.Value.Ticks;
         }
 
         return await FrameRepository.UpdateAsync(frame) ? 0 : 1;

@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using System.Runtime.InteropServices.JavaScript;
+using Spectre.Console;
 using Watson.Core.Models;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -54,10 +55,10 @@ public class LogCommand : Command<LogOptions>
         // TODO: get from settings
         var dayEndHour = new TimeSpan(21, 0, 0);
 
-        var groupedFrames = frames.GroupBy(e => e.TimestampAsDateTime.Date);
+        var groupedFrames = frames.GroupBy(e => e.TimeAsDateTime.Date);
         foreach (var group in groupedFrames)
         {
-            var groupFrames = group.OrderByDescending(e => e.Timestamp)
+            var groupFrames = group.OrderByDescending(e => e.Time)
                 .ToList();
             var totalTime = TimeHelper.GetDuration(groupFrames, dayEndHour);
             AnsiConsole.WriteLine(
@@ -76,9 +77,9 @@ public class LogCommand : Command<LogOptions>
             for (var i = 0; i < groupFrames.Count; ++i)
             {
                 var frame = groupFrames[i];
-                var fromTime = DateTimeOffset.FromUnixTimeSeconds(frame.Timestamp).TimeOfDay;
+                var fromTime = new DateTime(frame.Time).TimeOfDay;
                 var toTime = i + 1 < groupFrames.Count
-                    ? DateTimeOffset.FromUnixTimeSeconds(groupFrames[i + 1].Timestamp).TimeOfDay
+                    ? new DateTime(groupFrames[i + 1].Time).TimeOfDay
                     : dayEndHour;
                 var duration = toTime - fromTime;
 
@@ -100,8 +101,8 @@ public class LogCommand : Command<LogOptions>
     }
 
     private async Task<IEnumerable<Frame>> RetrieveFrames(
-        DateTimeOffset fromTime,
-        DateTimeOffset toTime,
+        DateTime fromTime,
+        DateTime toTime,
         IEnumerable<string> projects,
         IEnumerable<string> tags
     )

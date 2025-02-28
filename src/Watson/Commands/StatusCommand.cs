@@ -17,7 +17,7 @@ public class StatusCommand : Command<StatusOptions>
 
     public override async Task<int> Run(StatusOptions options)
     {
-        var frame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+        var frame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
         if (frame is null) return 1;
 
         Console.WriteLine(
@@ -25,8 +25,8 @@ public class StatusCommand : Command<StatusOptions>
             frame.Id,
             frame.Project?.Name,
             frame.Tags.Count,
-            frame.TimestampAsDateTime,
-            (DateTimeOffset.Now - frame.TimestampAsDateTime).Duration()
+            frame.TimeAsDateTime,
+            (DateTime.Now - frame.TimeAsDateTime).Duration()
         );
 
         return 0;

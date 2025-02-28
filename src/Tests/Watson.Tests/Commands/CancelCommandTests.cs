@@ -60,7 +60,7 @@ public class CancelCommandTests : IDisposable
     public async Task Run_ShouldCancelLastFrame_WhenItExists()
     {
         // Arrange
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
         var options = new CancelOptions();
 
         // Act
@@ -89,7 +89,7 @@ public class CancelCommandTests : IDisposable
     public async Task Run_ShouldFail_WhenLastFrameIsAnEmptyFrame()
     {
         // Arrange
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','',0)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','',0)");
         var options = new CancelOptions();
 
         // Act

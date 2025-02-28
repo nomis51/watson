@@ -63,7 +63,7 @@ public class RestartCommandTests : IDisposable
         var options = new RestartOptions
         {
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
         // Act
         var result = await _sut.Run(options);
@@ -71,7 +71,7 @@ public class RestartCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public class RestartCommandTests : IDisposable
         {
             FrameId = "id"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
         await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
         await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
 
@@ -94,7 +94,7 @@ public class RestartCommandTests : IDisposable
         var frame = await _dbContext.Connection.QueryFirstAsync<Frame>(
             "SELECT * FROM Frames WHERE Id <> 'id'"
         );
-        (DateTimeOffset.Now - frame.TimestampAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+        (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
 
         var frameTag = await _dbContext.Connection.QueryFirstAsync<int>(
             $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}'"

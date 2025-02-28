@@ -58,30 +58,30 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         return framesList;
     }
 
-    public Task<Frame?> GetNextFrameAsync(DateTimeOffset time)
+    public Task<Frame?> GetNextFrameAsync(DateTime time)
     {
-        var timestamp = time.ToUnixTimeSeconds();
+        var timestamp = time.Ticks;
         return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Timestamp > @Timestamp ORDER BY Timestamp DESC LIMIT 1",
-            new { Timestamp = timestamp }
+            $"SELECT * FROM {TableName} WHERE Time > @Time ORDER BY Time DESC LIMIT 1",
+            new { Time = timestamp }
         );
     }
 
-    public Task<Frame?> GetPreviousFrameAsync(DateTimeOffset time)
+    public Task<Frame?> GetPreviousFrameAsync(DateTime time)
     {
-        var timestamp = time.ToUnixTimeSeconds();
+        var timestamp = time.Ticks;
         return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Timestamp < @Timestamp ORDER BY Timestamp ASC LIMIT 1",
-            new { Timestamp = timestamp }
+            $"SELECT * FROM {TableName} WHERE Time < @Time ORDER BY Time ASC LIMIT 1",
+            new { Time = timestamp }
         );
     }
 
-    public Task<IEnumerable<Frame>> GetAsync(DateTimeOffset fromTime, DateTimeOffset toTime)
+    public Task<IEnumerable<Frame>> GetAsync(DateTime fromTime, DateTime toTime)
     {
-        var fromTimestamp = fromTime.ToUnixTimeSeconds();
-        var toTimestamp = toTime.ToUnixTimeSeconds();
+        var fromTimestamp = fromTime.Ticks;
+        var toTimestamp = toTime.Ticks;
         return DbContext.Connection.QueryAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Timestamp >= @FromTimestamp AND Timestamp <= @ToTimestamp ORDER BY Timestamp ASC",
+            $"SELECT * FROM {TableName} WHERE Time >= @FromTimestamp AND Time <= @ToTimestamp ORDER BY Time ASC",
             new
             {
                 FromTimestamp = fromTimestamp,
@@ -91,15 +91,15 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     }
 
     public async Task<IEnumerable<Frame>> GetAsync(
-        DateTimeOffset fromTime,
-        DateTimeOffset toTime,
+        DateTime fromTime,
+        DateTime toTime,
         List<string> projectIds,
         List<string> tagIds
     )
     {
-        var fromTimestamp = fromTime.ToUnixTimeSeconds();
-        var toTimestamp = toTime.ToUnixTimeSeconds();
-        var sql = $"SELECT * FROM {TableName} WHERE Timestamp >= @FromTimestamp AND Timestamp <= @ToTimestamp";
+        var fromTimestamp = fromTime.Ticks;
+        var toTimestamp = toTime.Ticks;
+        var sql = $"SELECT * FROM {TableName} WHERE Time >= @FromTimestamp AND Time <= @ToTimestamp";
 
         if (projectIds.Count != 0)
         {
@@ -159,7 +159,7 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         DbContext.Connection.Execute($"""
                                       CREATE TABLE IF NOT EXISTS {TableName} (
                                          Id TEXT NOT NULL PRIMARY KEY UNIQUE,
-                                         Timestamp INTEGER NOT NULL,
+                                         Time REAL NOT NULL,
                                          ProjectId TEXT NOT NULL
                                       );
                                       """);
@@ -197,12 +197,12 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
     protected override string BuildInsertQuery()
     {
-        return $"INSERT INTO {TableName} (Id, Timestamp, ProjectId) VALUES (@Id, @Timestamp, @ProjectId)";
+        return $"INSERT INTO {TableName} (Id, Time, ProjectId) VALUES (@Id, @Time, @ProjectId)";
     }
 
     protected override string BuildUpdateQuery()
     {
-        return $"UPDATE {TableName} SET Timestamp = @Timestamp, ProjectId = @ProjectId WHERE Id = @Id";
+        return $"UPDATE {TableName} SET Time = @Time, ProjectId = @ProjectId WHERE Id = @Id";
     }
 
     #endregion

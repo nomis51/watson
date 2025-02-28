@@ -11,41 +11,38 @@ public class FrameTests
     public void Ctor_ShouldHaveDateTimeFieldOfTimestamp()
     {
         // Arrange
-        var time = DateTimeOffset.Now.AddMinutes(-2);
+        var time = DateTime.Now.AddMinutes(-2);
 
         // Act
         var sut = new Frame
         {
-            Timestamp = time.ToUnixTimeSeconds()
+            Time = time.Ticks
         };
 
         // Assert
-        sut.TimestampAsDateTime.ToString("yyyy-MM-dd HH:mm").ShouldBe(time.ToString("yyyy-MM-dd HH:mm"));
+        sut.TimeAsDateTime.ShouldBe(time);
     }
 
     [Fact]
     public void Ctor_ShouldHaveNowAsDefaultTimestamp()
     {
         // Arrange
-        const int gracePeriod = 5;
+        const int gracePeriod = 3;
 
         // Act
         var sut = new Frame();
 
         // Assert
-        sut.Timestamp.ShouldBeGreaterThan(0);
-        sut.Timestamp.ShouldSatisfyAllConditions(
-            e => e.ShouldBeGreaterThanOrEqualTo(DateTimeOffset.Now.ToUnixTimeSeconds()),
-            e => e.ShouldBeLessThanOrEqualTo(
-                new DateTimeOffset(DateTime.Now.AddSeconds(gracePeriod)).ToUnixTimeSeconds())
-        );
+        sut.Time.ShouldBeGreaterThan(0);
+        sut.Time.ShouldBeGreaterThanOrEqualTo(DateTime.Now.AddSeconds(-gracePeriod).Ticks);
+        sut.Time.ShouldBeLessThanOrEqualTo(DateTime.Now.AddSeconds(gracePeriod).Ticks);
     }
 
     [Fact]
     public void CreateEmptyFrame_ShouldCreateEmptyFrame_WithProvidedTimestamp()
     {
         // Arrange
-        var time = DateTimeOffset.Now.AddMinutes(-2).ToUnixTimeSeconds();
+        var time = DateTime.Now.AddMinutes(-2).Ticks;
 
         // Act
         var sut = Frame.CreateEmpty(time);
@@ -53,7 +50,7 @@ public class FrameTests
         // Assert
         sut.ProjectId.ShouldBeEmpty();
         sut.Id.ShouldBeNull();
-        sut.Timestamp.ShouldBe(time);
+        sut.Time.ShouldBe(time);
     }
 
     #endregion

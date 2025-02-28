@@ -104,7 +104,7 @@ public class RemoveCommandTests : IDisposable
             Resource = "frame",
             ResourceId = "id"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Timestamp) VALUES ('id','id',1)");
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
         // Act
         var result = await _sut.Run(options);
