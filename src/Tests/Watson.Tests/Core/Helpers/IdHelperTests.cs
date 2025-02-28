@@ -13,29 +13,17 @@ public class IdHelperTests
 
     #region Tests
 
-    [InlineData(8)]
-    [InlineData(10)]
-    [InlineData(20)]
-    [Theory]
-    public void GenerateId_ShouldReturnRandomIdOfLength(int length)
+    [Fact]
+    public void GenerateId_ShouldReturnRandomIdOfLength()
     {
         // Arrange
 
         // Act
-        var id = _sut.GenerateId(length);
+        var id = _sut.GenerateId();
 
         // Assert
         id.ShouldNotBeEmpty();
-        id.Length.ShouldBe(length);
-    }
-
-    [Fact]
-    public void GenerateId_ShouldThrow_WhenLengthIsLessThan8()
-    {
-        // Arrange
-        // Act
-        // Assert
-        Should.Throw<ArgumentException>(() => _sut.GenerateId(7));
+        id.Length.ShouldBe(8);
     }
 
     #endregion

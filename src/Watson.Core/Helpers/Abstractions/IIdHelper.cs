@@ -2,5 +2,5 @@
 
 public interface IIdHelper
 {
-   string GenerateId(int length = 8);
+   string GenerateId();
 }

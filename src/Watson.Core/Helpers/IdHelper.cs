@@ -8,36 +8,18 @@ public class IdHelper : IIdHelper
 {
     #region Constants
 
-    private const string Base36Chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+    private const string Base36Chars = "0123456789abcdef";
 
     #endregion
 
     #region Public methods
 
-    public string GenerateId(int length = 8)
+    public string GenerateId()
     {
-        if (length < 8) throw new ArgumentException("Length must be at least 8", nameof(length));
-
-        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
-        return ToBase36(bytes, length)[..length];
-    }
-
-    #endregion
-
-    #region Private methods
-
-    private static string ToBase36(byte[] bytes, int length)
-    {
-        var value = BitConverter.ToUInt64(bytes.Take(length).ToArray(), 0);
-        StringBuilder sb = new();
-
-        while (value > 0)
-        {
-            sb.Append(Base36Chars[(int)(value % 36)]);
-            value /= 36;
-        }
-
-        return sb.ToString().PadLeft(length, '0');
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var randomValue = RandomNumberGenerator.GetInt32(0, 0xFFFF);
+        var combined = (timestamp << 16) | (uint)randomValue;
+        return combined.ToString("x8")[^8..];
     }
 
     #endregion
