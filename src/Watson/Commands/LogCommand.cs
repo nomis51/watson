@@ -95,6 +95,7 @@ public class LogCommand : Command<LogOptions>
             panel.NoBorder();
             panel.PadLeft(5);
             AnsiConsole.Write(panel);
+            AnsiConsole.WriteLine();
         }
     }
 
@@ -115,7 +116,7 @@ public class LogCommand : Command<LogOptions>
             }
             else
             {
-                totalSeconds += frames[i - 1].Timestamp - frames[i].Timestamp;
+                totalSeconds += frames[i + 1].Timestamp - frames[i].Timestamp;
             }
         }
 
