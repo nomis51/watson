@@ -20,21 +20,21 @@ public class RestartCommand : Command<RestartOptions>
     {
         if (string.IsNullOrEmpty(options.FrameId))
         {
-            var lastFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+            var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
             if (lastFrame is null) return 1;
             if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 
             var frame = Frame.CreateEmpty(lastFrame.Timestamp);
 
-            var ok = await DependencyResolver.FrameRepository.InsertAsync(frame);
+            var ok = await FrameRepository.InsertAsync(frame);
             if (!ok) return 1;
 
             lastFrame.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            ok = await DependencyResolver.FrameRepository.UpdateAsync(lastFrame);
+            ok = await FrameRepository.UpdateAsync(lastFrame);
             return !ok ? 1 : 0;
         }
 
-        var existingFrame = await DependencyResolver.FrameRepository.GetByIdAsync(options.FrameId);
+        var existingFrame = await FrameRepository.GetByIdAsync(options.FrameId);
         if (existingFrame is null) return 1;
 
         var newFrame = new Frame
@@ -43,10 +43,10 @@ public class RestartCommand : Command<RestartOptions>
             ProjectId = existingFrame.ProjectId
         };
 
-        var ok2 = await DependencyResolver.FrameRepository.InsertAsync(newFrame);
+        var ok2 = await FrameRepository.InsertAsync(newFrame);
         if (!ok2) return 1;
 
-        await DependencyResolver.FrameRepository.AssociateTagsAsync(newFrame.Id,
+        await FrameRepository.AssociateTagsAsync(newFrame.Id,
             existingFrame.Tags.Select(e => e.Name));
 
         return 0;

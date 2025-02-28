@@ -22,13 +22,13 @@ public class EditCommand : Command<EditOptions>
             string.IsNullOrEmpty(options.FromTime)) return 1;
 
         var frame = string.IsNullOrEmpty(options.FrameId)
-            ? await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now)
-            : await DependencyResolver.FrameRepository.GetByIdAsync(options.FrameId);
+            ? await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now)
+            : await FrameRepository.GetByIdAsync(options.FrameId);
         if (frame is null) return 1;
 
         if (!string.IsNullOrEmpty(options.Project))
         {
-            var project = await DependencyResolver.ProjectRepository.EnsureNameExistsAsync(options.Project);
+            var project = await ProjectRepository.EnsureNameExistsAsync(options.Project);
             if (project is null) return 1;
 
             frame.ProjectId = project.Id;
@@ -36,11 +36,11 @@ public class EditCommand : Command<EditOptions>
 
         if (!string.IsNullOrEmpty(options.FromTime))
         {
-            if (!DependencyResolver.TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
+            if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
             frame.Timestamp = fromTime!.Value.ToUnixTimeSeconds();
         }
 
-        return await DependencyResolver.FrameRepository.UpdateAsync(frame) ? 0 : 1;
+        return await FrameRepository.UpdateAsync(frame) ? 0 : 1;
     }
 
     #endregion

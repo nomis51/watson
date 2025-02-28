@@ -21,12 +21,12 @@ public class StopCommand : Command<StopOptions>
         if (string.IsNullOrEmpty(options.AtTime))
         {
             var frame = Frame.CreateEmpty(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-            return await DependencyResolver.FrameRepository.InsertAsync(frame) ? 0 : 1;
+            return await FrameRepository.InsertAsync(frame) ? 0 : 1;
         }
 
-        if (!DependencyResolver.TimeHelper.ParseDateTime(options.AtTime, out var atTime)) return 1;
+        if (!TimeHelper.ParseDateTime(options.AtTime, out var atTime)) return 1;
         var emptyFrame = Frame.CreateEmpty(atTime!.Value.ToUnixTimeSeconds());
-        return await DependencyResolver.FrameRepository.InsertAsync(emptyFrame) ? 0 : 1;
+        return await FrameRepository.InsertAsync(emptyFrame) ? 0 : 1;
     }
 
     #endregion

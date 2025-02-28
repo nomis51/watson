@@ -35,7 +35,7 @@ public class CreateCommand : Command<CreateOptions>
 
     private async Task<int> CreateTag(string name)
     {
-        var existingTag = await DependencyResolver.TagRepository.DoesNameExistAsync(name);
+        var existingTag = await TagRepository.DoesNameExistAsync(name);
         if (existingTag) return 1;
 
         var tag = new Tag
@@ -43,12 +43,12 @@ public class CreateCommand : Command<CreateOptions>
             Name = name
         };
 
-        return await DependencyResolver.TagRepository.InsertAsync(tag) ? 0 : 1;
+        return await TagRepository.InsertAsync(tag) ? 0 : 1;
     }
 
     private async Task<int> CreateProject(string name)
     {
-        var existingProject = await DependencyResolver.ProjectRepository.DoesNameExistAsync(name);
+        var existingProject = await ProjectRepository.DoesNameExistAsync(name);
         if (existingProject) return 1;
 
         var project = new Project
@@ -56,7 +56,7 @@ public class CreateCommand : Command<CreateOptions>
             Name = name
         };
 
-        return await DependencyResolver.ProjectRepository.InsertAsync(project) ? 0 : 1;
+        return await ProjectRepository.InsertAsync(project) ? 0 : 1;
     }
 
     #endregion

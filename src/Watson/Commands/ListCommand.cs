@@ -21,9 +21,9 @@ public class ListCommand : Command<ListOptions>
 
         var resources = options.Resource switch
         {
-            "project" => (await DependencyResolver.ProjectRepository.GetAsync())
+            "project" => (await ProjectRepository.GetAsync())
                 .Select(e => (e.Id, e.Name)),
-            "tag" => (await DependencyResolver.TagRepository.GetAsync())
+            "tag" => (await TagRepository.GetAsync())
                 .Select(e => (e.Id, e.Name)),
             _ => null
         };

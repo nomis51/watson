@@ -17,7 +17,7 @@ public class StatusCommand : Command<StatusOptions>
 
     public override async Task<int> Run(StatusOptions options)
     {
-        var frame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+        var frame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
         if (frame is null) return 1;
 
         Console.WriteLine(

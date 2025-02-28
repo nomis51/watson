@@ -21,12 +21,12 @@ public class LogCommand : Command<LogOptions>
     {
         if (!string.IsNullOrEmpty(options.FromTime) || !string.IsNullOrEmpty(options.ToTime))
         {
-            if (!DependencyResolver.TimeHelper.ParseDateTime(options.FromTime, out var fromTime))
+            if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime))
             {
                 return 1;
             }
 
-            if (!DependencyResolver.TimeHelper.ParseDateTime(options.ToTime, out var toTime))
+            if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime))
             {
                 return 1;
             }
@@ -59,10 +59,10 @@ public class LogCommand : Command<LogOptions>
         {
             var groupFrames = group.OrderByDescending(e => e.Timestamp)
                 .ToList();
-            var totalTime = GetTotalTime(groupFrames);
+            var totalTime = TimeHelper.GetDuration(groupFrames, dayEndHour);
             AnsiConsole.WriteLine(
                 "{0} ({1})",
-                group.Key.ToLocalTime().Date.ToString("dddd dd MMMM yyyy"),
+                TimeHelper.FormatDate(group.Key.ToLocalTime()),
                 $"{totalTime.Hours}h {totalTime.Minutes}m"
             );
 
@@ -84,8 +84,8 @@ public class LogCommand : Command<LogOptions>
 
                 grid.AddRow(
                     frame.Id,
-                    $"{fromTime.Hours.ToString().PadLeft(2, '0')}:{fromTime.Minutes.ToString().PadLeft(2, '0')} to {toTime.Hours.ToString().PadLeft(2, '0')}:{toTime.Minutes.ToString().PadLeft(2, '0')}",
-                    $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m",
+                    $"{TimeHelper.FormatTime(fromTime)} to {TimeHelper.FormatTime(toTime)}",
+                    TimeHelper.FormatDuration(duration),
                     frame.Project?.Name ?? "-",
                     frame.Tags.Count == 0 ? string.Empty : $"[[{string.Join(", ", frame.Tags.Select(e => e.Name))}]]"
                 );
@@ -99,30 +99,6 @@ public class LogCommand : Command<LogOptions>
         }
     }
 
-    private static TimeSpan GetTotalTime(List<Frame> frames)
-    {
-        // TODO: get from settings
-        var dayEndHour = new TimeSpan(21, 0, 0);
-
-        var totalSeconds = 0L;
-
-        for (var i = frames.Count - 1; i >= 0; --i)
-        {
-            if (i == frames.Count - 1)
-            {
-                totalSeconds += Convert.ToInt64(dayEndHour.TotalSeconds) -
-                                Convert.ToInt64(DateTimeOffset.FromUnixTimeSeconds(frames[i].Timestamp).TimeOfDay
-                                    .TotalSeconds);
-            }
-            else
-            {
-                totalSeconds += frames[i + 1].Timestamp - frames[i].Timestamp;
-            }
-        }
-
-        return TimeSpan.FromSeconds(totalSeconds);
-    }
-
     private async Task<IEnumerable<Frame>> RetrieveFrames(
         DateTimeOffset fromTime,
         DateTimeOffset toTime,
@@ -134,7 +110,7 @@ public class LogCommand : Command<LogOptions>
 
         foreach (var name in projects)
         {
-            var project = await DependencyResolver.ProjectRepository.GetByNameAsync(name);
+            var project = await ProjectRepository.GetByNameAsync(name);
             if (project is null) continue;
 
             projectIds.Add(project.Id);
@@ -144,13 +120,13 @@ public class LogCommand : Command<LogOptions>
 
         foreach (var name in tags)
         {
-            var tag = await DependencyResolver.TagRepository.GetByNameAsync(name);
+            var tag = await TagRepository.GetByNameAsync(name);
             if (tag is null) continue;
 
             tagIds.Add(tag.Id);
         }
 
-        return await DependencyResolver.FrameRepository.GetAsync(fromTime, toTime, projectIds, tagIds);
+        return await FrameRepository.GetAsync(fromTime, toTime, projectIds, tagIds);
     }
 
     #endregion

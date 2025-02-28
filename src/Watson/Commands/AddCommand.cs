@@ -19,10 +19,10 @@ public class AddCommand : Command<AddOptions>
     public override async Task<int> Run(AddOptions options)
     {
         if (string.IsNullOrEmpty(options.Project)) return 1;
-        if (!DependencyResolver.TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
-        if (!DependencyResolver.TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
+        if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
+        if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
         if (toTime is not null && fromTime is null) return 1;
-        if(toTime <= fromTime) return 1;
+        if (toTime <= fromTime) return 1;
         if (toTime >= DateTimeOffset.UtcNow) return 1;
 
         return await CreateFrame(options.Project, fromTime, toTime, options.Tags);
@@ -39,11 +39,11 @@ public class AddCommand : Command<AddOptions>
         IEnumerable<string> tags
     )
     {
-        var projectModel = await DependencyResolver.ProjectRepository.EnsureNameExistsAsync(project);
+        var projectModel = await ProjectRepository.EnsureNameExistsAsync(project);
         if (projectModel is null) return 1;
 
         var tagslst = tags.ToList();
-        if (!await DependencyResolver.TagRepository.EnsureTagsExistsAsync(tagslst)) return 1;
+        if (!await TagRepository.EnsureTagsExistsAsync(tagslst)) return 1;
 
         fromTime ??= DateTimeOffset.UtcNow;
         var frame = new Frame
@@ -52,10 +52,10 @@ public class AddCommand : Command<AddOptions>
             Timestamp = fromTime.Value.ToUnixTimeSeconds()
         };
 
-        var ok = await DependencyResolver.FrameHelper.CreateFrame(frame, toTime);
+        var ok = await FrameHelper.CreateFrame(frame, toTime);
         if (!ok) return 1;
 
-        await DependencyResolver.FrameRepository.AssociateTagsAsync(projectModel.Id, tagslst);
+        await FrameRepository.AssociateTagsAsync(projectModel.Id, tagslst);
         return 0;
     }
 

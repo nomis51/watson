@@ -18,11 +18,11 @@ public class CancelCommand : Command<CancelOptions>
 
     public override async Task<int> Run(CancelOptions options)
     {
-        var lastFrame = await DependencyResolver.FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
+        var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTimeOffset.Now);
         if (lastFrame is null) return 1;
         if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
 
-        return await DependencyResolver.FrameRepository.DeleteAsync(lastFrame.Id) ? 0 : 1;
+        return await FrameRepository.DeleteAsync(lastFrame.Id) ? 0 : 1;
     }
 
     #endregion

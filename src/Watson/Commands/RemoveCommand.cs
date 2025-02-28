@@ -19,14 +19,16 @@ public class RemoveCommand : Command<RemoveOptions>
     {
         if (string.IsNullOrEmpty(options.Resource)) return 1;
         if (string.IsNullOrEmpty(options.ResourceId)) return 1;
-        
+
         return options.Resource switch
         {
-            "project" => await DependencyResolver.ProjectRepository.DeleteAsync(options.ResourceId),
-            "tag" => await DependencyResolver.TagRepository.DeleteAsync(options.ResourceId),
-            "frame" => await DependencyResolver.FrameRepository.DeleteAsync(options.ResourceId),
+            "project" => await ProjectRepository.DeleteAsync(options.ResourceId),
+            "tag" => await TagRepository.DeleteAsync(options.ResourceId),
+            "frame" => await FrameRepository.DeleteAsync(options.ResourceId),
             _ => false
-        } ? 0 : 1;
+        }
+            ? 0
+            : 1;
     }
 
     #endregion

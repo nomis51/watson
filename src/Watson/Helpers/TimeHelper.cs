@@ -1,10 +1,51 @@
-﻿using Watson.Helpers.Abstractions;
+﻿using Watson.Core.Models;
+using Watson.Helpers.Abstractions;
 
 namespace Watson.Helpers;
 
 public class TimeHelper : ITimeHelper
 {
     #region Public methods
+
+    public TimeSpan GetDuration(List<Frame> frames, TimeSpan dayEndHour)
+    {
+        var totalSeconds = 0L;
+
+        for (var i = frames.Count - 1; i >= 0; --i)
+        {
+            if (i == frames.Count - 1)
+            {
+                totalSeconds += Convert.ToInt64(dayEndHour.TotalSeconds) -
+                                Convert.ToInt64(DateTimeOffset.FromUnixTimeSeconds(frames[i].Timestamp).TimeOfDay
+                                    .TotalSeconds);
+            }
+            else
+            {
+                totalSeconds += frames[i + 1].Timestamp - frames[i].Timestamp;
+            }
+        }
+
+        return TimeSpan.FromSeconds(totalSeconds);
+    }
+
+    public string FormatDate(DateTime date, string format = "dddd dd MMMM yyyy")
+    {
+        return date.ToString(format);
+    }
+
+    public string FormatTime(TimeSpan time)
+    {
+        return string.Join(
+            ':',
+            time.Hours.ToString().PadLeft(2, '0'),
+            time.Minutes.ToString().PadLeft(2, '0')
+        );
+    }
+
+    public string FormatDuration(TimeSpan duration)
+    {
+        return $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m";
+    }
 
     public bool ParseDateTime(string? timeStr, out DateTimeOffset? dateTime)
     {
