@@ -40,7 +40,7 @@ public class LogCommand : Command<LogOptions>
                 options.Tags?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? []
             );
 
-            DisplayFrames(frames);
+            DisplayFrames(frames, options.Reverse);
         }
 
         return 0;
@@ -50,12 +50,18 @@ public class LogCommand : Command<LogOptions>
 
     #region Private methods
 
-    private void DisplayFrames(IEnumerable<Frame> frames)
+    private void DisplayFrames(IEnumerable<Frame> frames, bool reversed)
     {
         // TODO: get from settings
         var dayEndHour = new TimeSpan(21, 0, 0);
 
         var groupedFrames = frames.GroupBy(e => e.TimeAsDateTime.Date);
+
+        if (reversed)
+        {
+            groupedFrames = groupedFrames.Reverse();
+        }
+        
         foreach (var group in groupedFrames)
         {
             var groupFrames = group.OrderByDescending(e => e.Time)
