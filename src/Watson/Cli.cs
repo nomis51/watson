@@ -37,6 +37,7 @@ public class Cli : ICli
                 RemoveOptions,
                 RenameOptions,
                 RestartOptions,
+                StartOptions,
                 StatusOptions,
                 StopOptions
             >(args)
@@ -50,6 +51,7 @@ public class Cli : ICli
                 RemoveOptions,
                 RenameOptions,
                 RestartOptions,
+                StartOptions,
                 StatusOptions,
                 StopOptions,
                 Task<int>
@@ -63,6 +65,7 @@ public class Cli : ICli
                 async options => await new RemoveCommand(_dependencyResolver).Run(options),
                 async options => await new RenameCommand(_dependencyResolver).Run(options),
                 async options => await new RestartCommand(_dependencyResolver).Run(options),
+                async options => await new StartCommand(_dependencyResolver).Run(options),
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
                 errors => Task.FromResult(1));

@@ -1,4 +1,5 @@
-﻿using Watson.Models.Abstractions;
+﻿using Spectre.Console;
+using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
@@ -20,13 +21,13 @@ public class StatusCommand : Command<StatusOptions>
         var frame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
         if (frame is null) return 1;
 
-        Console.WriteLine(
-            "{0}: {1} [{2}] started at {3:HH:mm} ({4:HH:mm})",
+        AnsiConsole.MarkupLine(
+            "{0}: {1} ({2}) started at {3} ({4})",
             frame.Id,
-            frame.Project?.Name,
-            frame.Tags.Count,
-            frame.TimeAsDateTime,
-            (DateTime.Now - frame.TimeAsDateTime).Duration()
+            $"[green]{frame.Project?.Name ?? "-"}[/]",
+            $"[purple]{string.Join("[/], [purple]", frame.Tags.Select(e => e.Name))}[/]",
+            $"[blue]{TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay)}[/]",
+            TimeHelper.FormatDuration(DateTime.Now - frame.TimeAsDateTime)
         );
 
         return 0;

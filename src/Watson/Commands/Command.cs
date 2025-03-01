@@ -9,17 +9,17 @@ public abstract class Command<TOptions> : ICommand<TOptions>
 {
     #region Members
 
-    private readonly IDependencyResolver _dependencyResolver;
+    protected readonly IDependencyResolver DependencyResolver;
 
     #endregion
 
     #region Props
 
-    protected ITimeHelper TimeHelper => _dependencyResolver.TimeHelper;
-    protected IFrameHelper FrameHelper => _dependencyResolver.FrameHelper;
-    protected IFrameRepository FrameRepository => _dependencyResolver.FrameRepository;
-    protected IProjectRepository ProjectRepository => _dependencyResolver.ProjectRepository;
-    protected ITagRepository TagRepository => _dependencyResolver.TagRepository;
+    protected ITimeHelper TimeHelper => DependencyResolver.TimeHelper;
+    protected IFrameHelper FrameHelper => DependencyResolver.FrameHelper;
+    protected IFrameRepository FrameRepository => DependencyResolver.FrameRepository;
+    protected IProjectRepository ProjectRepository => DependencyResolver.ProjectRepository;
+    protected ITagRepository TagRepository => DependencyResolver.TagRepository;
 
     #endregion
 
@@ -27,7 +27,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
 
     protected Command(IDependencyResolver dependencyResolver)
     {
-        _dependencyResolver = dependencyResolver;
+        DependencyResolver = dependencyResolver;
     }
 
     #endregion

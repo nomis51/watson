@@ -58,22 +58,32 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         return framesList;
     }
 
-    public Task<Frame?> GetNextFrameAsync(DateTime time)
+    public async Task<Frame?> GetNextFrameAsync(DateTime time)
     {
         var timestamp = time.Ticks;
-        return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
             $"SELECT * FROM {TableName} WHERE Time > @Time ORDER BY Time DESC LIMIT 1",
             new { Time = timestamp }
         );
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
     }
 
-    public Task<Frame?> GetPreviousFrameAsync(DateTime time)
+    public async Task<Frame?> GetPreviousFrameAsync(DateTime time)
     {
         var timestamp = time.Ticks;
-        return DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
             $"SELECT * FROM {TableName} WHERE Time < @Time ORDER BY Time ASC LIMIT 1",
             new { Time = timestamp }
         );
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
     }
 
     public Task<IEnumerable<Frame>> GetAsync(DateTime fromTime, DateTime toTime)
