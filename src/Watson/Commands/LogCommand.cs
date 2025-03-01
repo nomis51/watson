@@ -84,11 +84,15 @@ public class LogCommand : Command<LogOptions>
                 var duration = toTime - fromTime;
 
                 grid.AddRow(
-                    frame.Id,
-                    $"{TimeHelper.FormatTime(fromTime)} to {TimeHelper.FormatTime(toTime)}",
-                    TimeHelper.FormatDuration(duration),
-                    frame.Project?.Name ?? "-",
-                    frame.Tags.Count == 0 ? string.Empty : $"[[{string.Join(", ", frame.Tags.Select(e => e.Name))}]]"
+                    new Text(frame.Id),
+                    new Text($"{TimeHelper.FormatTime(fromTime)} to {TimeHelper.FormatTime(toTime)}"),
+                    new Markup($"[blue]{TimeHelper.FormatDuration(duration)}[/]"),
+                    new Markup($"[green]{frame.Project?.Name ?? "-"}[/]"),
+                    new Markup(
+                        frame.Tags.Count == 0
+                            ? string.Empty
+                            : $"([purple]{string.Join("[/], [purple]", frame.Tags.Select(e => e.Name))}[/])"
+                    )
                 );
             }
 
