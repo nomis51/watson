@@ -9,23 +9,14 @@ public class TimeHelper : ITimeHelper
 
     public TimeSpan GetDuration(List<Frame> frames, TimeSpan dayEndHour)
     {
-        var totalSeconds = 0L;
+        if (frames.Count == 0) return TimeSpan.Zero;
 
-        for (var i = frames.Count - 1; i >= 0; --i)
-        {
-            if (i == frames.Count - 1)
-            {
-                totalSeconds += Convert.ToInt64(dayEndHour.TotalSeconds) -
-                                Convert.ToInt64(new DateTime(frames[i].Time).TimeOfDay
-                                    .TotalSeconds);
-            }
-            else
-            {
-                totalSeconds += frames[i + 1].Time - frames[i].Time;
-            }
-        }
+        frames = frames.Where(e => !string.IsNullOrEmpty(e.ProjectId))
+            .OrderBy(e => e.Time)
+            .ToList();
+        if (frames.Count == 0) return TimeSpan.Zero;
 
-        return TimeSpan.FromSeconds(totalSeconds);
+        return dayEndHour - frames[0].TimeAsDateTime.TimeOfDay;
     }
 
     public string FormatDate(DateTime date, string format = "dddd dd MMMM yyyy")

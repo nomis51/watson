@@ -1,4 +1,6 @@
-﻿using Shouldly;
+﻿using System.Runtime.InteropServices;
+using Shouldly;
+using Watson.Core.Models;
 using Watson.Helpers;
 
 namespace Watson.Tests.Helpers;
@@ -126,6 +128,138 @@ public class TimeHelperTests
             dateTime.ShouldNotBeNull();
             dateTime.Value.ToString("yyyy-MM-dd HH:mm").ShouldBe(expected);
         }
+    }
+
+    [Fact]
+    public void GetDuration_ShouldReturnDurationOfFrames()
+    {
+        // Arrange
+        List<Frame> frames =
+        [
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 0, 0).Ticks,
+                ProjectId = "id"
+            },
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 23, 0).Ticks,
+                ProjectId = "id"
+            },
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 45, 0).Ticks,
+                ProjectId = "id"
+            },
+        ];
+        var dayEndHour = new TimeSpan(8, 0, 0);
+
+        // Act
+        var result = _sut.GetDuration(frames, dayEndHour);
+
+        // Assert
+        result.Minutes.ShouldBe(0);
+        result.Hours.ShouldBe(1);
+    }
+
+    [Fact]
+    public void GetDuration_ShouldReturnZero_WhenFramesAreEmpty()
+    {
+        // Arrange
+        List<Frame> frames = new();
+        var dayEndHour = new TimeSpan(8, 0, 0);
+
+        // Act
+        var result = _sut.GetDuration(frames, dayEndHour);
+
+        // Assert
+        result.Minutes.ShouldBe(0);
+        result.Hours.ShouldBe(0);
+    }
+
+    [Fact]
+    public void GetDuration_ShouldReturnZero_WhenFramesAreAllEmpty()
+    {
+        // Arrange
+        List<Frame> frames =
+        [
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 0, 0).Ticks,
+                ProjectId = ""
+            },
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 23, 0).Ticks,
+                ProjectId = ""
+            },
+            new()
+            {
+                Time = new DateTime(2025, 1, 1, 7, 45, 0).Ticks,
+                ProjectId = ""
+            },
+        ];
+        var dayEndHour = new TimeSpan(8, 0, 0);
+
+        // Act
+        var result = _sut.GetDuration(frames, dayEndHour);
+
+        // Assert
+        result.Minutes.ShouldBe(0);
+        result.Hours.ShouldBe(0);
+    }
+
+    [InlineData(1, 2, "01h 02m")]
+    [InlineData(1, 0, "01h 00m")]
+    [InlineData(0, 2, "00h 02m")]
+    [InlineData(0, 0, "00h 00m")]
+    [InlineData(15, 45, "15h 45m")]
+    [Theory]
+    public void FormatDuration_ShouldReturnFormattedDuration(int hours, int minutes, string expected)
+    {
+        // Arrange
+        var duration = new TimeSpan(hours, minutes, 0);
+
+        // Act
+        var result = _sut.FormatDuration(duration);
+
+        // Assert
+        result.ShouldBe(expected);
+    }
+
+    [InlineData("dddd dd MMMM yyyy", "2022-12-13", "Tuesday 13 December 2022")]
+    [InlineData("yyyy-MM-dd", "2022-12-13", "2022-12-13")]
+    [Theory]
+    public void FormatDate_ShouldReturnFormattedDate(string format, string input, string expected)
+    {
+        // Arrange
+        var date = DateTime.Parse(input);
+
+        // Act
+        var result = _sut.FormatDate(date, format);
+
+        // Assert
+        result.ShouldBe(expected);
+    }
+
+    [InlineData(12, 45, "12:45")]
+    [InlineData(0, 45, "00:45")]
+    [InlineData(1, 45, "01:45")]
+    [InlineData(1, 0, "01:00")]
+    [InlineData(0, 0, "00:00")]
+    [InlineData(1, 1, "01:01")]
+    [InlineData(13, 13, "13:13")]
+    [Theory]
+    public void FormatTime_ShouldReturnFormattedTime(int hours, int minutes, string expected)
+    {
+        // Arrange
+        var time = new TimeSpan(hours, minutes, 0);
+
+        // Act
+        var result = _sut.FormatTime(time);
+
+        // Assert
+        result.ShouldBe(expected);
     }
 
     #endregion
