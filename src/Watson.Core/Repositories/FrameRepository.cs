@@ -94,7 +94,9 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
         DateTime fromTime,
         DateTime toTime,
         List<string> projectIds,
-        List<string> tagIds
+        List<string> tagIds,
+        List<string> ignoredProjectIds,
+        List<string> ignoredTagIds
     )
     {
         var fromTimestamp = fromTime.Ticks;
@@ -106,10 +108,21 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
             sql += $" AND ProjectId IN ('{string.Join("','", projectIds)}')";
         }
 
+        if (ignoredProjectIds.Count != 0)
+        {
+            sql += $" AND ProjectId NOT IN ('{string.Join("','", ignoredProjectIds)}')";
+        }
+
         if (tagIds.Count != 0)
         {
             sql +=
                 $" AND Id IN (SELECT FrameId FROM {FrameTagTableName} WHERE TagId IN ('{string.Join("','", tagIds)}'))";
+        }
+
+        if (ignoredTagIds.Count != 0)
+        {
+            sql +=
+                $" AND Id NOT IN (SELECT FrameId FROM {FrameTagTableName} WHERE TagId IN ('{string.Join("','", ignoredTagIds)}'))";
         }
 
         var frames = await DbContext.Connection.QueryAsync<Frame>(

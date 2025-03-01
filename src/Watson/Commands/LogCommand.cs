@@ -20,29 +20,71 @@ public class LogCommand : Command<LogOptions>
 
     public override async Task<int> Run(LogOptions options)
     {
+        DateTime? fromTime = null;
+        DateTime? toTime = null;
+
         if (!string.IsNullOrEmpty(options.FromTime) || !string.IsNullOrEmpty(options.ToTime))
         {
-            if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime))
+            if (!TimeHelper.ParseDateTime(options.FromTime, out fromTime))
             {
                 return 1;
             }
 
-            if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime))
+            if (!TimeHelper.ParseDateTime(options.ToTime, out toTime))
             {
                 return 1;
             }
+        }
+        else if (options.Year)
+        {
+            fromTime = new DateTime(DateTime.Now.Year, 1, 1);
+            toTime = new DateTime(DateTime.Now.Year, 12, 31, 23, 59, 59);
+        }
+        else if (options.Month)
+        {
+            fromTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month,
+                DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month), 23, 59, 59);
+        }
+        else if (options.Week)
+        {
+            // TODO: get week start day from settings
+            var date = DateTime.Now;
+            while (date.DayOfWeek != DayOfWeek.Sunday)
+            {
+                date = date.AddDays(-1);
+            }
 
-            var frames = await RetrieveFrames(
-                fromTime!.Value,
-                toTime!.Value,
-                options.Projects?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
-                [],
-                options.Tags?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? []
-            );
-
-            DisplayFrames(frames, options.Reverse);
+            fromTime = date;
+            toTime = date.AddDays(6);
+        }
+        else if (options.Day)
+        {
+            fromTime = DateTime.Now.Date;
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
+        }
+        else if (options.All)
+        {
+            fromTime = DateTime.MinValue;
+            toTime = DateTime.MaxValue;
         }
 
+        if (!fromTime.HasValue || !toTime.HasValue) return 1;
+
+        var frames = await RetrieveFrames(
+            fromTime.Value,
+            toTime.Value,
+            options.Projects?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            [],
+            options.Tags?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? [],
+            options.IgnoredProjects?.Split(',',
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            [],
+            options.IgnoredTags?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            []
+        );
+
+        DisplayFrames(frames, options.Reverse);
         return 0;
     }
 
@@ -61,7 +103,7 @@ public class LogCommand : Command<LogOptions>
         {
             groupedFrames = groupedFrames.Reverse();
         }
-        
+
         foreach (var group in groupedFrames)
         {
             var groupFrames = group.OrderByDescending(e => e.Time)
@@ -114,7 +156,9 @@ public class LogCommand : Command<LogOptions>
         DateTime fromTime,
         DateTime toTime,
         IEnumerable<string> projects,
-        IEnumerable<string> tags
+        IEnumerable<string> tags,
+        IEnumerable<string> ignoredProjects,
+        IEnumerable<string> ignoredTags
     )
     {
         List<string> projectIds = [];
@@ -137,7 +181,34 @@ public class LogCommand : Command<LogOptions>
             tagIds.Add(tag.Id);
         }
 
-        return await FrameRepository.GetAsync(fromTime, toTime, projectIds, tagIds);
+        List<string> ignoredProjectIds = [];
+
+        foreach (var name in ignoredProjects)
+        {
+            var project = await ProjectRepository.GetByNameAsync(name);
+            if (project is null) continue;
+
+            ignoredProjectIds.Add(project.Id);
+        }
+
+        List<string> ignoredTagIds = [];
+
+        foreach (var name in ignoredTags)
+        {
+            var tag = await TagRepository.GetByNameAsync(name);
+            if (tag is null) continue;
+
+            ignoredTagIds.Add(tag.Id);
+        }
+
+        return await FrameRepository.GetAsync(
+            fromTime,
+            toTime,
+            projectIds,
+            tagIds,
+            ignoredProjectIds,
+            ignoredTagIds
+        );
     }
 
     #endregion

@@ -389,7 +389,7 @@ public class FrameRepositoryTests : IDisposable
             });
 
         // Act
-        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], []);
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], [], [], []);
 
         // Assert
         var resultLst = result.ToList();
@@ -424,7 +424,7 @@ public class FrameRepositoryTests : IDisposable
             });
 
         // Act
-        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), ["id"], []);
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), ["id"], [], [], []);
 
         // Assert
         var resultLst = result.ToList();
@@ -472,7 +472,7 @@ public class FrameRepositoryTests : IDisposable
             });
 
         // Act
-        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], ["id"]);
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], ["id"], [], []);
 
         // Assert
         var resultLst = result.ToList();
@@ -527,7 +527,7 @@ public class FrameRepositoryTests : IDisposable
             });
 
         // Act
-        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), ["id"], ["id"]);
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), ["id"], ["id"], [], []);
 
         // Assert
         var resultLst = result.ToList();

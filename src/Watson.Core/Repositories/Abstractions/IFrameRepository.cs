@@ -12,7 +12,9 @@ public interface IFrameRepository : IRepository<Frame>
         DateTime fromTime,
         DateTime toTime,
         List<string> projectIds,
-        List<string> tagIds
+        List<string> tagIds,
+        List<string> ignoredProjectIds,
+        List<string> ignoredTagIds
     );
 
     Task AssociateTagsAsync(string frameId, IEnumerable<string> tags);
