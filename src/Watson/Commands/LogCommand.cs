@@ -77,8 +77,8 @@ public class LogCommand : Command<LogOptions>
             for (var i = 0; i < groupFrames.Count; ++i)
             {
                 var frame = groupFrames[i];
-                var fromTime = new DateTime(frame.Time).TimeOfDay;
-                var toTime = i + 1 < groupFrames.Count
+                var toTime = new DateTime(frame.Time).TimeOfDay;
+                var fromTime = i + 1 < groupFrames.Count
                     ? new DateTime(groupFrames[i + 1].Time).TimeOfDay
                     : dayEndHour;
                 var duration = toTime - fromTime;
