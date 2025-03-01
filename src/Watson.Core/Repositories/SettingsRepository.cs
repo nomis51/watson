@@ -37,6 +37,8 @@ public class SettingsRepository : ISettingsRepository
     {
         _fileSystem = fileSystem;
         _logger = logger;
+
+        EnsureFoldersExist();
     }
 
     #endregion
@@ -79,9 +81,11 @@ public class SettingsRepository : ISettingsRepository
 
     private void EnsureFoldersExist()
     {
-        if (_fileSystem.Directory.Exists(SettingsFilePath)) return;
+        var folder = Path.GetDirectoryName(SettingsFilePath)!;
+        if (_fileSystem.Directory.Exists(folder)) return;
 
-        _fileSystem.Directory.CreateDirectory(SettingsFilePath);
+        _fileSystem.Directory.CreateDirectory(folder);
+        _fileSystem.File.WriteAllText(SettingsFilePath, JsonSerializer.Serialize(new Settings()));
     }
 
     #endregion

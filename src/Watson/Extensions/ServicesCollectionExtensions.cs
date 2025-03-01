@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.IO.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
 using Watson.Core;
@@ -23,6 +24,7 @@ public static class ServicesCollectionExtensions
         ConfigureLogging(services);
         RegisterServices(services);
 
+        services.AddScoped<IFileSystem, FileSystem>();
         services.AddSingleton<ICli, Cli>();
         return services;
     }
@@ -60,6 +62,7 @@ public static class ServicesCollectionExtensions
         services.AddSingleton<IFrameRepository, FrameRepository>();
         services.AddSingleton<IProjectRepository, ProjectRepository>();
         services.AddSingleton<ITagRepository, TagRepository>();
+        services.AddSingleton<ISettingsRepository, SettingsRepository>();
     }
 
     #endregion
