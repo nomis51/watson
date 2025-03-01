@@ -95,7 +95,7 @@ public class LogCommand : Command<LogOptions>
     private void DisplayFrames(IEnumerable<Frame> frames, bool reversed)
     {
         // TODO: get from settings
-        var dayEndHour = new TimeSpan(21, 0, 0);
+        var dayEndHour = new TimeSpan(16, 0, 0);
 
         var groupedFrames = frames.GroupBy(e => e.TimeAsDateTime.Date);
 
@@ -106,7 +106,7 @@ public class LogCommand : Command<LogOptions>
 
         foreach (var group in groupedFrames)
         {
-            var groupFrames = group.OrderByDescending(e => e.Time)
+            var groupFrames = group.OrderBy(e => e.Time)
                 .ToList();
             var totalTime = TimeHelper.GetDuration(groupFrames, dayEndHour);
             AnsiConsole.WriteLine(
@@ -125,10 +125,10 @@ public class LogCommand : Command<LogOptions>
             for (var i = 0; i < groupFrames.Count; ++i)
             {
                 var frame = groupFrames[i];
-                var toTime = new DateTime(frame.Time).TimeOfDay;
-                var fromTime = i + 1 < groupFrames.Count
+                var toTime = i + 1 < groupFrames.Count
                     ? new DateTime(groupFrames[i + 1].Time).TimeOfDay
                     : dayEndHour;
+                var fromTime = new DateTime(frame.Time).TimeOfDay;
                 var duration = toTime - fromTime;
 
                 grid.AddRow(
