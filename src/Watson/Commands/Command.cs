@@ -20,6 +20,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
     protected IFrameRepository FrameRepository => DependencyResolver.FrameRepository;
     protected IProjectRepository ProjectRepository => DependencyResolver.ProjectRepository;
     protected ITagRepository TagRepository => DependencyResolver.TagRepository;
+    protected ISettingsRepository SettingsRepository => DependencyResolver.SettingsRepository;
 
     #endregion
 

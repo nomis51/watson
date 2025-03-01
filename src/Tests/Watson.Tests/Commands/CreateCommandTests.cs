@@ -1,10 +1,12 @@
 ﻿using Dapper;
+using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core;
 using Watson.Core.Helpers;
-using Watson.Core.Models;
+using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
@@ -17,6 +19,7 @@ public class CreateCommandTests : IDisposable
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
+    private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly CreateCommand _sut;
 
     #endregion
@@ -35,7 +38,8 @@ public class CreateCommandTests : IDisposable
                 frameRepository,
                 new TagRepository(_dbContext, idHelper),
                 new TimeHelper(),
-                new FrameHelper(frameRepository)
+                new FrameHelper(frameRepository),
+                _settingsRepository
             )
         );
     }
@@ -97,7 +101,7 @@ public class CreateCommandTests : IDisposable
         var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Projects WHERE Name = 'project'");
         count.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Run_ShouldCreateTag_WhenDoesntExists()
     {
@@ -118,7 +122,7 @@ public class CreateCommandTests : IDisposable
                 "SELECT * FROM Tags WHERE Name = 'tag'");
         tag.ShouldNotBeNull();
     }
-    
+
     [Fact]
     public async Task Run_ShouldFail_WhenTagAlreadyExists()
     {
@@ -139,7 +143,7 @@ public class CreateCommandTests : IDisposable
         var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Tags WHERE Name = 'tag'");
         count.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Run_ShouldFail_WhenResourceIsInvalid()
     {
@@ -173,7 +177,7 @@ public class CreateCommandTests : IDisposable
         // Assert
         result.ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Run_ShouldFail_WhenNameIsMissing()
     {
@@ -189,7 +193,7 @@ public class CreateCommandTests : IDisposable
 
         // Assert
         result.ShouldBe(1);
-    }   
+    }
 
     #endregion
 }

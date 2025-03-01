@@ -3,7 +3,7 @@ using Shouldly;
 using Watson.Core;
 using Watson.Core.Abstractions;
 using Watson.Core.Helpers;
-using Watson.Core.Models;
+using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 
 namespace Watson.Tests.Core.Repositories;

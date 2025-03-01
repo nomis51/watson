@@ -1,4 +1,4 @@
-﻿namespace Watson.Core.Models.Abstractions;
+﻿namespace Watson.Core.Models.Database.Abstractions;
 
 public abstract class DbModel
 {

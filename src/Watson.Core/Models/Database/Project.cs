@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using Watson.Core.Models.Abstractions;
+using Watson.Core.Models.Database.Abstractions;
 
-namespace Watson.Core.Models;
+namespace Watson.Core.Models.Database;
 
 [Description("Projects")]
 public class Project : DbModel

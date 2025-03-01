@@ -1,9 +1,11 @@
 ﻿using Dapper;
+using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
@@ -16,6 +18,7 @@ public class RemoveCommandTests : IDisposable
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
+    private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly RemoveCommand _sut;
 
     #endregion
@@ -34,7 +37,8 @@ public class RemoveCommandTests : IDisposable
                 frameRepository,
                 new TagRepository(_dbContext, idHelper),
                 new TimeHelper(),
-                new FrameHelper(frameRepository)
+                new FrameHelper(frameRepository),
+                _settingsRepository
             )
         );
     }

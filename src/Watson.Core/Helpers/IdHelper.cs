@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 using Watson.Core.Helpers.Abstractions;
 
 namespace Watson.Core.Helpers;

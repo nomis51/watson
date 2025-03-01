@@ -1,4 +1,4 @@
-﻿using Watson.Core.Models.Abstractions;
+﻿using Watson.Core.Models.Database.Abstractions;
 
 namespace Watson.Core.Repositories.Abstractions;
 

@@ -11,13 +11,15 @@ public class DependencyResolver : IDependencyResolver
     public IFrameRepository FrameRepository { get; }
     public ITimeHelper TimeHelper { get; }
     public IFrameHelper FrameHelper { get; }
+    public ISettingsRepository SettingsRepository { get; }
 
     public DependencyResolver(
         IProjectRepository projectRepository,
         IFrameRepository frameRepository,
         ITagRepository tagRepository,
         ITimeHelper timeHelper,
-        IFrameHelper frameHelper
+        IFrameHelper frameHelper,
+        ISettingsRepository settingsRepository
     )
     {
         ProjectRepository = projectRepository;
@@ -25,5 +27,6 @@ public class DependencyResolver : IDependencyResolver
         TagRepository = tagRepository;
         TimeHelper = timeHelper;
         FrameHelper = frameHelper;
+        SettingsRepository = settingsRepository;
     }
 }

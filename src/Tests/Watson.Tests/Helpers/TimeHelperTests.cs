@@ -1,6 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using Shouldly;
-using Watson.Core.Models;
+﻿using Shouldly;
+using Watson.Core.Models.Database;
 using Watson.Helpers;
 
 namespace Watson.Tests.Helpers;

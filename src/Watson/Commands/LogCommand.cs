@@ -1,6 +1,5 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Spectre.Console;
-using Watson.Core.Models;
+﻿using Spectre.Console;
+using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -48,9 +47,11 @@ public class LogCommand : Command<LogOptions>
         }
         else if (options.Week)
         {
-            // TODO: get week start day from settings
+            // TODO: check for custom work time (week start day)
+            var settings = await SettingsRepository.GetSettings();
+
             var date = DateTime.Now;
-            while (date.DayOfWeek != DayOfWeek.Sunday)
+            while (date.DayOfWeek != settings.WorkTime.WeekStartDay)
             {
                 date = date.AddDays(-1);
             }
@@ -92,10 +93,11 @@ public class LogCommand : Command<LogOptions>
 
     #region Private methods
 
-    private void DisplayFrames(IEnumerable<Frame> frames, bool reversed)
+    private async Task DisplayFrames(IEnumerable<Frame> frames, bool reversed)
     {
-        // TODO: get from settings
-        var dayEndHour = new TimeSpan(16, 0, 0);
+        // TODO: check for custom work time
+        var settings = await SettingsRepository.GetSettings();
+        var dayEndHour = settings.WorkTime.EndTime;
 
         var groupedFrames = frames.GroupBy(e => e.TimeAsDateTime.Date);
 

@@ -10,4 +10,5 @@ public interface IDependencyResolver
     IFrameRepository FrameRepository { get; }
     ITimeHelper TimeHelper { get; }
     IFrameHelper FrameHelper { get; }
+    ISettingsRepository SettingsRepository { get; }
 }

@@ -1,16 +1,15 @@
 ﻿using Dapper;
-using Microsoft.AspNetCore.Components.Forms;
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core;
 using Watson.Core.Helpers;
-using Watson.Core.Models;
+using Watson.Core.Models.Database;
+using Watson.Core.Models.Settings;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
-using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Tests.Commands;
@@ -21,6 +20,7 @@ public class AddCommandTests : IDisposable
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
+    private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly AddCommand _sut;
 
     #endregion
@@ -32,6 +32,9 @@ public class AddCommandTests : IDisposable
         var idHelper = new IdHelper();
         _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
+        _settingsRepository.GetSettings()
+            .Returns(new Settings());
+
         var frameRepository = new FrameRepository(_dbContext, idHelper);
         _sut = new AddCommand(
             new DependencyResolver(
@@ -39,7 +42,8 @@ public class AddCommandTests : IDisposable
                 frameRepository,
                 new TagRepository(_dbContext, idHelper),
                 new TimeHelper(),
-                new FrameHelper(frameRepository)
+                new FrameHelper(frameRepository),
+                _settingsRepository
             )
         );
     }

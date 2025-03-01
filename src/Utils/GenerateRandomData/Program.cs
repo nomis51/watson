@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Watson.Core;
 using Watson.Core.Helpers;
-using Watson.Core.Models;
+using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 
 var projects = new[]

@@ -3,7 +3,7 @@ using System.Reflection;
 using Dapper;
 using Watson.Core.Abstractions;
 using Watson.Core.Helpers.Abstractions;
-using Watson.Core.Models.Abstractions;
+using Watson.Core.Models.Database.Abstractions;
 using Watson.Core.Repositories.Abstractions;
 
 namespace Watson.Core.Repositories;

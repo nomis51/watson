@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using Watson.Core.Models.Abstractions;
+using Watson.Core.Models.Database.Abstractions;
 
 namespace Watson.Tests.Core.Repositories.Mocks;
 

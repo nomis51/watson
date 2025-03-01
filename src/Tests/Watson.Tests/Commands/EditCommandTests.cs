@@ -1,10 +1,12 @@
 ﻿using Dapper;
+using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core;
 using Watson.Core.Helpers;
-using Watson.Core.Models;
+using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
@@ -17,6 +19,7 @@ public class EditCommandTests : IDisposable
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
+    private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly EditCommand _sut;
 
     #endregion
@@ -35,7 +38,8 @@ public class EditCommandTests : IDisposable
                 frameRepository,
                 new TagRepository(_dbContext, idHelper),
                 new TimeHelper(),
-                new FrameHelper(frameRepository)
+                new FrameHelper(frameRepository),
+                _settingsRepository
             )
         );
     }
