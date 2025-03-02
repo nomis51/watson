@@ -30,8 +30,9 @@ jobs:
         id: get_version
         run: |
           VERSION=$(grep -oP '(?<=<Version>)[^<]+' Watson.csproj)
+          echo "Extracted version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         working-directory: src/Watson
       - name: Restore dependencies
         run: dotnet restore
@@ -47,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: watson-zip
-          path: Watson.$VERSION.zip
+          path: Watson.${{ env.VERSION }}.zip
   #      - name: Package
   #        run: dotnet pack --configuration Release
   #      - name: Publish
