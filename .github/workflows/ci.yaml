@@ -58,4 +58,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ./Watson.${{ needs.build.outputs.version }}.zip
+          files: ./src/Watson/Watson.${{ needs.build.outputs.version }}.zip
