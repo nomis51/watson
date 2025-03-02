@@ -37,4 +37,4 @@ You can see the `status` of the current frame with the `status` command.
 
 You can also list of all the frames within a time period with the `log` command.
 
-For more details about all the available commands and options run `watson help` or visit the Commands page.
+For more details about all the available commands and options run `watson help` or visit the [Commands page](https://github.com/nomis51/watson/blob/dev/docs/commands.md).
