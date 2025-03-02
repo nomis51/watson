@@ -48,9 +48,9 @@ jobs:
         run: rm -rf bin && rm -rf obj
         working-directory: src/Watson
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Watson/Watson.csproj
       - name: Publish
-        run: dotnet publish --configuration Release --output ./output
+        run: dotnet publish Watson/Watson.csproj --configuration Release --output ./output
       - name: Zip release
         run: cd ./output && zip -r Watson.${{ env.VERSION }}.zip .
       - name: Upload build artifact
