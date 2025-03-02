@@ -10,15 +10,14 @@ using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class RenameCommandTests : IDisposable
+public class RenameCommandTests : CommandTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly RenameCommand _sut;
 
@@ -29,14 +28,13 @@ public class RenameCommandTests : IDisposable
     public RenameCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new RenameCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -44,16 +42,10 @@ public class RenameCommandTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -70,7 +62,7 @@ public class RenameCommandTests : IDisposable
             ResourceId = "id",
             Name = "newName"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
 
         // Act
         var result = await _sut.Run(options);
@@ -78,7 +70,7 @@ public class RenameCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var project =
-            await _dbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+            await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
                 "SELECT * FROM Projects WHERE Name = 'newName'");
         project.ShouldNotBeNull();
     }
@@ -93,14 +85,14 @@ public class RenameCommandTests : IDisposable
             ResourceId = "id",
             Name = "newName"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var tag = await _dbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
+        var tag = await DbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
             "SELECT * FROM Tags WHERE Name = 'newName'");
         tag.ShouldNotBeNull();
     }

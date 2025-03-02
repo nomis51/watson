@@ -10,15 +10,14 @@ using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class RestartCommandTests : IDisposable
+public class RestartCommandTests : CommandTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly RestartCommand _sut;
 
@@ -29,14 +28,13 @@ public class RestartCommandTests : IDisposable
     public RestartCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new RestartCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -44,16 +42,10 @@ public class RestartCommandTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -67,14 +59,14 @@ public class RestartCommandTests : IDisposable
         var options = new RestartOptions
         {
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
@@ -86,21 +78,21 @@ public class RestartCommandTests : IDisposable
         {
             FrameId = "id"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>(
+        var frame = await DbContext.Connection.QueryFirstAsync<Frame>(
             "SELECT * FROM Frames WHERE Id <> 'id'"
         );
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
 
-        var frameTag = await _dbContext.Connection.QueryFirstAsync<int>(
+        var frameTag = await DbContext.Connection.QueryFirstAsync<int>(
             $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}'"
         );
         frameTag.ShouldBe(1);

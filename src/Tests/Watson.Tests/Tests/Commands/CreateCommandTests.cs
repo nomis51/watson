@@ -10,15 +10,14 @@ using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class CreateCommandTests : IDisposable
+public class CreateCommandTests : CommandTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly CreateCommand _sut;
 
@@ -29,14 +28,13 @@ public class CreateCommandTests : IDisposable
     public CreateCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new CreateCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -44,16 +42,10 @@ public class CreateCommandTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -76,7 +68,7 @@ public class CreateCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var project =
-            await _dbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+            await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
                 "SELECT * FROM Projects WHERE Name = 'project'");
         project.ShouldNotBeNull();
     }
@@ -90,7 +82,7 @@ public class CreateCommandTests : IDisposable
             Resource = "project",
             Name = "project"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
 
 
         // Act
@@ -98,7 +90,7 @@ public class CreateCommandTests : IDisposable
 
         // Assert
         result.ShouldBe(1);
-        var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Projects WHERE Name = 'project'");
+        var count = DbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Projects WHERE Name = 'project'");
         count.ShouldBe(1);
     }
 
@@ -118,7 +110,7 @@ public class CreateCommandTests : IDisposable
         // Assert
         result.ShouldBe(0);
         var tag =
-            await _dbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
+            await DbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
                 "SELECT * FROM Tags WHERE Name = 'tag'");
         tag.ShouldNotBeNull();
     }
@@ -132,7 +124,7 @@ public class CreateCommandTests : IDisposable
             Resource = "tag",
             Name = "tag"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
 
 
         // Act
@@ -140,7 +132,7 @@ public class CreateCommandTests : IDisposable
 
         // Assert
         result.ShouldBe(1);
-        var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Tags WHERE Name = 'tag'");
+        var count = DbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Tags WHERE Name = 'tag'");
         count.ShouldBe(1);
     }
 

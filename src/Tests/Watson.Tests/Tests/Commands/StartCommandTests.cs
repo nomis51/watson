@@ -11,15 +11,14 @@ using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StartCommandTests : IDisposable
+public class StartCommandTests : CommandTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly StartCommand _sut;
 
@@ -30,17 +29,16 @@ public class StartCommandTests : IDisposable
     public StartCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
         _settingsRepository.GetSettings()
             .Returns(new Settings());
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new StartCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -48,16 +46,10 @@ public class StartCommandTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -79,9 +71,9 @@ public class StartCommandTests : IDisposable
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
-        var project = await _dbContext.Connection.QueryFirstAsync<Project>("SELECT * FROM Projects");
-        var tags = await _dbContext.Connection.QueryAsync<Tag>("SELECT * FROM Tags");
+        var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        var project = await DbContext.Connection.QueryFirstAsync<Project>("SELECT * FROM Projects");
+        var tags = await DbContext.Connection.QueryAsync<Tag>("SELECT * FROM Tags");
         tags.Count().ShouldBe(2);
         project.Name.ShouldBe("project");
         frame.ProjectId.ShouldBe(project.Id);

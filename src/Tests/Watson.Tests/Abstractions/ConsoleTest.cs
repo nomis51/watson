@@ -2,7 +2,7 @@
 
 namespace Watson.Tests.Abstractions;
 
-public abstract class ConsoleTest : IDisposable
+public abstract class ConsoleTest : CommandTest, IDisposable
 {
     #region Members
 
@@ -12,8 +12,9 @@ public abstract class ConsoleTest : IDisposable
 
     #region Constructors
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
         ConsoleHelper.Dispose();
     }

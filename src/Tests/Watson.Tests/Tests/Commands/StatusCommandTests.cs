@@ -19,8 +19,6 @@ public class StatusCommandTests : ConsoleTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly StatusCommand _sut;
 
@@ -31,14 +29,13 @@ public class StatusCommandTests : ConsoleTest, IDisposable
     public StatusCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new StatusCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -50,14 +47,6 @@ public class StatusCommandTests : ConsoleTest, IDisposable
     {
         base.Dispose();
         GC.SuppressFinalize(this);
-
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -71,11 +60,11 @@ public class StatusCommandTests : ConsoleTest, IDisposable
         var time = DateTime.Now.Date;
         time = time.AddDays(-1);
         time = time.AddTicks(time.TimeOfDay.Add(new TimeSpan(15, 45, 0)).Ticks);
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
             new { Time = time.Ticks });
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
         var options = new StatusOptions();
 
         var expectedOutput =

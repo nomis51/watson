@@ -10,15 +10,14 @@ using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class CancelCommandTests : IDisposable
+public class CancelCommandTests : CommandTest, IDisposable
 {
     #region Members
 
-    private readonly AppDbContext _dbContext;
-    private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
     private readonly CancelCommand _sut;
 
@@ -29,14 +28,13 @@ public class CancelCommandTests : IDisposable
     public CancelCommandTests()
     {
         var idHelper = new IdHelper();
-        _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
-        var frameRepository = new FrameRepository(_dbContext, idHelper);
+        var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new CancelCommand(
             new DependencyResolver(
-                new ProjectRepository(_dbContext, idHelper),
+                new ProjectRepository(DbContext, idHelper),
                 frameRepository,
-                new TagRepository(_dbContext, idHelper),
+                new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository
@@ -44,16 +42,10 @@ public class CancelCommandTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
         GC.SuppressFinalize(this);
-        _dbContext.Connection.Close();
-        _dbContext.Connection.Dispose();
-
-        if (File.Exists(_dbFilePath))
-        {
-            File.Delete(_dbFilePath);
-        }
     }
 
     #endregion
@@ -64,7 +56,7 @@ public class CancelCommandTests : IDisposable
     public async Task Run_ShouldCancelLastFrame_WhenItExists()
     {
         // Arrange
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
         var options = new CancelOptions();
 
         // Act
@@ -72,7 +64,7 @@ public class CancelCommandTests : IDisposable
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
         frame.ShouldBeNull();
     }
 
@@ -93,7 +85,7 @@ public class CancelCommandTests : IDisposable
     public async Task Run_ShouldFail_WhenLastFrameIsAnEmptyFrame()
     {
         // Arrange
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','',0)");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','',0)");
         var options = new CancelOptions();
 
         // Act
