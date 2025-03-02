@@ -43,7 +43,7 @@ jobs:
       - name: Publish
         run: dotnet publish --configuration Release --output ./output
       - name: Zip release
-        run: zip -r Watson.$VERSION.zip ./output
+        run: zip -r Watson.${{ env.VERSION }}.zip ./output
       - name: Debug - List files
         run: |
           echo "Current directory: $(pwd)"
