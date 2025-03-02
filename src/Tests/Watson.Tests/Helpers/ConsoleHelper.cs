@@ -44,7 +44,7 @@ public class ConsoleHelper : IDisposable
 
     public string[] GetMockOutputAsLines()
     {
-        return _stringWriter.ToString().Trim().Split("\r\n");
+        return _stringWriter.ToString().Trim().Split(_stringWriter.NewLine);
     }
 
     public string GetMockOutput()
