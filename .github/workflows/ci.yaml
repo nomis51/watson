@@ -55,7 +55,7 @@ jobs:
           echo "Contents of src/:"
           ls -l ./
       - name: Zip release
-        run: zip -r Watson.${{ env.VERSION }}.zip ./output
+        run: cd ./output && zip -r Watson.${{ env.VERSION }}.zip *
       - name: Debug - Check if zip file exists
         run: |
           echo "Checking if Watson.${{ env.VERSION }}.zip exists..."
