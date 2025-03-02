@@ -22,6 +22,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=$(grep -oP '(?<=<Version>)[^<]+' Watson.csproj)" >> $GITHUB_ENV
+        working-directory: src/Watson
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -31,4 +35,4 @@ jobs:
       - name: Package
         run: dotnet pack --configuration Release
 #      - name: Publish
-#        run: dotnet nuget push Watson.0.1.0.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+#        run: dotnet nuget push Watson.$VERSION.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
