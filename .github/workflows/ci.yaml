@@ -28,11 +28,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-build --verbosity normal
       - name: Publish
-        run: dotnet publish --no-build --configuration Release --output ./output
+        run: dotnet publish --configuration Release --output ./output
       - name: Zip release
         run: zip -r Watson.$VERSION.zip ./output
   #      - name: Package
