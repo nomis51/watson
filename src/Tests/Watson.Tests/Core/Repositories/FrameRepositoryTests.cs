@@ -535,5 +535,60 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(1);
     }
 
+    [Fact]
+    public async Task GetAsync_ShouldReturnFramesWithinRangeAndTagsAndProjectAndIgnoreProjectsAndIgnoreTags()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id",
+                ProjectId = "id",
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id2",
+                ProjectId = "id1",
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id3",
+                ProjectId = "id2",
+                Time = 3
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)", new
+            {
+                Id = "id",
+                FrameId = "id",
+                TagId = "id"
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)", new
+            {
+                Id = "id2",
+                FrameId = "id2",
+                TagId = "id"
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)", new
+            {
+                Id = "id",
+                Name = "name"
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), ["id"], ["id"], ["id"], ["id"]);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(0);
+    }
+
     #endregion
 }

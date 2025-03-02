@@ -6,7 +6,8 @@ $dotCoverFilters = @(
     "-:class=Watson.Extensions.ServicesCollectionExtensions",
     "-:class=Watson.Commands.Command*",
     "-:class=Watson.Cli",
-    "-:class=*Program"
+    "-:class=*Program",
+    "-:class=Watson.Core.Models.Settings.*"
 )
 $dotnetTestFilters = @(
     "FullyQualifiedName~Watson.Tests"
