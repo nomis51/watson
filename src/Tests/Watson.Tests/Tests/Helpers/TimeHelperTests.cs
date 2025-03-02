@@ -2,7 +2,7 @@
 using Watson.Core.Models.Database;
 using Watson.Helpers;
 
-namespace Watson.Tests.Helpers;
+namespace Watson.Tests.Tests.Helpers;
 
 public class TimeHelperTests
 {

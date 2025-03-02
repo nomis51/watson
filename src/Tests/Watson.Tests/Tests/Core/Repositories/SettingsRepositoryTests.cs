@@ -7,7 +7,7 @@ using Shouldly;
 using Watson.Core.Models.Settings;
 using Watson.Core.Repositories;
 
-namespace Watson.Tests.Core.Repositories;
+namespace Watson.Tests.Tests.Core.Repositories;
 
 public class SettingsRepositoryTests
 {

@@ -11,28 +11,28 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 
-namespace Watson.Tests.Commands;
+namespace Watson.Tests.Tests.Commands;
 
-public class RestartCommandTests : IDisposable
+public class StopCommandTests : IDisposable
 {
     #region Members
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
-    private readonly RestartCommand _sut;
+    private readonly StopCommand _sut;
 
     #endregion
 
     #region Constructors
 
-    public RestartCommandTests()
+    public StopCommandTests()
     {
         var idHelper = new IdHelper();
         _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
         var frameRepository = new FrameRepository(_dbContext, idHelper);
-        _sut = new RestartCommand(
+        _sut = new StopCommand(
             new DependencyResolver(
                 new ProjectRepository(_dbContext, idHelper),
                 frameRepository,
@@ -61,49 +61,41 @@ public class RestartCommandTests : IDisposable
     #region Tests
 
     [Fact]
-    public async Task Run_ShouldRestartCurrentFrame()
+    public async Task Run_ShouldStopCurrentFrame()
     {
         // Arrange
-        var options = new RestartOptions
-        {
-        };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
+        var options = new StopOptions();
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        var frame = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
+        frame.ShouldNotBeNull();
+        frame.ProjectId.ShouldBeEmpty();
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     [Fact]
-    public async Task Run_ShouldRestartSpecifiedFrame()
+    public async Task Run_ShouldStopFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
-        var options = new RestartOptions
+        var atTime = DateTime.Now.AddMinutes(-1);
+        var options = new StopOptions
         {
-            FrameId = "id"
+            AtTime = atTime.ToString("yyyy-MM-dd HH:mm")
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var frame = await _dbContext.Connection.QueryFirstAsync<Frame>(
-            "SELECT * FROM Frames WHERE Id <> 'id'"
-        );
-        (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
-
-        var frameTag = await _dbContext.Connection.QueryFirstAsync<int>(
-            $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}'"
-        );
-        frameTag.ShouldBe(1);
+        var frame = await _dbContext.Connection.QueryFirstOrDefaultAsync<Frame>("SELECT * FROM Frames");
+        frame.ShouldNotBeNull();
+        frame.ProjectId.ShouldBeEmpty();
+        (atTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
     #endregion

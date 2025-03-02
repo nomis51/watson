@@ -3,7 +3,7 @@ using Watson.Core.Abstractions;
 using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Repositories;
 
-namespace Watson.Tests.Core.Repositories.Mocks;
+namespace Watson.Tests.Tests.Core.Repositories.Mocks;
 
 public class TestRepository : Repository<TestModel>
 {

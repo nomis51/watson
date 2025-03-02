@@ -6,7 +6,7 @@ using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 
-namespace Watson.Tests.Core.Repositories;
+namespace Watson.Tests.Tests.Core.Repositories;
 
 public class TagRepositoryTests : IDisposable
 {

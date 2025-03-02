@@ -1,7 +1,7 @@
 ﻿using Shouldly;
 using Watson.Core.Models.Database;
 
-namespace Watson.Tests.Core.Models;
+namespace Watson.Tests.Tests.Core.Models;
 
 public class FrameTests
 {

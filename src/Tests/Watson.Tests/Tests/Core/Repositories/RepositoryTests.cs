@@ -4,9 +4,9 @@ using Shouldly;
 using Watson.Core;
 using Watson.Core.Abstractions;
 using Watson.Core.Helpers;
-using Watson.Tests.Core.Repositories.Mocks;
+using Watson.Tests.Tests.Core.Repositories.Mocks;
 
-namespace Watson.Tests.Core.Repositories;
+namespace Watson.Tests.Tests.Core.Repositories;
 
 public class RepositoryTests : IDisposable
 {

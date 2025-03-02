@@ -1,7 +1,7 @@
 ﻿using Shouldly;
 using Watson.Core.Helpers;
 
-namespace Watson.Tests.Core.Helpers;
+namespace Watson.Tests.Tests.Core.Helpers;
 
 public class IdHelperTests
 {

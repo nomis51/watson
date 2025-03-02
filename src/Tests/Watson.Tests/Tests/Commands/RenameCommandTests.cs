@@ -11,28 +11,28 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 
-namespace Watson.Tests.Commands;
+namespace Watson.Tests.Tests.Commands;
 
-public class CreateCommandTests : IDisposable
+public class RenameCommandTests : IDisposable
 {
     #region Members
 
     private readonly AppDbContext _dbContext;
     private readonly string _dbFilePath = Path.GetTempFileName();
     private readonly ISettingsRepository _settingsRepository = Substitute.For<ISettingsRepository>();
-    private readonly CreateCommand _sut;
+    private readonly RenameCommand _sut;
 
     #endregion
 
     #region Constructors
 
-    public CreateCommandTests()
+    public RenameCommandTests()
     {
         var idHelper = new IdHelper();
         _dbContext = new AppDbContext($"Data Source={_dbFilePath};Cache=Shared;Pooling=False");
 
         var frameRepository = new FrameRepository(_dbContext, idHelper);
-        _sut = new CreateCommand(
+        _sut = new RenameCommand(
             new DependencyResolver(
                 new ProjectRepository(_dbContext, idHelper),
                 frameRepository,
@@ -61,14 +61,16 @@ public class CreateCommandTests : IDisposable
     #region Tests
 
     [Fact]
-    public async Task Run_ShouldCreateProject_WhenDoesntExists()
+    public async Task Run_ShouldRenameProject()
     {
         // Arrange
-        var options = new CreateOptions
+        var options = new RenameOptions
         {
             Resource = "project",
-            Name = "project"
+            ResourceId = "id",
+            Name = "newName"
         };
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
 
         // Act
         var result = await _sut.Run(options);
@@ -77,81 +79,59 @@ public class CreateCommandTests : IDisposable
         result.ShouldBe(0);
         var project =
             await _dbContext.Connection.QueryFirstOrDefaultAsync<Project>(
-                "SELECT * FROM Projects WHERE Name = 'project'");
+                "SELECT * FROM Projects WHERE Name = 'newName'");
         project.ShouldNotBeNull();
     }
 
     [Fact]
-    public async Task Run_ShouldFail_WhenProjectAlreadyExists()
+    public async Task Run_ShouldRenameTag()
     {
         // Arrange
-        var options = new CreateOptions
-        {
-            Resource = "project",
-            Name = "project"
-        };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
-
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
-        var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Projects WHERE Name = 'project'");
-        count.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Run_ShouldCreateTag_WhenDoesntExists()
-    {
-        // Arrange
-        var options = new CreateOptions
+        var options = new RenameOptions
         {
             Resource = "tag",
-            Name = "tag"
+            ResourceId = "id",
+            Name = "newName"
         };
+        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(0);
-        var tag =
-            await _dbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
-                "SELECT * FROM Tags WHERE Name = 'tag'");
+        var tag = await _dbContext.Connection.QueryFirstOrDefaultAsync<Tag>(
+            "SELECT * FROM Tags WHERE Name = 'newName'");
         tag.ShouldNotBeNull();
     }
 
     [Fact]
-    public async Task Run_ShouldFail_WhenTagAlreadyExists()
+    public async Task Run_ShouldFail_WhenResourceNotSpecified()
     {
         // Arrange
-        var options = new CreateOptions
+        var options = new RenameOptions
         {
-            Resource = "tag",
-            Name = "tag"
+            Resource = "",
+            ResourceId = "id",
+            Name = "newName"
         };
-        await _dbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
-
 
         // Act
         var result = await _sut.Run(options);
 
         // Assert
         result.ShouldBe(1);
-        var count = _dbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Tags WHERE Name = 'tag'");
-        count.ShouldBe(1);
     }
 
     [Fact]
     public async Task Run_ShouldFail_WhenResourceIsInvalid()
     {
         // Arrange
-        var options = new CreateOptions
+        var options = new RenameOptions
         {
             Resource = "invalid",
-            Name = "name"
+            ResourceId = "id",
+            Name = "newName"
         };
 
         // Act
@@ -162,29 +142,31 @@ public class CreateCommandTests : IDisposable
     }
 
     [Fact]
-    public async Task Run_ShouldFail_WhenResourceIsMissing()
+    public async Task Run_ShouldFail_WhenResourceIdIsNotSpecified()
     {
         // Arrange
-        var options = new CreateOptions
-        {
-            Resource = "",
-            Name = "name"
-        };
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Run_ShouldFail_WhenNameIsMissing()
-    {
-        // Arrange
-        var options = new CreateOptions
+        var options = new RenameOptions
         {
             Resource = "project",
+            ResourceId = "",
+            Name = "newName"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenNameIsNotSpecified()
+    {
+        // Arrange
+        var options = new RenameOptions
+        {
+            Resource = "project",
+            ResourceId = "id",
             Name = ""
         };
 

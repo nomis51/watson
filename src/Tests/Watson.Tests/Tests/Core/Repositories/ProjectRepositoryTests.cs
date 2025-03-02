@@ -5,7 +5,7 @@ using Watson.Core.Abstractions;
 using Watson.Core.Helpers;
 using Watson.Core.Repositories;
 
-namespace Watson.Tests.Core.Repositories;
+namespace Watson.Tests.Tests.Core.Repositories;
 
 public class ProjectRepositoryTests : IDisposable
 {
@@ -160,13 +160,13 @@ public class ProjectRepositoryTests : IDisposable
         (await _dbContext.Connection.QueryFirstAsync<string>("SELECT Name FROM Projects"))
             .ShouldBe(newName);
     }
-    
+
     [Fact]
     public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
     {
         // Arrange
         const string name = "name";
-        
+
         // Act
         var result = await _sut.RenameAsync("id", name);
 

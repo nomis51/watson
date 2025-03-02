@@ -12,7 +12,7 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 
-namespace Watson.Tests.Commands;
+namespace Watson.Tests.Tests.Commands;
 
 public class AddCommandTests : IDisposable
 {

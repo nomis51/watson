@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Watson.Core.Models.Database.Abstractions;
 
-namespace Watson.Tests.Core.Repositories.Mocks;
+namespace Watson.Tests.Tests.Core.Repositories.Mocks;
 
 [Description("Tests")]
 public class TestModel : DbModel
