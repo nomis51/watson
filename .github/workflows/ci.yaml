@@ -30,11 +30,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Get version
+      - name: Get latest tag
         id: get_version
         run: |
-          VERSION=$(grep -oP '(?<=<Version>)[^<]+' Watson.csproj)
-          echo "Extracted version: $VERSION"
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          VERSION=${LATEST_TAG#v}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         working-directory: src/Watson
@@ -50,7 +50,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Watson/Watson.csproj
       - name: Publish
-        run: dotnet publish Watson/Watson.csproj --configuration Release --output ./output
+        run: dotnet publish Watson/Watson.csproj --configuration Release --output ./output --self-contained false
       - name: Zip release
         run: cd ./output && zip -r Watson.${{ env.VERSION }}.zip .
       - name: Upload build artifact
