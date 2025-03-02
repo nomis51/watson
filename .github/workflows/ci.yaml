@@ -16,6 +16,9 @@ jobs:
     defaults:
       run:
         working-directory: src
+        
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +28,10 @@ jobs:
           dotnet-version: 8.0.x
       - name: Get version
         id: get_version
-        run: echo "VERSION=$(grep -oP '(?<=<Version>)[^<]+' Watson.csproj)" >> $GITHUB_ENV
+        run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' src/Watson/Watson.csproj)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=version::$VERSION"
         working-directory: src/Watson
       - name: Restore dependencies
         run: dotnet restore
@@ -52,4 +58,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ./Watson.$VERSION.zip
+          files: ./Watson.${{ needs.build.outputs.version }}.zip
