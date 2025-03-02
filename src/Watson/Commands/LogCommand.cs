@@ -85,7 +85,7 @@ public class LogCommand : Command<LogOptions>
             []
         );
 
-        DisplayFrames(frames, options.Reverse);
+        await DisplayFrames(frames, options.Reverse);
         return 0;
     }
 
