@@ -48,7 +48,7 @@ jobs:
         run: rm -rf bin/Release
         working-directory: src/Watson
       - name: Publish
-        run: dotnet publish --configuration Release --output ./output/*
+        run: dotnet publish --configuration Release --output ./output
       - name: Zip release
         run: cd ./output && zip -r Watson.${{ env.VERSION }}.zip .
       - name: Upload build artifact
