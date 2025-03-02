@@ -14,6 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{EFE198BC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateRandomData", "Utils\GenerateRandomData\GenerateRandomData.csproj", "{554A82A5-BE61-461F-85A5-1910C363D889}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{188837EB-41B1-468E-8E4E-210777770B2F}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+		..\.github\workflows\ci.yaml = ..\.github\workflows\ci.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
