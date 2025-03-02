@@ -43,12 +43,11 @@ jobs:
         run: dotnet publish --configuration Release --output ./output
       - name: Zip release
         run: zip -r Watson.$VERSION.zip ./output
-        working-directory: src/Watson
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: watson-zip
-          path: src/Watson/Watson.$VERSION.zip
+          path: Watson.$VERSION.zip
   #      - name: Package
   #        run: dotnet pack --configuration Release
   #      - name: Publish
