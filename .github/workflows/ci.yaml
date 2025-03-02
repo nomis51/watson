@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: watson-zip
-          path: ./src/Watson.${{ env.VERSION }}.zip
+          path: ./src/output/Watson.${{ env.VERSION }}.zip
   #      - name: Package
   #        run: dotnet pack --configuration Release
   #      - name: Publish
