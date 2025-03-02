@@ -42,6 +42,11 @@ public class ConsoleHelper : IDisposable
 
     #region Public methods
 
+    public string[] GetMockOutputAsLines()
+    {
+        return _stringWriter.ToString().Trim().Split("\r\n");
+    }
+
     public string GetMockOutput()
     {
         return _stringWriter.ToString().Trim();
