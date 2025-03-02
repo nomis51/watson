@@ -40,8 +40,7 @@ jobs:
         working-directory: src/Watson
       - name: Update csproj version
         run: |
-          # Use sed to replace the <Version> in the .csproj file
-          sed -i "s|<Version>.*</Version>|<Version>${{ env.VERSION }}</Version>|g" src/Watson/Watson.csproj
+          sed -i "s|<Version>.*</Version>|<Version>${{ env.VERSION }}</Version>|g" Watson/Watson.csproj
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
