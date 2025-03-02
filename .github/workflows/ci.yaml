@@ -44,7 +44,7 @@ jobs:
       - name: Zip release
         run: zip -r Watson.$VERSION.zip ./output
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: watson-zip
           path: src/Watson/Watson.$VERSION.zip
@@ -59,7 +59,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: watson-zip
           path: .
