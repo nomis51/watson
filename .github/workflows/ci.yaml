@@ -34,15 +34,8 @@ jobs:
       - name: Publish
         run: dotnet publish --no-build --configuration Release --output ./output
       - name: Zip release
-        run: zip -r Watson.$VERSION.zip ./output  
-      - name: Upload to GitHub Release
-        uses: gh action upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./Watson.$VERSION.zip
-          asset_name: Watson.$VERSION.zip
-          asset_content_type: application/zip
-#      - name: Package
+        run: zip -r Watson.$VERSION.zip ./output
+  #      - name: Package
 #        run: dotnet pack --configuration Release
 #      - name: Publish
 #        run: dotnet nuget push Watson.$VERSION.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
