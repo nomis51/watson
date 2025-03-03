@@ -42,8 +42,8 @@ public class AddCommand : Command<AddOptions>
         var projectModel = await ProjectRepository.EnsureNameExistsAsync(project);
         if (projectModel is null) return 1;
 
-        var tagslst = tags.ToList();
-        if (!await TagRepository.EnsureTagsExistsAsync(tagslst)) return 1;
+        var tagsLst = tags.ToList();
+        if (!await TagRepository.EnsureTagsExistsAsync(tagsLst)) return 1;
 
         fromTime ??= DateTime.Now;
         var frame = new Frame
@@ -55,7 +55,7 @@ public class AddCommand : Command<AddOptions>
         var ok = await FrameHelper.CreateFrame(frame, toTime);
         if (!ok) return 1;
 
-        await FrameRepository.AssociateTagsAsync(projectModel.Id, tagslst);
+        await FrameRepository.AssociateTagsAsync(frame.Id, tagsLst);
         return 0;
     }
 

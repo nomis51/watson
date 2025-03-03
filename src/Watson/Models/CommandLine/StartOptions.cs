@@ -10,4 +10,20 @@ public class StartOptions
 
     [Value(1, MetaName = "tags", HelpText = "Optional tags", Required = false)]
     public IEnumerable<string> Tags { get; set; } = [];
+
+    private string? _fromTime = null;
+
+    [Option('f', "from", HelpText = "From time")]
+    public string? FromTime
+    {
+        get => _fromTime;
+        set => _fromTime = value;
+    }
+
+    [Option('a', "at", HelpText = "At time (alias for --from)")]
+    public string? AtTime
+    {
+        get => _fromTime;
+        set => _fromTime = value;
+    }
 }

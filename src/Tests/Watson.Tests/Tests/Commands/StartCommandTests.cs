@@ -80,5 +80,43 @@ public class StartCommandTests : CommandTest, IDisposable
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
+    [Fact]
+    public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
+    {
+        // Arrange
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        var options = new StartOptions
+        {
+            Project = "project",
+            FromTime = fromTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenAtTimeSpecified()
+    {
+        // Arrange
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        var options = new StartOptions
+        {
+            Project = "project",
+            AtTime = fromTime.ToString("yyyy-MM-dd HH:mm")
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
+        (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
     #endregion
 }

@@ -149,20 +149,27 @@ public class FrameRepositoryTests : IDisposable
     public async Task GetNextFrameAsync_ShouldReturnNextFrame_WhenNextFrameExists()
     {
         // Arrange
-        const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
             "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
-                Id = id,
+                Id = "id",
                 ProjectId = "id",
-                Time = 1
+                Time = DateTime.Now.AddMinutes(1).Ticks
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id2",
+                ProjectId = "id",
+                Time = DateTime.Now.AddSeconds(30).Ticks
             });
 
         // Act
-        var result = await _sut.GetNextFrameAsync(new DateTime(0));
+        var result = await _sut.GetNextFrameAsync(DateTime.Now);
 
         // Assert
         result.ShouldNotBeNull();
+        result.Id.ShouldBe("id2");
     }
 
     [Fact]
@@ -189,20 +196,27 @@ public class FrameRepositoryTests : IDisposable
     public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrame_WhenPreviousFrameExists()
     {
         // Arrange
-        const string id = "id";
         await _dbContext.Connection.ExecuteAsync(
             "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
             {
-                Id = id,
+                Id = "id",
                 ProjectId = "id",
-                Time = 1
+                Time = DateTime.Now.Ticks
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id2",
+                ProjectId = "id",
+                Time = DateTime.Now.AddSeconds(20).Ticks
             });
 
         // Act
-        var result = await _sut.GetPreviousFrameAsync(new DateTime(2));
+        var result = await _sut.GetPreviousFrameAsync(DateTime.Now.AddMinutes(1));
 
         // Assert
         result.ShouldNotBeNull();
+        result.Id.ShouldBe("id2");
     }
 
     [Fact]

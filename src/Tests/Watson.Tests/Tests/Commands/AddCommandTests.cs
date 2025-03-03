@@ -96,10 +96,14 @@ public class AddCommandTests : CommandTest, IDisposable
         var project = await DbContext.Connection.QueryFirstAsync<Project>("SELECT * FROM Projects");
         var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
         var tags = await DbContext.Connection.QueryAsync<Tag>("SELECT * FROM Tags");
+        var tagsLst = tags.ToList();
+        var count = await DbContext.Connection.QueryFirstAsync<int>(
+            $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}' AND TagId IN ('{string.Join("', '", tagsLst.Select(e => e.Id))}')");
 
-        tags.Count().ShouldBe(2);
+        tagsLst.Count.ShouldBe(2);
         project.Name.ShouldBe("project");
         frame.ProjectId.ShouldBe(project.Id);
+        count.ShouldBe(2);
         (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
