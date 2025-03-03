@@ -22,6 +22,7 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>watson</ToolCommandName>
         <PackageId>Nomis51.Watson</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,6 +32,10 @@
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1"/>
         <PackageReference Include="Spectre.Console" Version="0.49.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
