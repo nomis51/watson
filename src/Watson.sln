@@ -17,9 +17,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{188837EB-41B1-468E-8E4E-210777770B2F}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CI", "CI", "{C20AB20B-463D-4494-A80B-FBFBB1C9B394}"
+	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\ci-linux.yaml = ..\.github\workflows\ci-linux.yaml
 		..\.github\workflows\ci-windows.yaml = ..\.github\workflows\ci-windows.yaml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{A2E111FF-B725-473D-9978-5CBBE65B4423}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,5 +55,7 @@ Global
 		{D803D775-AEBD-4CCD-82C5-230911E3D75A} = {66E4B8C2-C0CD-46A5-BE26-8F9B7C1345F4}
 		{728AC125-8C46-4CAE-A154-593B3FF167AA} = {F12AF532-CEF9-4F47-9966-4F358ABACE71}
 		{554A82A5-BE61-461F-85A5-1910C363D889} = {EFE198BC-405E-4E47-BE2F-39CA6B1CE830}
+		{C20AB20B-463D-4494-A80B-FBFBB1C9B394} = {188837EB-41B1-468E-8E4E-210777770B2F}
+		{A2E111FF-B725-473D-9978-5CBBE65B4423} = {188837EB-41B1-468E-8E4E-210777770B2F}
 	EndGlobalSection
 EndGlobal

@@ -62,7 +62,7 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     {
         var timestamp = time.Ticks;
         var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Time > @Time ORDER BY Time DESC LIMIT 1",
+            $"SELECT * FROM {TableName} WHERE Time > @Time ORDER BY Time ASC LIMIT 1",
             new { Time = timestamp }
         );
         if (frame is null) return null;
@@ -76,7 +76,7 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     {
         var timestamp = time.Ticks;
         var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Time < @Time ORDER BY Time ASC LIMIT 1",
+            $"SELECT * FROM {TableName} WHERE Time < @Time ORDER BY Time DESC LIMIT 1",
             new { Time = timestamp }
         );
         if (frame is null) return null;
