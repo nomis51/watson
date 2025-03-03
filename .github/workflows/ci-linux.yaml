@@ -62,12 +62,12 @@ jobs:
         with:
           name: watson-zip
           path: ./src/output/Watson.${{ env.VERSION }}-linux-x64.zip
-      - name: Build App
-        run: dotnet build Watson/Watson.csproj --configuration Release
-      - name: Package App
-        run: dotnet pack Watson/Watson.csproj --configuration Release --output ./nupkgs
-      - name: Publish Nuget
-        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+#      - name: Build App
+#        run: dotnet build Watson/Watson.csproj --configuration Release
+#      - name: Package App
+#        run: dotnet pack Watson/Watson.csproj --configuration Release --output ./nupkgs
+#      - name: Publish Nuget
+#        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
   release:
     runs-on: ubuntu-latest
