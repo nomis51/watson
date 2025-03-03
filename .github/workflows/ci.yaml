@@ -55,18 +55,18 @@ jobs:
       - name: Restore dependencies for release
         run: dotnet restore Watson/Watson.csproj
       - name: Publish release
-        run: dotnet publish Watson/Watson.csproj --configuration Release --output ./output --self-contained false --runtime {{ matrix.runtime }}
+        run: dotnet publish Watson/Watson.csproj --configuration Release --output ./output --self-contained false --runtime ${{ matrix.runtime }}
       - name: Zip release
-        run: cd ./output && zip -r Watson.${{ env.VERSION }}-{{ matrix.runtime }}.zip .
+        run: cd ./output && zip -r Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip .
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: watson-zip
-          path: ./src/output/Watson.${{ env.VERSION }}-{{ matrix.runtime }}.zip
+          path: ./src/output/Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip
       - name: Build release for nuget
         run: dotnet build Watson/Watson.csproj --configuration Release
       - name: Package release for nuget
-        run: dotnet pack Watson/Watson.csproj --configuration Release --output ./nupkgs-{{ matrix.runtime }}
+        run: dotnet pack Watson/Watson.csproj --configuration Release --output ./nupkgs-${{ matrix.runtime }}
 
   github_release:
     runs-on: ubuntu-latest
@@ -85,7 +85,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: Watson.${{ needs.build.outputs.version }}-{{ matrix.runtime }}.zip
+          files: Watson.${{ needs.build.outputs.version }}-${{ matrix.runtime }}.zip
   
   nuget_publish:
     runs-on: ubuntu-latest
