@@ -64,9 +64,14 @@ jobs:
           name: watson-zip-${{ matrix.runtime }}
           path: ./src/output/Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip
       - name: Build release for nuget
-        run: dotnet build Watson/Watson.csproj --configuration Release
+        run: dotnet build Watson/Watson.csproj --configuration Release --runtime ${{ matrix.runtime }}
       - name: Package release for nuget
-        run: dotnet pack Watson/Watson.csproj --configuration Release --output ./nupkgs-${{ matrix.runtime }}
+        run: dotnet pack Watson/Watson.csproj --configuration Release --runtime ${{ matrix.runtime }} --output ./nupkg
+      - name: Upload nuget artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: watson-nupkg-${{ matrix.runtime }}
+          path: ./src/nupkg/Nomis51.Watson.${{ env.VERSION }}.nupkg
 
   github_release:
     runs-on: ubuntu-latest
