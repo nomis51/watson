@@ -116,10 +116,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Nomis51.Watson.${{ needs.build.outputs.version }}-win-x64.nupkg
-          path: ./nupkgs
+          path: .
 
       - name: Rename nupkg
-        run: mv ./nupkgs/Nomis51.Watson.${{ needs.build.outputs.version }}-win-x64.nupkg ./nupkgs/Nomis51.Watson.${{ needs.build.outputs.version }}.nupkg
+        run: mv ./Nomis51.Watson.${{ needs.build.outputs.version }}-win-x64.nupkg ./Nomis51.Watson.${{ needs.build.outputs.version }}.nupkg
 
       - name: Publish Nuget
-        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
