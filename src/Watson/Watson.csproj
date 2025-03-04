@@ -12,7 +12,6 @@
         <Description>A terminal based time tracking application highly inspired by td-watson</Description>
         <Copyright>nomis51</Copyright>
         <PackageProjectUrl>https://github.com/nomis51/watson</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/nomis51/watson/blob/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/nomis51/watson</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>time, tracker, terminal</PackageTags>
