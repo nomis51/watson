@@ -61,7 +61,7 @@ jobs:
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: watson-zip-${{ matrix.runtime }}
+          name: Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip
           path: ./src/output/Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip
       - name: Build release for nuget
         run: dotnet build Watson/Watson.csproj --configuration Release --runtime ${{ matrix.runtime }}
@@ -70,7 +70,7 @@ jobs:
       - name: Upload nuget artifact
         uses: actions/upload-artifact@v4
         with:
-          name: watson-nupkg-${{ matrix.runtime }}
+          name: Nomis51.Watson.${{ env.VERSION }}-${{ matrix.runtime }}.nupkg
           path: ./src/nupkg/Nomis51.Watson.${{ env.VERSION }}.nupkg
 
   github_release:
@@ -82,13 +82,13 @@ jobs:
       - name: Download win-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: watson-zip-win-x64
+          name: Watson-${{ needs.build.outputs.version }}-win-x64.zip
           path: .
 
       - name: Download linux-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: watson-zip-linux-x64
+          name: Watson.${{ needs.build.outputs.version }}-linux-x64.zip
           path: .
 
       - name: Create GitHub Release
@@ -102,7 +102,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body: |
-            Release noters for ${{ github.ref_name }}
+            Release notes for ${{ github.ref_name }}
   
   nuget_publish:
     runs-on: ubuntu-latest
@@ -114,8 +114,11 @@ jobs:
       - name: Download win-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: watson-zip-win-x64
-          path: .
+          name: Nomis51.Watson.${{ needs.build.outputs.version }}-win-x64.nupkg
+          path: ./nupkgs
+
+      - name: Rename nupkg
+        run: mv ./nupkgs/Nomis51.Watson.${{ needs.build.outputs.version }}-win-x64.nupkg ./nupkgs/Nomis51.Watson.${{ needs.build.outputs.version }}.nupkg
 
       - name: Publish Nuget
-        run: dotnet nuget push ./nupkgs-win-x64/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
