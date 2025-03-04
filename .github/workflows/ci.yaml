@@ -34,6 +34,7 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Get version
+        id: get_version
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0)
           VERSION=${LATEST_TAG#v}
@@ -82,7 +83,7 @@ jobs:
       - name: Download win-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: Watson-${{ needs.build.outputs.version }}-win-x64.zip
+          name: Watson.${{ needs.build.outputs.version }}-win-x64.zip
           path: .
 
       - name: Download linux-x64 artifact
