@@ -129,7 +129,10 @@ public class LogCommand : Command<LogOptions>
                 var frame = groupFrames[i];
                 var toTime = i + 1 < groupFrames.Count
                     ? new DateTime(groupFrames[i + 1].Time).TimeOfDay
-                    : dayEndHour;
+                    : frame.TimeAsDateTime.Date == DateTime.Today &&
+                      groupFrames[i].TimeAsDateTime.TimeOfDay < dayEndHour
+                        ? DateTime.Now.TimeOfDay
+                        : dayEndHour;
                 var fromTime = new DateTime(frame.Time).TimeOfDay;
                 var duration = toTime - fromTime;
 
