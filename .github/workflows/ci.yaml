@@ -61,7 +61,7 @@ jobs:
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: watson-zip
+          name: watson-zip-${{ matrix.runtime }}
           path: ./src/output/Watson.${{ env.VERSION }}-${{ matrix.runtime }}.zip
       - name: Build release for nuget
         run: dotnet build Watson/Watson.csproj --configuration Release
@@ -74,18 +74,30 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
-      - name: Download build artifact
+      - name: Download win-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: watson-zip
+          name: watson-zip-win-x64
+          path: .
+
+      - name: Download linux-x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: watson-zip-linux-x64
           path: .
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: Watson.${{ needs.build.outputs.version }}-${{ matrix.runtime }}.zip
+          files:
+            - Watson.${{ needs.build.outputs.version }}-win-x64.zip
+            - Watson.${{ needs.build.outputs.version }}-linux-x64.zip
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            Release noters for ${{ github.ref_name }}
   
   nuget_publish:
     runs-on: ubuntu-latest
@@ -93,10 +105,11 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
-      - name: Download build artifact
+      # Only publish the windows build
+      - name: Download win-x64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: nuget
+          name: watson-zip-win-x64
           path: .
 
       - name: Publish Nuget
