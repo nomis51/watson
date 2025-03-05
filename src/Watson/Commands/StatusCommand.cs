@@ -21,13 +21,28 @@ public class StatusCommand : Command<StatusOptions>
         var frame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
         if (frame is null) return 1;
 
+        var settings = await SettingsRepository.GetSettings();
+        var endTime = DateTime.Now;
+        if (DateTime.Now.TimeOfDay >= settings.WorkTime.LunchStartTime &&
+            DateTime.Now.TimeOfDay <= settings.WorkTime.LunchEndTime)
+        {
+            endTime = new DateTime(
+                DateTime.Now.Year,
+                DateTime.Now.Month,
+                DateTime.Now.Day,
+                settings.WorkTime.LunchStartTime.Hours,
+                settings.WorkTime.LunchStartTime.Minutes,
+                settings.WorkTime.LunchStartTime.Seconds
+            );
+        }
+
         AnsiConsole.MarkupLine(
             "{0}: {1} ({2}) started at {3} ({4})",
             frame.Id,
             $"[green]{frame.Project?.Name ?? "-"}[/]",
             $"[purple]{string.Join("[/], [purple]", frame.Tags.Select(e => e.Name))}[/]",
             $"[blue]{TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay)}[/]",
-            TimeHelper.FormatDuration(DateTime.Now - frame.TimeAsDateTime)
+            TimeHelper.FormatDuration(endTime - frame.TimeAsDateTime)
         );
 
         return 0;
