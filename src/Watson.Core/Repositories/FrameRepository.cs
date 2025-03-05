@@ -10,6 +10,12 @@ namespace Watson.Core.Repositories;
 
 public class FrameRepository : Repository<Frame>, IFrameRepository
 {
+    #region Constants
+
+    private const long TicksToUnixEpochDifference = 621355968000000000;
+
+    #endregion
+
     #region Props
 
     private static string ProjectTableName => typeof(Project).GetCustomAttribute<DescriptionAttribute>()!.Description;
@@ -72,8 +78,11 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
     {
         var timestamp = time.Ticks;
         var frame = await DbContext.Connection.QueryFirstOrDefaultAsync<Frame>(
-            $"SELECT * FROM {TableName} WHERE Time > @Time ORDER BY Time ASC LIMIT 1",
-            new { Time = timestamp }
+            $"SELECT * FROM {TableName} WHERE Time > @Time AND DATE((Time - {TicksToUnixEpochDifference}) / 10000000, 'unixepoch') = DATE('{time.Date:yyyy-MM-dd}') ORDER BY Time LIMIT 1",
+            new
+            {
+                Time = timestamp,
+            }
         );
         if (frame is null) return null;
 

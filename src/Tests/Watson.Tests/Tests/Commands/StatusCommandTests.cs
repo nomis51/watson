@@ -92,5 +92,30 @@ public class StatusCommandTests : ConsoleTest
         ConsoleHelper.GetMockOutput().ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task Run_ShouldDisplayElapsedUntilNow_WhenFrameIsRunning()
+    {
+        // Arrange
+        var time = DateTime.Now;
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] (00h 00m)");
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
     #endregion
 }
