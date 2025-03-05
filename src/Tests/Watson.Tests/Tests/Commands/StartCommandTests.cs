@@ -31,7 +31,14 @@ public class StartCommandTests : CommandTest
         var idHelper = new IdHelper();
 
         _settingsRepository.GetSettings()
-            .Returns(new Settings());
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(23, 59, 0)
+                }
+            });
 
         var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new StartCommand(

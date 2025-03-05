@@ -30,7 +30,14 @@ public class AddCommandTests : ConsoleTest
         var idHelper = new IdHelper();
 
         _settingsRepository.GetSettings()
-            .Returns(new Settings());
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(23, 59, 0)
+                }
+            });
 
         var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new AddCommand(
@@ -101,7 +108,7 @@ public class AddCommandTests : ConsoleTest
     }
 
     [Fact]
-    public async Task Run_ShouldAddFrameAtSpecifedTime_WhenFromTimeSpecified()
+    public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
         var fromTime = DateTime.Now.AddMinutes(-1);
@@ -346,6 +353,26 @@ public class AddCommandTests : ConsoleTest
                 $"{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]15:45[/]");
         result.ShouldBe(0);
         output.ShouldStartWith(expectedOutput);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeIsOutOfWorkHours()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 0, 0)
+                    .ToString("yyyy-MM-dd HH:mm"),
+            Project = "project",
+            Tags = ["tag"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
     }
 
     #endregion
