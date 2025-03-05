@@ -23,7 +23,7 @@ public class FrameHelper : IFrameHelper
 
     #region Public methods
 
-    public async Task<bool> CreateFrame(Frame frame, DateTime? toTime = null)
+    public async Task<Frame?> CreateFrame(Frame frame, DateTime? toTime = null)
     {
         if (toTime is null)
         {
@@ -46,7 +46,7 @@ public class FrameHelper : IFrameHelper
         if (toTimePreviousFrame is null)
         {
             // we have a problem, toTime cannot not have a previous frame if fromTime does, that's impossible
-            return false;
+            return null;
         }
 
         if (fromTimePreviousFrame.Id == toTimePreviousFrame.Id)
@@ -68,7 +68,7 @@ public class FrameHelper : IFrameHelper
 
     #region Private methods
 
-    private async Task<bool> CreateFrameOverMultipleFrames(
+    private async Task<Frame?> CreateFrameOverMultipleFrames(
         Frame frame,
         DateTime toTime,
         Frame toTimeNextFrame,
@@ -86,29 +86,30 @@ public class FrameHelper : IFrameHelper
             var result2 = await _frameRepository.DeleteManyAsync(
                 framesToDeleteIds
             );
-            if (!result2) return false;
+            if (!result2) return null;
         }
 
         var result3 = await _frameRepository.InsertAsync(frame);
-        if (!result3) return false;
+        if (result3 is null) return null;
 
         toTimeNextFrame.Time = toTime.Ticks;
-        result3 = await _frameRepository.UpdateAsync(toTimeNextFrame);
+        if (!await _frameRepository.UpdateAsync(toTimeNextFrame)) return null;
+
         return result3;
     }
 
-    private async Task<bool> CreateFrameOverTwoFrames(Frame frame, DateTime toTime, Frame toTimePreviousFrame)
+    private async Task<Frame?> CreateFrameOverTwoFrames(Frame frame, DateTime toTime, Frame toTimePreviousFrame)
     {
         var result = await _frameRepository.InsertAsync(frame);
-        if (!result) return false;
+        if (result is null) return null;
 
         toTimePreviousFrame.Time = toTime.Ticks;
-        result = await _frameRepository.UpdateAsync(toTimePreviousFrame);
+        if (!await _frameRepository.UpdateAsync(toTimePreviousFrame)) return null;
 
         return result;
     }
 
-    private async Task<bool> CreateFrameContainedInAFrame(
+    private async Task<Frame?> CreateFrameContainedInAFrame(
         Frame frame,
         DateTime toTime,
         Frame fromTimePreviousFrame
@@ -116,25 +117,26 @@ public class FrameHelper : IFrameHelper
     {
         // we add the new one, and cloned the previous frame and add it after the new frame with toTime
         var result = await _frameRepository.InsertAsync(frame);
-        if (!result) return false;
+        if (result is null) return null;
 
         fromTimePreviousFrame.Time = toTime.Ticks;
         fromTimePreviousFrame.Id = string.Empty;
-        result = await _frameRepository.InsertAsync(fromTimePreviousFrame);
+        if (await _frameRepository.InsertAsync(fromTimePreviousFrame) is null) return null;
+
         return result;
     }
 
-    private async Task<bool> CreateFrameAtTheBeginningOfTheDay(
+    private async Task<Frame?> CreateFrameAtTheBeginningOfTheDay(
         Frame frame,
         DateTime toTime,
         Frame toTimeNextFrame
     )
     {
         var result = await _frameRepository.InsertAsync(frame);
-        if (!result) return false;
+        if (result is null) return null;
 
         toTimeNextFrame.Time = toTime.Ticks;
-        result = await _frameRepository.UpdateAsync(toTimeNextFrame);
+        if (!await _frameRepository.UpdateAsync(toTimeNextFrame)) return null;
 
         return result;
     }

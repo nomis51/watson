@@ -21,7 +21,7 @@ public class FrameHelperTests
     public FrameHelperTests()
     {
         _frameRepository.InsertAsync(Arg.Any<Frame>())
-            .Returns(true);
+            .Returns(e => e.Arg<Frame>());
 
         _frameRepository.UpdateAsync(Arg.Any<Frame>())
             .Returns(true);
@@ -53,10 +53,10 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received()
@@ -83,13 +83,13 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
-            .Returns(false);
+            .Returns(default(Frame));
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -111,10 +111,10 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -134,10 +134,10 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received()
@@ -164,13 +164,13 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
-            .Returns(false);
+            .Returns(default(Frame));
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -190,13 +190,13 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(Arg.Is<Frame>(f => f.ProjectId == "from time previous frame"))
-            .Returns(false);
+            .Returns(default(Frame));
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -216,10 +216,10 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received()
@@ -247,13 +247,13 @@ public class FrameHelperTests
         sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
-            .Returns(false);
+            .Returns(default(Frame));
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -276,10 +276,10 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -319,10 +319,10 @@ public class FrameHelperTests
             .Returns(framesToDelete);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .GetAsync(
                 Arg.Is<DateTime>(d =>
@@ -386,10 +386,10 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -429,13 +429,13 @@ public class FrameHelperTests
             .Returns(framesToDelete);
 
         _frameRepository.InsertAsync(Arg.Any<Frame>())
-            .Returns(false);
+            .Returns(default(Frame));
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -478,10 +478,10 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -510,10 +510,10 @@ public class FrameHelperTests
             .Returns([]);
 
         // Act
-        var result = await (Task<bool>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .GetAsync(
                 Arg.Is<DateTime>(d =>
@@ -545,7 +545,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received(0)
@@ -563,7 +563,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.Received()
@@ -597,7 +597,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .GetNextFrameAsync(toTime);
         await _frameRepository.Received()
@@ -650,7 +650,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -682,7 +682,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.UpdateAsync(Arg.Is<Frame>(f =>
@@ -721,7 +721,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .InsertAsync(frame);
         await _frameRepository.UpdateAsync(Arg.Is<Frame>(f =>
@@ -768,7 +768,7 @@ public class FrameHelperTests
         var result = await _sut.CreateFrame(frame, toTime);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         await _frameRepository.Received()
             .DeleteManyAsync(Arg.Any<IEnumerable<string>>());
     }

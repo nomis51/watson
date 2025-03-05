@@ -9,7 +9,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class LogCommandTests: ConsoleTest, IDisposable
+public class LogCommandTests : ConsoleTest
 {
     #region Members
 
@@ -37,15 +37,9 @@ public class LogCommandTests: ConsoleTest, IDisposable
         );
     }
 
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
     #endregion
 
     #region Tests
-    
+
     #endregion
 }

@@ -33,6 +33,16 @@ public class FrameRepository : Repository<Frame>, IFrameRepository
 
     #region Public methods
 
+    public override async Task<Frame?> InsertAsync(Frame model)
+    {
+        var frame = await base.InsertAsync(model);
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
+    }
+
     public override async Task<Frame?> GetByIdAsync(string id)
     {
         var frame = await base.GetByIdAsync(id);

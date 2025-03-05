@@ -17,13 +17,23 @@ public class StartCommand : Command<StartOptions>
 
     public override Task<int> Run(StartOptions options)
     {
+        var addOptions = new AddOptions
+        {
+            Project = options.Project,
+            Tags = options.Tags
+        };
+
+        if (!string.IsNullOrEmpty(options.FromTime))
+        {
+            addOptions.FromTime = options.FromTime;
+        }
+        else if (!string.IsNullOrEmpty(options.AtTime))
+        {
+            addOptions.FromTime = options.AtTime;
+        }
+
         return new AddCommand(DependencyResolver)
-            .Run(new AddOptions
-            {
-                FromTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-                Project = options.Project,
-                Tags = options.Tags
-            });
+            .Run(addOptions);
     }
 
     #endregion

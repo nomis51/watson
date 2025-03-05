@@ -15,7 +15,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StartCommandTests : CommandTest, IDisposable
+public class StartCommandTests : CommandTest
 {
     #region Members
 
@@ -31,7 +31,14 @@ public class StartCommandTests : CommandTest, IDisposable
         var idHelper = new IdHelper();
 
         _settingsRepository.GetSettings()
-            .Returns(new Settings());
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(23, 59, 0)
+                }
+            });
 
         var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new StartCommand(
@@ -44,12 +51,6 @@ public class StartCommandTests : CommandTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion

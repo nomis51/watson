@@ -12,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class ListCommandTests : ConsoleTest, IDisposable
+public class ListCommandTests : ConsoleTest
 {
     #region Members
 
@@ -38,12 +38,6 @@ public class ListCommandTests : ConsoleTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion

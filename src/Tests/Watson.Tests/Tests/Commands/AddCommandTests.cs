@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Models.Settings;
@@ -15,7 +14,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class AddCommandTests : CommandTest, IDisposable
+public class AddCommandTests : ConsoleTest
 {
     #region Members
 
@@ -31,7 +30,14 @@ public class AddCommandTests : CommandTest, IDisposable
         var idHelper = new IdHelper();
 
         _settingsRepository.GetSettings()
-            .Returns(new Settings());
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(23, 59, 0)
+                }
+            });
 
         var frameRepository = new FrameRepository(DbContext, idHelper);
         _sut = new AddCommand(
@@ -44,12 +50,6 @@ public class AddCommandTests : CommandTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -108,7 +108,7 @@ public class AddCommandTests : CommandTest, IDisposable
     }
 
     [Fact]
-    public async Task Run_ShouldAddFrameAtSpecifedTime_WhenFromTimeSpecified()
+    public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
         var fromTime = DateTime.Now.AddMinutes(-1);
@@ -245,6 +245,127 @@ public class AddCommandTests : CommandTest, IDisposable
         {
             Project = "project",
             ToTime = "invalid"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsToday()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id, Time, ProjectId) VALUES ('id', @Time, 'id')",
+            new
+            {
+                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0).Ticks
+            }
+        );
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 45, 0).ToString(
+                    "yyyy-MM-dd HH:mm"),
+            ToTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 46, 0).ToString(
+                    "yyyy-MM-dd HH:mm"),
+            Project = "project",
+            Tags = ["tag"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]15:45[/] to [blue]15:46[/] (00h 01m)");
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Fact]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsNotToday()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id, Time, ProjectId) VALUES ('id', @Time, 'id')",
+            new
+            {
+                Time = new DateTime(2025, 1, 2, 16, 0, 0).Ticks
+            }
+        );
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(2025, 1, 2, 15, 45, 0).ToString(
+                    "yyyy-MM-dd HH:mm"),
+            ToTime =
+                new DateTime(2025, 1, 2, 15, 46, 0).ToString(
+                    "yyyy-MM-dd HH:mm"),
+            Project = "project",
+            Tags = ["tag"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]2025-01-02 15:45[/] to [blue]2025-01-02 15:46[/] (00h 01m)");
+
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Fact]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenFrameIsRunning()
+    {
+        // Arrange
+
+
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 45, 0).ToString(
+                    "yyyy-MM-dd HH:mm"),
+            Project = "project",
+            Tags = ["tag"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]15:45[/]");
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Fact]
+    public async Task Run_ShouldFail_WhenFromTimeIsOutOfWorkHours()
+    {
+        // Arrange
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 0, 0)
+                    .ToString("yyyy-MM-dd HH:mm"),
+            Project = "project",
+            Tags = ["tag"]
         };
 
         // Act

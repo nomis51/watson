@@ -26,12 +26,11 @@ public class RestartCommand : Command<RestartOptions>
 
             var frame = Frame.CreateEmpty(lastFrame.Time);
 
-            var ok = await FrameRepository.InsertAsync(frame);
-            if (!ok) return 1;
+            frame = await FrameRepository.InsertAsync(frame);
+            if (frame is null) return 1;
 
             lastFrame.Time = DateTime.Now.Ticks;
-            ok = await FrameRepository.UpdateAsync(lastFrame);
-            return !ok ? 1 : 0;
+            return await FrameRepository.UpdateAsync(lastFrame) ? 0 : 1;
         }
 
         var existingFrame = await FrameRepository.GetByIdAsync(options.FrameId);
@@ -43,8 +42,8 @@ public class RestartCommand : Command<RestartOptions>
             ProjectId = existingFrame.ProjectId
         };
 
-        var ok2 = await FrameRepository.InsertAsync(newFrame);
-        if (!ok2) return 1;
+        var frame1 = await FrameRepository.InsertAsync(newFrame);
+        if (frame1 is null) return 1;
 
         await FrameRepository.AssociateTagsAsync(newFrame.Id,
             existingFrame.Tags.Select(e => e.Name));

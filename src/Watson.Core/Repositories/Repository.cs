@@ -53,7 +53,7 @@ public abstract class Repository<TModel> : IRepository<TModel>
             .QueryAsync<TModel>($"SELECT * FROM {TableName}");
     }
 
-    public virtual async Task<bool> InsertAsync(TModel model)
+    public virtual async Task<TModel?> InsertAsync(TModel model)
     {
         if (string.IsNullOrEmpty(model.Id))
         {
@@ -63,7 +63,7 @@ public abstract class Repository<TModel> : IRepository<TModel>
         var sql = BuildInsertQuery();
 
         var result = await DbContext.Connection.ExecuteAsync(sql, model);
-        return result > 0;
+        return result > 0 ? model : null;
     }
 
     public async Task<bool> UpdateAsync(TModel model)

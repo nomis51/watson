@@ -15,7 +15,6 @@ public abstract class ConsoleTest : CommandTest, IDisposable
     public new void Dispose()
     {
         base.Dispose();
-        GC.SuppressFinalize(this);
         ConsoleHelper.Dispose();
     }
 
