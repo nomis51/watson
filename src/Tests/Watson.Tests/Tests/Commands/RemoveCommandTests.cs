@@ -13,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class RemoveCommandTests : CommandTest, IDisposable
+public class RemoveCommandTests : CommandTest
 {
     #region Members
 
@@ -39,12 +39,6 @@ public class RemoveCommandTests : CommandTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion

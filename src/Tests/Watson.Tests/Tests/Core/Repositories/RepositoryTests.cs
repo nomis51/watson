@@ -117,7 +117,7 @@ public class RepositoryTests : IDisposable
         var result = await _sut.InsertAsync(model);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         model.Id.ShouldNotBeNullOrEmpty();
     }
 
@@ -131,7 +131,7 @@ public class RepositoryTests : IDisposable
         var result = await _sut.InsertAsync(model);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
         model.Id.ShouldBe("id");
     }
 

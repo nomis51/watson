@@ -15,7 +15,7 @@ using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StatusCommandTests : ConsoleTest, IDisposable
+public class StatusCommandTests : ConsoleTest
 {
     #region Members
 
@@ -41,12 +41,6 @@ public class StatusCommandTests : ConsoleTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion

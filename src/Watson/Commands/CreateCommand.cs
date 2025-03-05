@@ -43,7 +43,7 @@ public class CreateCommand : Command<CreateOptions>
             Name = name
         };
 
-        return await TagRepository.InsertAsync(tag) ? 0 : 1;
+        return await TagRepository.InsertAsync(tag) is not null ? 0 : 1;
     }
 
     private async Task<int> CreateProject(string name)
@@ -56,7 +56,7 @@ public class CreateCommand : Command<CreateOptions>
             Name = name
         };
 
-        return await ProjectRepository.InsertAsync(project) ? 0 : 1;
+        return await ProjectRepository.InsertAsync(project) is not null ? 0 : 1;
     }
 
     #endregion

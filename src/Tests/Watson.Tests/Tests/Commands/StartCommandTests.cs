@@ -15,7 +15,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StartCommandTests : CommandTest, IDisposable
+public class StartCommandTests : CommandTest
 {
     #region Members
 
@@ -44,12 +44,6 @@ public class StartCommandTests : CommandTest, IDisposable
                 _settingsRepository
             )
         );
-    }
-
-    public new void Dispose()
-    {
-        base.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     #endregion

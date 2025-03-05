@@ -46,9 +46,7 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
             Name = name
         };
 
-        if (!await InsertAsync(project)) return null;
-
-        return project;
+        return await InsertAsync(project) is null ? null : project;
     }
 
     public Task<bool> RenameAsync(string id, string name)
