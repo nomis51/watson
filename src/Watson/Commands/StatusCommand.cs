@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Serilog;
+using Spectre.Console;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -37,8 +38,8 @@ public class StatusCommand : Command<StatusOptions>
             );
         }
 
-        var needToSubstractLunchTime = frame.TimeAsDateTime.TimeOfDay < settings.WorkTime.LunchStartTime &&
-                                       DateTime.Now.TimeOfDay > settings.WorkTime.LunchEndTime;
+        var needToSubtractLunchTime = frame.TimeAsDateTime.TimeOfDay < settings.WorkTime.LunchStartTime &&
+                                      DateTime.Now.TimeOfDay > settings.WorkTime.LunchEndTime;
 
         AnsiConsole.MarkupLine(
             "{0}: {1} ({2}) started at {3} ({4})",
@@ -48,7 +49,7 @@ public class StatusCommand : Command<StatusOptions>
             $"[blue]{TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay)}[/]",
             TimeHelper.FormatDuration(
                 endTime - frame.TimeAsDateTime -
-                (needToSubstractLunchTime
+                (needToSubtractLunchTime
                     ? (settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)
                     : TimeSpan.Zero)
             )
