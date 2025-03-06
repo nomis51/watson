@@ -113,7 +113,7 @@ public class LogCommand : Command<LogOptions>
             var totalTime = TimeHelper.GetDuration(groupFrames, dayEndHour);
             AnsiConsole.WriteLine(
                 "{0} ({1})",
-                TimeHelper.FormatDate(group.Key.ToLocalTime()),
+                TimeHelper.FormatDate(group.Key),
                 $"{totalTime.Hours}h {totalTime.Minutes}m"
             );
 
