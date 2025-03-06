@@ -42,7 +42,7 @@ public class StatusCommand : Command<StatusOptions>
                                       DateTime.Now.TimeOfDay > settings.WorkTime.LunchEndTime;
 
         AnsiConsole.MarkupLine(
-            "{0}: {1}{2} started at {3} ({4})",
+            "{0}: {1}{2} started at {3} ({4}){5}",
             frame.Id,
             $"[green]{frame.Project?.Name ?? "-"}[/]",
             frame.Tags.Count == 0
@@ -54,7 +54,10 @@ public class StatusCommand : Command<StatusOptions>
                 (needToSubtractLunchTime
                     ? (settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)
                     : TimeSpan.Zero)
-            )
+            ),
+            !needToSubtractLunchTime
+                ? string.Empty
+                : $" [yellow](+{TimeHelper.FormatDuration(settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)} lunch)[/]"
         );
 
         return 0;
