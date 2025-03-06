@@ -359,6 +359,16 @@ public class AddCommandTests : ConsoleTest
     public async Task Run_ShouldFail_WhenFromTimeIsOutOfWorkHours()
     {
         // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(16, 0, 0)
+                }
+            });
+
         var options = new AddOptions
         {
             FromTime =

@@ -24,7 +24,11 @@ public class AddCommand : Command<AddOptions>
 
         var settings = await SettingsRepository.GetSettings();
         if (fromTime.HasValue && (fromTime.Value.TimeOfDay < settings.WorkTime.StartTime ||
-                                  fromTime.Value.TimeOfDay > settings.WorkTime.EndTime)) return 1;
+                                  fromTime.Value.TimeOfDay > settings.WorkTime.EndTime))
+        {
+            AnsiConsole.MarkupLine("[yellow]Time is out of work hours[/]");
+            return 1;
+        }
 
         if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
         if (toTime.HasValue && (toTime.Value.TimeOfDay < settings.WorkTime.StartTime ||
