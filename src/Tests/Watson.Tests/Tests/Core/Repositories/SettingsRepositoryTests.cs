@@ -137,5 +137,21 @@ public class SettingsRepositoryTests
             );
     }
 
+    [Fact]
+    public async Task GetSettings_ShouldCreateDefaultSettingsFile_WhenFileDoesNotExist()
+    {
+        // Arrange
+        _fileSystem.File.Exists(Arg.Any<string>())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.GetSettings();
+
+        // Assert
+        result.ShouldNotBeNull();
+        await _fileSystem.Received()
+            .File.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>());
+    }
+
     #endregion
 }

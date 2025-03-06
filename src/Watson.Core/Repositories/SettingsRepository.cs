@@ -12,6 +12,11 @@ public class SettingsRepository : ISettingsRepository
 
     private const string SettingsFileName = "settings.json";
 
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        WriteIndented = true
+    };
+
     #endregion
 
     #region Members
@@ -49,24 +54,40 @@ public class SettingsRepository : ISettingsRepository
     {
         try
         {
-            if (!_fileSystem.File.Exists(SettingsFilePath)) return new Settings();
+            if (!_fileSystem.File.Exists(SettingsFilePath))
+            {
+                var settings = new Settings();
+                await SaveSettings(settings);
+                return settings;
+            }
 
             var json = await _fileSystem.File.ReadAllTextAsync(SettingsFilePath);
-            return JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
+
+            try
+            {
+                return JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
+            }
+            catch (Exception e)
+            {
+                await SaveSettings(new Settings());
+                _logger.LogError(e, "Failed to parse settings file");
+            }
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Failed to read settings file");
         }
 
-        return new Settings();
+        var settings2 = new Settings();
+        await SaveSettings(settings2);
+        return settings2;
     }
 
     public async Task SaveSettings(Settings settings)
     {
         try
         {
-            var json = JsonSerializer.Serialize(settings);
+            var json = JsonSerializer.Serialize(settings, _jsonSerializerOptions);
             await _fileSystem.File.WriteAllTextAsync(SettingsFilePath, json);
         }
         catch (Exception e)
