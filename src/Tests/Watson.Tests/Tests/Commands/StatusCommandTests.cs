@@ -191,5 +191,63 @@ public class StatusCommandTests : ConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
+    [Fact]
+    public async Task Run_ShouldOutputNoTagBrackets_WhenNoTagProvided()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
+            new { Time = DateTime.Now.Ticks });
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"id: [green]project[/] started at [blue]{DateTime.Now:HH:mm}[/] (00h 00m)");
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Fact]
+    public async Task Run_ShouldDisplayLunchTimeDuration_WhenFrameStillRunningAfterLunchTime()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    LunchStartTime = new TimeSpan(DateTime.Now.Hour - 1, 0, 0),
+                    LunchEndTime = new TimeSpan(DateTime.Now.Hour, 0, 0),
+                }
+            });
+        var time = DateTime.Now.AddHours(-2);
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id','id','id')");
+        var options = new StatusOptions();
+
+        var expectedDuration =
+            new TimeHelper().FormatDuration(new TimeSpan(0, DateTime.Now.Minute + (60 - DateTime.Now.Minute), 0));
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] ({expectedDuration}) [yellow](+01h 00m lunch)[/]");
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
     #endregion
 }
