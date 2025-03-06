@@ -93,11 +93,11 @@ public class LogCommandTests : ConsoleTest
         };
         var expectedLines = new[]
         {
-            $"{DateTime.Today:dddd dd MMMM yyyy} (7h 15m)",
+            $"{DateTime.Today:dddd dd MMMM yyyy} (6h 15m)",
             ConsoleHelper.GetSpectreMarkupOutput(
                 "id 08:45 to 09:15 [blue]00h 30m[/] [green]project[/] ([purple]tag[/], [purple]tag2[/])"),
             ConsoleHelper.GetSpectreMarkupOutput(
-                "id2 09:15 to 16:00 [blue]06h 45m[/] [green]project2[/] ([purple]tag[/])"),
+                "id2 09:15 to 16:00 [blue]05h 45m[/] [green]project2[/] ([purple]tag[/])"),
         };
 
         // Act
