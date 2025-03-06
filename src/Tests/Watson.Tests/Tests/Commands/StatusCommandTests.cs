@@ -191,5 +191,27 @@ public class StatusCommandTests : ConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
+    [Fact]
+    public async Task Run_ShouldOutputNoTagBrackets_WhenNoTagProvided()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',@Time)",
+            new { Time = DateTime.Now.Ticks });
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            ConsoleHelper.GetSpectreMarkupOutput(
+                $"id: [green]project[/] started at [blue]{DateTime.Now:HH:mm}[/] (00h 00m)");
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = ConsoleHelper.GetMockOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
     #endregion
 }
