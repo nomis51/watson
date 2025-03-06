@@ -604,5 +604,43 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(0);
     }
 
+    [Fact]
+    public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrameOfTimeDate()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id",
+                ProjectId = "id",
+                Time = DateTime.Now.AddDays(-1)
+            });
+
+        // Act
+        var result = await _sut.GetPreviousFrameAsync(DateTime.Now);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetNextFrameAsync_ShouldReturnNextFrameOfTimeDate()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            "INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)", new
+            {
+                Id = "id",
+                ProjectId = "id",
+                Time = DateTime.Now.AddDays(1)
+            });
+
+        // Act
+        var result = await _sut.GetNextFrameAsync(DateTime.Now);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
     #endregion
 }

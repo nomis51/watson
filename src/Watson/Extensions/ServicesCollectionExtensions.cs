@@ -42,7 +42,8 @@ public static class ServicesCollectionExtensions
                     $".{nameof(Watson).ToLower()}",
                     "logs",
                     ".txt"
-                )
+                ),
+                rollingInterval: RollingInterval.Day
             )
             .CreateLogger();
 
