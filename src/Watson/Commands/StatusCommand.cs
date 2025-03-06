@@ -23,6 +23,7 @@ public class StatusCommand : Command<StatusOptions>
 
         var settings = await SettingsRepository.GetSettings();
         var endTime = DateTime.Now;
+
         if (DateTime.Now.TimeOfDay >= settings.WorkTime.LunchStartTime &&
             DateTime.Now.TimeOfDay <= settings.WorkTime.LunchEndTime)
         {
@@ -36,13 +37,21 @@ public class StatusCommand : Command<StatusOptions>
             );
         }
 
+        var needToSubstractLunchTime = frame.TimeAsDateTime.TimeOfDay < settings.WorkTime.LunchStartTime &&
+                                       DateTime.Now.TimeOfDay > settings.WorkTime.LunchEndTime;
+
         AnsiConsole.MarkupLine(
             "{0}: {1} ({2}) started at {3} ({4})",
             frame.Id,
             $"[green]{frame.Project?.Name ?? "-"}[/]",
             $"[purple]{string.Join("[/], [purple]", frame.Tags.Select(e => e.Name))}[/]",
             $"[blue]{TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay)}[/]",
-            TimeHelper.FormatDuration(endTime - frame.TimeAsDateTime)
+            TimeHelper.FormatDuration(
+                endTime - frame.TimeAsDateTime -
+                (needToSubstractLunchTime
+                    ? (settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)
+                    : TimeSpan.Zero)
+            )
         );
 
         return 0;
