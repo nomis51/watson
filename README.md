@@ -47,4 +47,7 @@ And you can also list of all the `frames` within a time period with the `log` co
 ![watson](https://github.com/nomis51/watson/blob/master/docs/docs/images/420494237-15325c86-193a-45cf-b3c8-8d3d7425b692.png)
 
 For more details about all the available commands and options run `watson help` or visit
-the [commands page](commands.md).
+the [commands page](https://nomis51.github.io/watson/commands/).
+
+## Documentation
+See the [full documentation here](https://nomis51.github.io/watson).
