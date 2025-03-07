@@ -7,27 +7,21 @@ using Watson.Core.Repositories;
 var projects = new[]
 {
     "cooking",
-    "gaming",
-    "sleeping",
-    "reading",
-    "tv",
-    "music"
+    "eating"
 };
 
 var tags = new[]
 {
-    "banana",
-    "apple",
-    "spiderman",
-    "batman",
-    "1981",
-    "alice wonderland",
-    "metallica",
-    "beatles",
+    "pizza",
+    "pasta",
+    "vegetables",
+    "fruits",
+    "meat",
+    "tofu"
 };
 
 var startTime = DateTime.Now.AddDays(-14);
-var endTime = DateTime.Now;
+var endTime = DateTime.Now.AddDays(1);
 var startDayHour = new TimeSpan(8, 0, 0);
 var endDayHour = new TimeSpan(16, 0, 0);
 
@@ -54,7 +48,9 @@ while (currentDate < endTime.Date)
         if (currentTime > endDayHour) break;
 
         var projectName = projects[Random.Shared.Next(0, projects.Length)];
-        var tag = tags[Random.Shared.Next(0, tags.Length)];
+        var selectedTags = Enumerable.Range(0, Random.Shared.Next(0, 3))
+            .Select(_ => tags[Random.Shared.Next(0, tags.Length)])
+            .ToList();
         var project = await projectRepository.EnsureNameExistsAsync(projectName);
         var frame = new Frame
         {
@@ -62,8 +58,8 @@ while (currentDate < endTime.Date)
             ProjectId = project!.Id,
         };
         await frameRepository.InsertAsync(frame);
-        await tagRepository.EnsureTagsExistsAsync([tag]);
-        await frameRepository.AssociateTagsAsync(frame.Id, [tag]);
+        await tagRepository.EnsureTagsExistsAsync(selectedTags);
+        await frameRepository.AssociateTagsAsync(frame.Id, selectedTags);
     }
 
     currentDate = currentDate.AddDays(1);

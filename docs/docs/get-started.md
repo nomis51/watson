@@ -1,9 +1,4 @@
-# Watson
-
-Watson is a simple terminal based time tracking application highly inspired
-by [td-watson](https://github.com/jazzband/Watson).
-
-![watson](https://github.com/nomis51/watson/blob/master/docs/docs/images/420494237-15325c86-193a-45cf-b3c8-8d3d7425b692.png)
+﻿## Get started
 
 ### Requirements
 
@@ -44,7 +39,7 @@ You can display the `status` of the current `frame` with the `status` command.
 
 And you can also list of all the `frames` within a time period with the `log` command.
 
-![watson](https://github.com/nomis51/watson/blob/master/docs/docs/images/420494237-15325c86-193a-45cf-b3c8-8d3d7425b692.png)
+![watson](images/420494237-15325c86-193a-45cf-b3c8-8d3d7425b692.png)
 
 For more details about all the available commands and options run `watson help` or visit
 the [commands page](commands.md).
