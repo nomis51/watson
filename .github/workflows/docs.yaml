@@ -29,5 +29,8 @@ jobs:
       - name: Install MkDocs
         run: pip install mkdocs
 
+      - name: Install MkDocs and Material Theme
+        run: pip install mkdocs-material
+
       - name: Build and Deploy
         run: mkdocs gh-deploy --force
