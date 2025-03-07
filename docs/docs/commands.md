@@ -1,17 +1,4 @@
-# Commands
-
-- [add](#add)
-- [cancel](#cancel)
-- [create](#create)
-- [edit](#edit)
-- [list](#list)
-- [log](#log)
-- [remove](#remove)
-- [rename](#rename)
-- [restart](#restart)
-- [start](#start)
-- [status](#status)
-- [stop](#stop)
+﻿# Commands
 
 ## add
 

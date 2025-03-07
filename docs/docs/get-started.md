@@ -1,8 +1,4 @@
-# Watson
-
-A simple terminal based time tracking application highly inspired by td-watson.
-
-## Get started
+﻿## Get started
 
 ### Requirements
 
@@ -44,4 +40,4 @@ You can see the `status` of the current frame with the `status` command.
 And you can also list of all the frames within a time period with the `log` command.
 
 For more details about all the available commands and options run `watson help` or visit
-the [Commands page](https://github.com/nomis51/watson/blob/master/docs/docs/commands.md).
+the [Commands page](https://github.com/nomis51/watson/blob/dev/docs/commands.md).
