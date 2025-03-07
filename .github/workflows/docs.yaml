@@ -32,8 +32,8 @@ jobs:
       - name: Install MkDocs and Material Theme
         run: pip install mkdocs-material
 
-      - name: Build and Deploy
+      - name: Deploy MkDocs
         env:
           GIT_USER: github-actions[bot]
           GIT_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: mkdocs gh-deploy --force --remote-name origin --remote-branch gh-pages
+        run: mkdocs gh-deploy --force --remote-name origin
