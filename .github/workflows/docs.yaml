@@ -15,7 +15,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: src
+        working-directory: docs
 
     steps:
       - name: Checkout Repository
