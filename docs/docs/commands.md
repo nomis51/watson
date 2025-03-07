@@ -8,7 +8,7 @@ watson add [project] [tag1] [tag2] ... [options]
 
 Add a new frame for the specified project and tag(s) at the specified time<small>*</small>.
 
-*<small>*If no time is specified, the current time is used.</small>*
+*<small>*If no time is specified, the current time is used.*</small>
 
 #### Options
 
@@ -20,7 +20,7 @@ Add a new frame for the specified project and tag(s) at the specified time<small
 #### Example
 
 ```
-watson add cookin pizza hawaian --from "2025-01-01 14:45"
+watson add cookin pizza hawaiian --from "2025-01-01 14:45"
 ```
 
 ## cancel
@@ -177,7 +177,7 @@ Start a new frame for the specified project and tag(s).
 
 ```
 watson start watching-tv
-watson start cooking pizza hawaian
+watson start cooking pizza hawaiian
 ```
 
 ## status
