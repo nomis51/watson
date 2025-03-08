@@ -97,12 +97,12 @@ public class LogCommand : Command<LogOptions>
     {
         // TODO: check for custom work time
         var settings = await SettingsRepository.GetSettings();
-        var endTime = settings.WorkTime.EndTime;
-        var lunchTimeDuration = settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime;
+        var endTime = settings.GetTodaysWorkTime().EndTime;
+        var lunchTimeDuration = settings.GetTodaysWorkTime().LunchEndTime - settings.GetTodaysWorkTime().LunchStartTime;
 
-        if (DateTime.Now.TimeOfDay > settings.WorkTime.EndTime)
+        if (DateTime.Now.TimeOfDay > settings.GetTodaysWorkTime().EndTime)
         {
-            endTime = settings.WorkTime.EndTime;
+            endTime = settings.GetTodaysWorkTime().EndTime;
         }
 
         var groupedFrames = frames.GroupBy(e => e.TimeAsDateTime.Date);
@@ -143,17 +143,20 @@ public class LogCommand : Command<LogOptions>
                 var fromTime = new DateTime(frame.Time).TimeOfDay;
                 var duration = toTime - fromTime;
 
-                if (fromTime < settings.WorkTime.LunchStartTime && toTime > settings.WorkTime.LunchEndTime)
+                if (fromTime < settings.GetTodaysWorkTime().LunchStartTime &&
+                    toTime > settings.GetTodaysWorkTime().LunchEndTime)
                 {
-                    duration -= settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime;
+                    duration -= settings.GetTodaysWorkTime().LunchEndTime - settings.GetTodaysWorkTime().LunchStartTime;
                 }
-                else if (fromTime > settings.WorkTime.LunchStartTime && fromTime < settings.WorkTime.LunchEndTime)
+                else if (fromTime > settings.GetTodaysWorkTime().LunchStartTime &&
+                         fromTime < settings.GetTodaysWorkTime().LunchEndTime)
                 {
-                    duration -= settings.WorkTime.LunchEndTime - fromTime;
+                    duration -= settings.GetTodaysWorkTime().LunchEndTime - fromTime;
                 }
-                else if (toTime > settings.WorkTime.LunchStartTime && toTime < settings.WorkTime.LunchEndTime)
+                else if (toTime > settings.GetTodaysWorkTime().LunchStartTime &&
+                         toTime < settings.GetTodaysWorkTime().LunchEndTime)
                 {
-                    duration -= toTime - settings.WorkTime.LunchStartTime;
+                    duration -= toTime - settings.GetTodaysWorkTime().LunchStartTime;
                 }
 
                 grid.AddRow(
