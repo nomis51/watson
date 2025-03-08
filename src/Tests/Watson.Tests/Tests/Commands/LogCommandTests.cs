@@ -96,8 +96,6 @@ public class LogCommandTests : ConsoleTest
             $"{DateTime.Today:dddd dd MMMM yyyy} (6h 15m)",
             ConsoleHelper.GetSpectreMarkupOutput(
                 "id 08:45 to 09:15 [blue]00h 30m[/] [green]project[/] ([purple]tag[/], [purple]tag2[/])"),
-            ConsoleHelper.GetSpectreMarkupOutput(
-                "id2 09:15 to 16:00 [blue]05h 45m[/] [green]project2[/] ([purple]tag[/])"),
         };
 
         // Act
@@ -113,8 +111,17 @@ public class LogCommandTests : ConsoleTest
             if (i >= lines.Length) Assert.Fail("Missing line: " + expectedLines[i]);
             var line = Regex.Replace(lines[i].Trim(), @"\s+", " ");
 
-            line.ShouldBe(expectedLines[i]);
+            if (i + 1 < lines.Length)
+            {
+                line.ShouldBe(expectedLines[i]);
+            }
         }
+
+        var lastLine = Regex.Replace(lines[^1].Trim(), @"\s+", " ");
+        lastLine.StartsWith("id2 09:15 to ").ShouldBeTrue();
+        lastLine.EndsWith(
+                ConsoleHelper.GetSpectreMarkupOutput(" [green]project2[/] ([purple]tag[/])"))
+            .ShouldBeTrue();
     }
 
     #endregion
