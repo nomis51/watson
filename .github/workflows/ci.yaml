@@ -173,8 +173,12 @@ jobs:
       - name: Submit Package to WinGet
         run: |
           gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh repo clone microsoft/winget-pkgs
-          cp -r ./winget-package/manifest winget-pkgs/manifests/n/Nomis51/Watson
+          gh repo clone https://github.com/microsoft/winget-pkgs.git
+          
+          mkdir -p winget-pkgs/manifests/n/Nomis51/Watson
+          
+          cp -r ./winget-package/manifest/* winget-pkgs/manifests/n/Nomis51/Watson
+          
           cd winget-pkgs
           git checkout -b add-nomis51-watson-${{ needs.build.outputs.version }}
           git add .
