@@ -214,3 +214,35 @@ Stop the currently running frame.
 watson stop
 watson stop --at "2025-01-01 14:45"
 ```
+
+## config
+
+```
+watson config [action] [key] [value]
+```
+
+Get or set a settings value.
+
+#### Examples
+
+```
+watson config get workTime.endTime
+watson config set workTime.endTime 9:15
+```
+
+## workhours
+
+```
+watson workhours [start|end|reset] [time]
+```
+
+Get or set custom work hours for the current day.
+If `reset` is passed, the work hours are reset to the default values.
+
+#### Examples
+
+```
+watson workhours start 9:15
+watson workhours end 17:15
+watson workhours reset
+```
