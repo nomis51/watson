@@ -22,6 +22,7 @@
         <ToolCommandName>watson</ToolCommandName>
         <PackageId>Nomis51.Watson</PackageId>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <ApplicationIcon>logo-avatar.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,6 +36,10 @@
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\docs\docs\images\logo-avatar.png" Pack="true" PackagePath="icon.png"/>
     </ItemGroup>
 
 </Project>

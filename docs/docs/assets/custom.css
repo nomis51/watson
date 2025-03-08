@@ -1,0 +1,13 @@
+﻿.md-logo img {
+    height: 40px !important;
+    width: auto;
+}
+
+.md-header {
+    background-color: #006aa7 !important;
+}
+
+.md-nav__link--active,
+.md-content a {
+    color: #006aa7 !important;
+}

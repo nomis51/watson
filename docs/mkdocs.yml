@@ -1,3 +1,16 @@
 site_name: Watson
 theme:
   name: material
+  logo: images/logo-avatar.png
+  palette:
+    primary: '#006aa7'
+    accent: '#e67e22'
+
+extra_css:
+  - assets/custom.css
+
+nav:
+  - Home: index.md
+  - Get started: get-started.md
+  - Commands: commands.md
+  - FAQ: faq.md

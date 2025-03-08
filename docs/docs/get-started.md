@@ -1,6 +1,4 @@
-﻿## Get started
-
-### Requirements
+﻿### Requirements
 
 - [.NET 8.0 or higher](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
