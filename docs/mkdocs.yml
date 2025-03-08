@@ -10,7 +10,7 @@ theme:
     repo: fontawesome/brands/github
 
 repo_url: https://github.com/nomis51/watson
-repo_name: GitHub
+repo_name: Source code
 
 extra_css:
   - assets/custom.css
