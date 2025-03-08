@@ -181,6 +181,10 @@ jobs:
           
           cd winget-pkgs
           git checkout -b add-nomis51-watson-${{ needs.build.outputs.version }}
+
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+
           git add .
           git commit -m "Add Watson ${{ needs.build.outputs.version }} to WinGet"
           git push origin add-nomis51-watson-${{ needs.build.outputs.version }}
