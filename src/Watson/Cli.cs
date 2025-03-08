@@ -30,6 +30,7 @@ public class Cli : ICli
         return Parser.Default.ParseArguments<
                 AddOptions,
                 CancelOptions,
+                ConfigOptions,
                 CreateOptions,
                 EditOptions,
                 ListOptions,
@@ -44,6 +45,7 @@ public class Cli : ICli
             .MapResult<
                 AddOptions,
                 CancelOptions,
+                ConfigOptions,
                 CreateOptions,
                 EditOptions,
                 ListOptions,
@@ -58,6 +60,7 @@ public class Cli : ICli
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
+                async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new CreateCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
                 async options => await new ListCommand(_dependencyResolver).Run(options),
