@@ -185,6 +185,8 @@ jobs:
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
 
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/microsoft/winget-pkgs.git
+
           git add .
           git commit -m "Add Watson ${{ needs.build.outputs.version }} to WinGet"
           git push origin add-nomis51-watson-${{ needs.build.outputs.version }}
