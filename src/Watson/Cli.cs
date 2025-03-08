@@ -40,7 +40,8 @@ public class Cli : ICli
                 RestartOptions,
                 StartOptions,
                 StatusOptions,
-                StopOptions
+                StopOptions,
+                WorkHoursOptions
             >(args)
             .MapResult<
                 AddOptions,
@@ -56,6 +57,7 @@ public class Cli : ICli
                 StartOptions,
                 StatusOptions,
                 StopOptions,
+                WorkHoursOptions,
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
@@ -71,6 +73,7 @@ public class Cli : ICli
                 async options => await new StartCommand(_dependencyResolver).Run(options),
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
+                async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors => Task.FromResult(1));
     }
 
