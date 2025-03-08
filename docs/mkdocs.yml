@@ -2,6 +2,7 @@ site_name: Watson
 theme:
   name: material
   logo: images/logo-avatar.png
+  favicon: images/logo-avatar.ico
   palette:
     primary: '#006aa7'
     accent: '#e67e22'
