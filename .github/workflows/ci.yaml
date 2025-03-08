@@ -51,7 +51,7 @@ jobs:
       - name: Build for tests
         run: dotnet build --no-restore
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal || exit 1
         working-directory: src/Watson
       - name: Restore dependencies for release
         run: dotnet restore Watson/Watson.csproj

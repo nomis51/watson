@@ -258,6 +258,8 @@ public class AddCommandTests : ConsoleTest
     public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsToday()
     {
         // Arrange
+        var hour = DateTime.Now.Hour;
+        var minute = DateTime.Now.Minute - 2;
         await DbContext.Connection.ExecuteAsync(
             "INSERT INTO Frames (Id, Time, ProjectId) VALUES ('id', @Time, 'id')",
             new
@@ -268,10 +270,10 @@ public class AddCommandTests : ConsoleTest
         var options = new AddOptions
         {
             FromTime =
-                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 45, 0).ToString(
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute, 0).ToString(
                     "yyyy-MM-dd HH:mm"),
             ToTime =
-                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 46, 0).ToString(
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute + 1, 0).ToString(
                     "yyyy-MM-dd HH:mm"),
             Project = "project",
             Tags = ["tag"]
@@ -285,7 +287,7 @@ public class AddCommandTests : ConsoleTest
         var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
         var expectedOutput =
             ConsoleHelper.GetSpectreMarkupOutput(
-                $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]15:45[/] to [blue]15:46[/] (00h 01m)");
+                $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}[/] to [blue]{hour.ToString().PadLeft(2, '0')}:{(minute + 1).ToString().PadLeft(2, '0')}[/] (00h 01m)");
         result.ShouldBe(0);
         output.ShouldStartWith(expectedOutput);
     }
@@ -331,12 +333,12 @@ public class AddCommandTests : ConsoleTest
     public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenFrameIsRunning()
     {
         // Arrange
-
-
+        var hour = DateTime.Now.Hour;
+        var minute = DateTime.Now.Minute - 1;
         var options = new AddOptions
         {
             FromTime =
-                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 45, 0).ToString(
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute, 0).ToString(
                     "yyyy-MM-dd HH:mm"),
             Project = "project",
             Tags = ["tag"]
@@ -350,7 +352,7 @@ public class AddCommandTests : ConsoleTest
         var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
         var expectedOutput =
             ConsoleHelper.GetSpectreMarkupOutput(
-                $"{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]15:45[/]");
+                $"{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}[/]");
         result.ShouldBe(0);
         output.ShouldStartWith(expectedOutput);
     }

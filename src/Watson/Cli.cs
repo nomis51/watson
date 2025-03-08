@@ -30,20 +30,7 @@ public class Cli : ICli
         return Parser.Default.ParseArguments<
                 AddOptions,
                 CancelOptions,
-                CreateOptions,
-                EditOptions,
-                ListOptions,
-                LogOptions,
-                RemoveOptions,
-                RenameOptions,
-                RestartOptions,
-                StartOptions,
-                StatusOptions,
-                StopOptions
-            >(args)
-            .MapResult<
-                AddOptions,
-                CancelOptions,
+                ConfigOptions,
                 CreateOptions,
                 EditOptions,
                 ListOptions,
@@ -54,10 +41,28 @@ public class Cli : ICli
                 StartOptions,
                 StatusOptions,
                 StopOptions,
+                WorkHoursOptions
+            >(args)
+            .MapResult<
+                AddOptions,
+                CancelOptions,
+                ConfigOptions,
+                CreateOptions,
+                EditOptions,
+                ListOptions,
+                LogOptions,
+                RemoveOptions,
+                RenameOptions,
+                RestartOptions,
+                StartOptions,
+                StatusOptions,
+                StopOptions,
+                WorkHoursOptions,
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
+                async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new CreateCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
                 async options => await new ListCommand(_dependencyResolver).Run(options),
@@ -68,6 +73,7 @@ public class Cli : ICli
                 async options => await new StartCommand(_dependencyResolver).Run(options),
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
+                async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors => Task.FromResult(1));
     }
 
