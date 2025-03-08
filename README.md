@@ -1,4 +1,4 @@
-# Watson
+# <img src="https://github.com/nomis51/watson/blob/master/docs/docs/images/logo-avatar.png" style="height: 80px; with: auto;"> Watson
 
 Watson is a simple terminal based time tracking application highly inspired
 by [td-watson](https://github.com/jazzband/Watson).
