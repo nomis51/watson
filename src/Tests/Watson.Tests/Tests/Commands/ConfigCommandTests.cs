@@ -88,5 +88,54 @@ public class ConfigCommandTests : ConsoleTest
         result.ShouldBe(1);
     }
 
+    [Fact]
+    public async Task Run_Set_ShouldSetSettingValue_WhenExists()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime = new SettingsWorkTime
+                {
+                    StartTime = new TimeSpan(1, 0, 0)
+                }
+            });
+        var options = new ConfigOptions
+        {
+            Action = "set",
+            Key = "workTime.startTime",
+            Value = "02:00:00"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _settingsRepository.Received()
+            .SaveSettings(Arg.Is<Settings>(s =>
+                    s.WorkTime.StartTime == new TimeSpan(2, 0, 0)
+                )
+            );
+    }
+
+    [Fact]
+    public async Task Run_Set_ShouldFail_WhenSettingDoesNotExist()
+    {
+        // Arrange
+        var options = new ConfigOptions
+        {
+            Action = "set",
+            Key = "foo",
+            Value = "02:00:00"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
     #endregion
 }

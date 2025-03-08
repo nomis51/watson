@@ -43,7 +43,11 @@ public class ConfigCommand : Command<ConfigOptions>
 
     private async Task<int> SetConfig(string key, string? value)
     {
-        return 1;
+        var settings = await SettingsRepository.GetSettings();
+        if (!settings.SetJsonPathValue(key, ConvertToValueType(value, key))) return 1;
+
+        await SettingsRepository.SaveSettings(settings);
+        return 0;
     }
 
     private async Task<int> GetConfig(string key)
@@ -53,6 +57,21 @@ public class ConfigCommand : Command<ConfigOptions>
 
         AnsiConsole.MarkupLine("{0}: {1}", key, value ?? "[grey](null)[/]");
         return 0;
+    }
+
+    private static object? ConvertToValueType(string? input, string key)
+    {
+        if (string.IsNullOrEmpty(input)) return null;
+
+        return key switch
+        {
+            "workTime.startTime" => TimeSpan.Parse(input),
+            "workTime.endTime" => TimeSpan.Parse(input),
+            "workTime.lunchStartTime" => TimeSpan.Parse(input),
+            "workTime.lunchEndTime" => TimeSpan.Parse(input),
+            "workTime.weekStartDay" => (DayOfWeek)Enum.Parse(typeof(DayOfWeek), input, true),
+            _ => null
+        };
     }
 
     #endregion
