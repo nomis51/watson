@@ -6,6 +6,11 @@ theme:
   palette:
     primary: '#006aa7'
     accent: '#e67e22'
+  icon:
+    repo: fontawesome/brands/github
+
+repo_url: https://github.com/nomis51/watson
+repo_name: Source code
 
 extra_css:
   - assets/custom.css
