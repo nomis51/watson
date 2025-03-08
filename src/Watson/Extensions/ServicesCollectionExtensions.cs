@@ -35,18 +35,6 @@ public static class ServicesCollectionExtensions
 
     private static void ConfigureLogging(IServiceCollection services)
     {
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(
-                Path.Join(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    $".{nameof(Watson).ToLower()}",
-                    "logs",
-                    ".txt"
-                ),
-                rollingInterval: RollingInterval.Day
-            )
-            .CreateLogger();
-
         services.AddLogging();
         services.AddSerilog();
     }
