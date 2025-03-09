@@ -9,7 +9,7 @@ public class TodoOptions
     public string Action { get; set; } = null!;
 
     [Value(1, MetaName = "arguments", Required = true, HelpText = "Arguments")]
-    public List<string> Arguments { get; set; } = [];
+    public IEnumerable<string> Arguments { get; set; } = [];
 
     [Option('d', "due", HelpText = "Due time")]
     public string? DueTime { get; set; }

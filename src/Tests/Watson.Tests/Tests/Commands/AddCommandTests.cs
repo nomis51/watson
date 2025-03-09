@@ -265,7 +265,7 @@ public class AddCommandTests : ConsoleTest
             "INSERT INTO Frames (Id, Time, ProjectId) VALUES ('id', @Time, 'id')",
             new
             {
-                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0).Ticks
+                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour + 1, 0, 0).Ticks
             }
         );
         var options = new AddOptions

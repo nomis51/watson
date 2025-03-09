@@ -81,7 +81,7 @@ public class Cli : ICli
                 async options => await new StatsCommand(_dependencyResolver).Run(options),
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
-                async options => await new TodoCommands(_dependencyResolver).Run(options),
+                async options => await new TodoCommand(_dependencyResolver).Run(options),
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
                 {

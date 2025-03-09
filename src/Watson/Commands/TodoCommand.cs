@@ -4,11 +4,11 @@ using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
 
-public class TodoCommands : Command<TodoOptions>
+public class TodoCommand : Command<TodoOptions>
 {
     #region Constructors
 
-    public TodoCommands(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    public TodoCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
     {
     }
 
@@ -31,16 +31,17 @@ public class TodoCommands : Command<TodoOptions>
 
     private async Task<int> AddTodo(TodoOptions options)
     {
-        if (options.Arguments.Count < 2) return 1;
+        var arguments = options.Arguments.ToList();
+        if (arguments.Count < 2) return 1;
 
-        var project = await ProjectRepository.EnsureNameExistsAsync(options.Arguments[1]);
+        var project = await ProjectRepository.EnsureNameExistsAsync(arguments[1]);
         if (project is null) return 1;
 
-        var hasDueTime = TimeHelper.ParseDateTime(options.DueTime, out var dueTime);
+        var hasDueTime = TimeHelper.ParseDateTime(options.DueTime, out var dueTime) && dueTime is not null;
 
         var todo = new Todo
         {
-            Description = options.Arguments[0],
+            Description = arguments[0],
             ProjectId = project.Id,
             DueTime = hasDueTime ? dueTime!.Value.Ticks : null,
             Priority = options.Priority
@@ -54,10 +55,12 @@ public class TodoCommands : Command<TodoOptions>
 
         if (tags.Count > 0)
         {
+            if (!await TagRepository.EnsureTagsExistsAsync(tags)) return 1;
+
             await TodoRepository.AssociateTagsAsync(todo.Id, tags);
         }
 
-        return 1;
+        return 0;
     }
 
     #endregion
