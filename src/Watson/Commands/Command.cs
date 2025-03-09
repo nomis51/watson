@@ -21,6 +21,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
     protected IProjectRepository ProjectRepository => DependencyResolver.ProjectRepository;
     protected ITagRepository TagRepository => DependencyResolver.TagRepository;
     protected ISettingsRepository SettingsRepository => DependencyResolver.SettingsRepository;
+    protected ITodoRepository TodoRepository => DependencyResolver.TodoRepository;
 
     #endregion
 
