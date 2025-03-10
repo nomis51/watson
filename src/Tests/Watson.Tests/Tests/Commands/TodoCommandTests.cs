@@ -152,5 +152,45 @@ public class TodoCommandTests : ConsoleTest
         todo.DutTimeAsDateTime!.Value.ToString("yyyy-MM-dd").ShouldBe(options.DueTime);
     }
 
+    [Fact]
+    public async Task Run_ShouldRemoveTodo_WhenExists()
+    {
+        // Arrange
+        var options = new TodoOptions
+        {
+            Action = "remove",
+            Arguments = ["id"]
+        };
+        await DbContext.Connection.ExecuteAsync(
+            "INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority) VALUES ('id','description','id', null, null)");
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+
+        var todo = await DbContext.Connection.QueryFirstOrDefaultAsync<Todo>(
+            "SELECT * FROM Todos WHERE Id = 'id'");
+        todo.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Run_ShouldFailToRemove_WhenTodoDoesNotExist()
+    {
+        // Arrange
+        var options = new TodoOptions
+        {
+            Action = "remove",
+            Arguments = ["id"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
     #endregion
 }
