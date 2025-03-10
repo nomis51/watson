@@ -21,6 +21,7 @@ public class TodoCommand : Command<TodoOptions>
         return options.Action switch
         {
             "add" => await AddTodo(options),
+            "remove" => await RemoveTodo(options),
             _ => 1
         };
     }
@@ -28,6 +29,16 @@ public class TodoCommand : Command<TodoOptions>
     #endregion
 
     #region Private methods
+
+    private async Task<int> RemoveTodo(TodoOptions options)
+    {
+        var arguments = options.Arguments.ToList();
+        if (arguments.Count < 1) return 1;
+
+        if (!await TodoRepository.DeleteAsync(arguments[0])) return 1;
+
+        return 0;
+    }
 
     private async Task<int> AddTodo(TodoOptions options)
     {
