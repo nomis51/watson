@@ -2,6 +2,8 @@
 using Dapper;
 using NSubstitute;
 using Shouldly;
+using Spectre.Console;
+using Spectre.Console.Rendering;
 using Watson.Commands;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
@@ -199,13 +201,12 @@ public class TodoCommandTests : ConsoleTest
         // Arrange
         var time = DateTime.Now;
         await DbContext.Connection.ExecuteAsync(
-            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority) VALUES ('id1','description1','id1', {time.Ticks}, 3)",
-            new { time = time });
+            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority) VALUES ('id1','description1','id1', {time.Ticks}, 3)");
         await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id1','project1')");
         await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id1','tag1')");
         await DbContext.Connection.ExecuteAsync("INSERT INTO Todos_Tags (Id,TodoId,TagId) VALUES ('id1','id1','id1')");
 
-        var options = new TodoOptions()
+        var options = new TodoOptions
         {
             Action = "list"
         };
@@ -215,19 +216,47 @@ public class TodoCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var lines = ConsoleHelper.GetMockOutputAsLines();
-        lines.Length.ShouldBe(2);
+        var output = ConsoleHelper.GetMockOutput();
 
-        Regex.Replace(lines[0], "\\s+", " ")
-            .Trim()
-            .ShouldBe("ID Description Project Tags Completed Priority Due Time");
+        var expectedTable = CreateTable([
+            [
+                new Text("id1"),
+                new Text("description1"),
+                new Markup("[green]project1[/]"),
+                new Markup("[purple]tag1[/]"),
+                new Markup("[gray]-[/]").Centered(),
+                new Markup("3").Centered(),
+                new Markup(time.ToString("yyyy-MM-dd HH:mm")).Centered()
+            ]
+        ]);
+        var expectedOutput = ConsoleHelper.GetSpectreRenderableOutput(expectedTable);
+        output.ShouldBe(expectedOutput);
+    }
 
-        var expected = ConsoleHelper.GetSpectreMarkupOutput(
-            $"id1 description1 [green]project1[/] ([purple]tag1[/]) - 3 {time:yyyy-MM-dd HH:mm}"
-        );
-        Regex.Replace(lines[1], "\\s+", " ")
-            .Trim()
-            .ShouldBe(expected);
+    #endregion
+
+    #region Private methods
+
+    private static Table CreateTable(IEnumerable<IEnumerable<IRenderable>> rows)
+    {
+        var table = new Table();
+        table.Border(TableBorder.Rounded);
+        table.AddColumn("ID");
+        table.AddColumn("Description");
+        table.AddColumn("Project");
+        table.AddColumn("Tags");
+        table.AddColumn("Completed")
+            .Centered();
+        table.AddColumn("Priority")
+            .Centered();
+        table.AddColumn("Due Time");
+
+        foreach (var row in rows)
+        {
+            table.AddRow(row);
+        }
+
+        return table;
     }
 
     #endregion
