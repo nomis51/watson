@@ -260,6 +260,36 @@ public class TodoCommandTests : ConsoleTest
         todo.IsCompleted.ShouldBe(isCompleted);
     }
 
+    [InlineData("complete", true, false)]
+    [InlineData("done", true, false)]
+    [InlineData("uncomplete", false, true)]
+    [InlineData("undone", false, true)]
+    [InlineData("undo", false, true)]
+    [InlineData("reset", false, true)]
+    [Theory]
+    public async Task Run_ShouldToggleCompletion_WithDifferentAliases(string argument, bool expected, bool initial)
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority,IsCompleted) VALUES ('id1','description1','id1', null, null, {initial})");
+
+        var options = new TodoOptions
+        {
+            Action = argument,
+            Arguments = ["id1"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var todo = await DbContext.Connection.QueryFirstOrDefaultAsync<Todo>(
+            "SELECT * FROM Todos WHERE Id = 'id1'");
+        todo.ShouldNotBeNull();
+        todo.IsCompleted.ShouldBe(expected);
+    }
+
     #endregion
 
     #region Private methods
@@ -284,6 +314,38 @@ public class TodoCommandTests : ConsoleTest
         }
 
         return table;
+    }
+
+    [Fact]
+    public async Task Run_ShouldEditTodo_WhenTodoExists()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority) VALUES ('id1','description1','id1', {DateTime.Today.Ticks}, 3)");
+
+        var options = new TodoOptions
+        {
+            Action = "edit",
+            Arguments = ["id1", "description2", "project2", "tag2"],
+            DueTime = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd HH:mm"),
+            Priority = 2
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var todo = await DbContext.Connection.QueryFirstOrDefaultAsync<Todo>(
+            "SELECT * FROM Todos WHERE Id = 'id1'");
+        var project = await DbContext.Connection.QueryFirstOrDefaultAsync<Project>(
+            "SELECT * FROM Projects WHERE Name = 'project2'");
+        project.ShouldNotBeNull();
+        todo.ShouldNotBeNull();
+        todo.Description.ShouldBe("description2");
+        todo.ProjectId.ShouldBe(project.Id);
+        todo.DueTime!.Value.ShouldBeGreaterThan(DateTime.Today.AddDays(1).Ticks);
+        todo.Priority.ShouldBe(2);
     }
 
     #endregion

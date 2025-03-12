@@ -27,6 +27,7 @@ public class TodoCommand : Command<TodoOptions>
             "list" => await ListTodos(options),
             "complete" or "done" => await ToggleCompletionTodo(options, true),
             "uncomplete" or "undone" or "undo" or "reset" => await ToggleCompletionTodo(options, false),
+            "edit" => await EditTodo(options),
             _ => 1
         };
     }
@@ -34,6 +35,49 @@ public class TodoCommand : Command<TodoOptions>
     #endregion
 
     #region Private methods
+
+    private async Task<int> EditTodo(TodoOptions options)
+    {
+        var arguments = options.Arguments.ToList();
+        if (arguments.Count < 1) return 1;
+
+        var todo = await TodoRepository.GetByIdAsync(arguments[0]);
+        if (todo is null) return 1;
+
+        if (options.Priority is not null)
+        {
+            todo.Priority = options.Priority.Value;
+        }
+
+        if (options.DueTime is not null)
+        {
+            if (!TimeHelper.ParseDateTime(options.DueTime, out var dueTime)) return 1;
+
+            todo.DueTime = dueTime!.Value.Ticks;
+        }
+
+        if (arguments.Count > 1)
+        {
+            todo.Description = arguments[1];
+        }
+
+        if (arguments.Count > 2)
+        {
+            var project = await ProjectRepository.EnsureNameExistsAsync(arguments[2]);
+            if (project is null) return 1;
+
+            todo.ProjectId = project.Id;
+        }
+
+        var ok = await TodoRepository.UpdateAsync(todo);
+
+        if (arguments.Count > 3)
+        {
+            await TodoRepository.AssociateTagsAsync(todo.Id, arguments.Skip(3));
+        }
+
+        return ok ? 0 : 1;
+    }
 
     private async Task<int> ToggleCompletionTodo(TodoOptions options, bool isCompleted)
     {
