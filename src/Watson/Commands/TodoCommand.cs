@@ -36,39 +36,35 @@ public class TodoCommand : Command<TodoOptions>
     {
         var todos = await TodoRepository.GetAsync();
 
-        var grid = new Grid();
-        grid.AddColumn();
-        grid.AddColumn();
-        grid.AddColumn();
-        grid.AddColumn();
-        grid.AddColumn();
-        grid.AddColumn();
-        grid.AddColumn();
-
-        grid.AddRow(
-            "ID",
-            "Description",
-            "Project",
-            "Tags",
-            "Completed",
-            "Priority",
-            "Due Time"
-        );
+        var table = new Table();
+        table.Border(TableBorder.Rounded);
+        table.AddColumn("ID");
+        table.AddColumn("Description");
+        table.AddColumn("Project");
+        table.AddColumn("Tags");
+        table.AddColumn("Completed")
+            .Centered();
+        table.AddColumn("Priority")
+            .Centered();
+        table.AddColumn("Due Time");
 
         foreach (var todo in todos)
         {
-            grid.AddRow(
-                todo.Id,
-                todo.Description,
-                $"[green]{todo.Project?.Name ?? "[gray]-[/]"}[/]",
-                $"([purple]{string.Join("[/], [purple]", todo.Tags.Select(e => e.Name))}[/])",
-                todo.IsCompleted ? Emoji.Known.CheckMarkButton : "[gray]-[/]",
-                todo.Priority.ToString() ?? "[gray]-[/]",
-                todo.DueTimeAsDateTime?.ToString("yyyy-MM-dd HH:mm") ?? "[gray]-[/]"
+            table.AddRow(
+                new Text(todo.Id),
+                new Text(todo.Description),
+                new Markup($"[green]{todo.Project?.Name ?? "[gray]-[/]"}[/]"),
+                new Markup($"[purple]{string.Join("[/], [purple]", todo.Tags.Select(e => e.Name))}[/]"),
+                new Markup(todo.IsCompleted ? Emoji.Known.CheckMarkButton : "[gray]-[/]")
+                    .Centered(),
+                new Markup(todo.Priority.ToString() ?? "[gray]-[/]")
+                    .Centered(),
+                new Markup(todo.DueTimeAsDateTime?.ToString("yyyy-MM-dd HH:mm") ?? "[gray]-[/]")
+                    .Centered()
             );
         }
 
-        AnsiConsole.Write(grid);
+        AnsiConsole.Write(table);
 
         return 0;
     }
