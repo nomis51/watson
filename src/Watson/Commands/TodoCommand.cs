@@ -1,4 +1,5 @@
-﻿using Watson.Core.Models.Database;
+﻿using Spectre.Console;
+using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -22,6 +23,7 @@ public class TodoCommand : Command<TodoOptions>
         {
             "add" => await AddTodo(options),
             "remove" => await RemoveTodo(options),
+            "list" => await ListTodos(options),
             _ => 1
         };
     }
@@ -29,6 +31,47 @@ public class TodoCommand : Command<TodoOptions>
     #endregion
 
     #region Private methods
+
+    private async Task<int> ListTodos(TodoOptions options)
+    {
+        var todos = await TodoRepository.GetAsync();
+
+        var grid = new Grid();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddColumn();
+        grid.AddColumn();
+
+        grid.AddRow(
+            "ID",
+            "Description",
+            "Project",
+            "Tags",
+            "Completed",
+            "Priority",
+            "Due Time"
+        );
+
+        foreach (var todo in todos)
+        {
+            grid.AddRow(
+                todo.Id,
+                todo.Description,
+                $"[green]{todo.Project?.Name ?? "[gray]-[/]"}[/]",
+                $"([purple]{string.Join("[/], [purple]", todo.Tags.Select(e => e.Name))}[/])",
+                todo.IsCompleted ? Emoji.Known.CheckMarkButton : "[gray]-[/]",
+                todo.Priority.ToString() ?? "[gray]-[/]",
+                todo.DueTimeAsDateTime?.ToString("yyyy-MM-dd HH:mm") ?? "[gray]-[/]"
+            );
+        }
+
+        AnsiConsole.Write(grid);
+
+        return 0;
+    }
 
     private async Task<int> RemoveTodo(TodoOptions options)
     {

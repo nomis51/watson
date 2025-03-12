@@ -8,7 +8,7 @@ public class TodoOptions
     [Value(0, MetaName = "action", Required = true, HelpText = "list, add, done, remove, edit")]
     public string Action { get; set; } = null!;
 
-    [Value(1, MetaName = "arguments", Required = true, HelpText = "Arguments")]
+    [Value(1, MetaName = "arguments", Required = false, HelpText = "Arguments")]
     public IEnumerable<string> Arguments { get; set; } = [];
 
     [Option('d', "due", HelpText = "Due time")]

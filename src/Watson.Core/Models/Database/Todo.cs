@@ -15,5 +15,5 @@ public class Todo : DbModel
     public Project? Project { get; set; }
     public List<Tag> Tags { get; set; } = [];
 
-    public DateTime? DutTimeAsDateTime => DueTime is null ? null : new DateTime(DueTime.Value);
+    public DateTime? DueTimeAsDateTime => DueTime is null ? null : new DateTime(DueTime.Value);
 }

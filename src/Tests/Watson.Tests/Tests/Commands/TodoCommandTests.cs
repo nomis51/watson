@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using System.Text.RegularExpressions;
+using Dapper;
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
@@ -74,7 +75,7 @@ public class TodoCommandTests : ConsoleTest
         todo.IsCompleted.ShouldBeFalse();
         todo.Priority.ShouldBeNull();
         todo.DueTime.ShouldBeNull();
-        todo.DutTimeAsDateTime.ShouldBeNull();
+        todo.DueTimeAsDateTime.ShouldBeNull();
     }
 
     [Fact]
@@ -148,8 +149,8 @@ public class TodoCommandTests : ConsoleTest
             "SELECT * FROM Todos");
         todo.ShouldNotBeNull();
         todo.DueTime.ShouldNotBeNull();
-        todo.DutTimeAsDateTime.ShouldNotBeNull();
-        todo.DutTimeAsDateTime!.Value.ToString("yyyy-MM-dd").ShouldBe(options.DueTime);
+        todo.DueTimeAsDateTime.ShouldNotBeNull();
+        todo.DueTimeAsDateTime!.Value.ToString("yyyy-MM-dd").ShouldBe(options.DueTime);
     }
 
     [Fact]
@@ -190,6 +191,43 @@ public class TodoCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Run_ShouldListTodos()
+    {
+        // Arrange
+        var time = DateTime.Now;
+        await DbContext.Connection.ExecuteAsync(
+            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority) VALUES ('id1','description1','id1', {time.Ticks}, 3)",
+            new { time = time });
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id1','project1')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id1','tag1')");
+        await DbContext.Connection.ExecuteAsync("INSERT INTO Todos_Tags (Id,TodoId,TagId) VALUES ('id1','id1','id1')");
+
+        var options = new TodoOptions()
+        {
+            Action = "list"
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var lines = ConsoleHelper.GetMockOutputAsLines();
+        lines.Length.ShouldBe(2);
+
+        Regex.Replace(lines[0], "\\s+", " ")
+            .Trim()
+            .ShouldBe("ID Description Project Tags Completed Priority Due Time");
+
+        var expected = ConsoleHelper.GetSpectreMarkupOutput(
+            $"id1 description1 [green]project1[/] ([purple]tag1[/]) - 3 {time:yyyy-MM-dd HH:mm}"
+        );
+        Regex.Replace(lines[1], "\\s+", " ")
+            .Trim()
+            .ShouldBe(expected);
     }
 
     #endregion

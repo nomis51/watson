@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics;
+using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
 using Watson.Extensions;
@@ -8,6 +10,8 @@ LoggingHelper.Configure();
 
 try
 {
+    Console.OutputEncoding = Encoding.Unicode;
+
     var services = new ServiceCollection();
     return await services.AddAppResources()
         .BuildServiceProvider()
@@ -16,6 +20,7 @@ try
 }
 catch (Exception e)
 {
+    if (Debugger.IsAttached) throw;
     Log.Fatal(e, "An unhandled exception occurred.");
 }
 

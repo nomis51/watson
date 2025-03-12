@@ -33,6 +33,20 @@ public class TodoRepository : Repository<Todo>, ITodoRepository
 
     #region Public methods
 
+    public override async Task<IEnumerable<Todo>> GetAsync()
+    {
+        var todos = await base.GetAsync();
+        var todosList = todos.ToList();
+
+        foreach (var frame in todosList)
+        {
+            await InjectProject(frame);
+            await InjectTags(frame);
+        }
+
+        return todosList;
+    }
+
     public override async Task<Todo?> InsertAsync(Todo model)
     {
         var todo = await base.InsertAsync(model);
