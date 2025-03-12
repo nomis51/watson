@@ -11,6 +11,7 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
+using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 
@@ -40,7 +41,8 @@ public class LogCommandTests : ConsoleTest
                 new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
-                _settingsRepository
+                _settingsRepository,
+                new TodoRepository(DbContext, idHelper)
             )
         );
     }

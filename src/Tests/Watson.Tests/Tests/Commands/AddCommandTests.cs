@@ -11,6 +11,7 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
+using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 
@@ -47,7 +48,8 @@ public class AddCommandTests : ConsoleTest
                 new TagRepository(DbContext, idHelper),
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
-                _settingsRepository
+                _settingsRepository,
+                new TodoRepository(DbContext, idHelper)
             )
         );
     }
@@ -264,7 +266,7 @@ public class AddCommandTests : ConsoleTest
             "INSERT INTO Frames (Id, Time, ProjectId) VALUES ('id', @Time, 'id')",
             new
             {
-                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0).Ticks
+                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour + 1, 0, 0).Ticks
             }
         );
         var options = new AddOptions

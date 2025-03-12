@@ -9,6 +9,7 @@ public static class LoggingHelper
     public static void Configure()
     {
         Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
             .WriteTo.File(
                 Path.Join(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),

@@ -92,8 +92,8 @@ public class TimeHelperTests
     }
 
     [InlineData("13", "$year-$month-$day 13:00")]
-    [InlineData("12-13", null)]
-    [InlineData("2022-12-13", null)]
+    [InlineData("12-13", "$year-12-13 00:00")]
+    [InlineData("2022-12-13", "2022-12-13 00:00")]
     [InlineData("13 13", "$year-$month-13 13:00")]
     [InlineData("12-13 14", "$year-12-13 14:00")]
     [InlineData("2022-12-13 14", "2022-12-13 14:00")]
@@ -101,7 +101,7 @@ public class TimeHelperTests
     [InlineData("13 13 13", null)]
     [InlineData("nope", null)]
     [InlineData("", null)]
-    [InlineData("2024-02-01 aa", null)]
+    [InlineData("2024-02-01 aa", "2024-02-01 00:00")]
     [Theory]
     public void ParseDateTime_ShouldParseDateTimeToExpected(string? input, string? expected)
     {

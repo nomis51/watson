@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
 using Watson.Models.Abstractions;
@@ -10,15 +11,17 @@ public class Cli : ICli
 {
     #region Members
 
+    private readonly ILogger<Cli> _logger;
     private readonly IDependencyResolver _dependencyResolver;
 
     #endregion
 
     #region Constructors
 
-    public Cli(IDependencyResolver dependencyResolver)
+    public Cli(IDependencyResolver dependencyResolver, ILogger<Cli> logger)
     {
         _dependencyResolver = dependencyResolver;
+        _logger = logger;
     }
 
     #endregion
@@ -42,6 +45,7 @@ public class Cli : ICli
                 StatsOptions,
                 StatusOptions,
                 StopOptions,
+                TodoOptions,
                 WorkHoursOptions
             >(args)
             .MapResult<
@@ -59,6 +63,7 @@ public class Cli : ICli
                 StatsOptions,
                 StatusOptions,
                 StopOptions,
+                TodoOptions,
                 WorkHoursOptions,
                 Task<int>
             >(
@@ -76,8 +81,17 @@ public class Cli : ICli
                 async options => await new StatsCommand(_dependencyResolver).Run(options),
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
+                async options => await new TodoCommand(_dependencyResolver).Run(options),
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
-                errors => Task.FromResult(1));
+                errors =>
+                {
+                    foreach (var error in errors)
+                    {
+                        _logger.LogError("Error while parsing input arguments: {Error}", error);
+                    }
+
+                    return Task.FromResult(1);
+                });
     }
 
     #endregion

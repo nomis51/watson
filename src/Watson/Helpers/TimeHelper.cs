@@ -59,11 +59,12 @@ public class TimeHelper : ITimeHelper
             return false;
         }
 
-        var datePart = parts.Length == 2 ? parts[0] : null;
-        var timePart = parts.Length == 2 ? parts[1] : parts[0];
+        var hasHyphen = parts[0].Contains('-');
+        var datePart = parts.Length == 2 ? parts[0] : hasHyphen ? parts[0] : null;
+        var timePart = parts.Length == 2 ? parts[1] : hasHyphen ? null : parts[0];
 
         var date = datePart is not null ? ParseDate(datePart) : null;
-        var time = ParseTime(timePart);
+        var time = timePart is not null ? ParseTime(timePart) : null;
 
         if (date is not null && time is not null)
         {
@@ -74,6 +75,12 @@ public class TimeHelper : ITimeHelper
         if (time is not null)
         {
             dateTime = DateTime.Now.Date.Add(time.Value);
+            return true;
+        }
+
+        if (date is not null)
+        {
+            dateTime = date.Value;
             return true;
         }
 

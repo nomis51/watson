@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace Watson.Tests.Helpers;
 
@@ -58,6 +59,16 @@ public class ConsoleHelper : IDisposable
         var originalOut = AnsiConsole.Profile.Out;
         AnsiConsole.Profile.Out = new AnsiConsoleOutput(writer);
         AnsiConsole.MarkupLine(input);
+        AnsiConsole.Profile.Out = originalOut;
+        return writer.ToString().Trim();
+    }
+
+    public string GetSpectreRenderableOutput(IRenderable renderable)
+    {
+        var writer = new StringWriter();
+        var originalOut = AnsiConsole.Profile.Out;
+        AnsiConsole.Profile.Out = new AnsiConsoleOutput(writer);
+        AnsiConsole.Write(renderable);
         AnsiConsole.Profile.Out = originalOut;
         return writer.ToString().Trim();
     }
