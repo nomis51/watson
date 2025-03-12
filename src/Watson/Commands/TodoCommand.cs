@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using System.ComponentModel;
+using Spectre.Console;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -24,6 +25,8 @@ public class TodoCommand : Command<TodoOptions>
             "add" => await AddTodo(options),
             "remove" => await RemoveTodo(options),
             "list" => await ListTodos(options),
+            "complete" or "done" => await ToggleCompletionTodo(options, true),
+            "uncomplete" or "undone" or "undo" or "reset" => await ToggleCompletionTodo(options, false),
             _ => 1
         };
     }
@@ -31,6 +34,18 @@ public class TodoCommand : Command<TodoOptions>
     #endregion
 
     #region Private methods
+
+    private async Task<int> ToggleCompletionTodo(TodoOptions options, bool isCompleted)
+    {
+        var arguments = options.Arguments.ToList();
+        if (arguments.Count < 1) return 1;
+
+        var todo = await TodoRepository.GetByIdAsync(arguments[0]);
+        if (todo is null) return 1;
+
+        todo.IsCompleted = isCompleted;
+        return await TodoRepository.UpdateAsync(todo) ? 0 : 1;
+    }
 
     private async Task<int> ListTodos(TodoOptions options)
     {

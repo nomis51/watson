@@ -233,6 +233,33 @@ public class TodoCommandTests : ConsoleTest
         output.ShouldBe(expectedOutput);
     }
 
+    [InlineData(true)]
+    [InlineData(false)]
+    [Theory]
+    public async Task Run_ShouldToggleCompletion_WhenTodoExists(bool isCompleted)
+    {
+        // Arrange
+        var originalIsCompleted = !isCompleted;
+        await DbContext.Connection.ExecuteAsync(
+            $"INSERT INTO Todos (Id,Description,ProjectId,DueTime,Priority,IsCompleted) VALUES ('id1','description1','id1', null, null, {originalIsCompleted})");
+
+        var options = new TodoOptions
+        {
+            Action = originalIsCompleted ? "uncomplete" : "complete",
+            Arguments = ["id1"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var todo = await DbContext.Connection.QueryFirstOrDefaultAsync<Todo>(
+            "SELECT * FROM Todos WHERE Id = 'id1'");
+        todo.ShouldNotBeNull();
+        todo.IsCompleted.ShouldBe(isCompleted);
+    }
+
     #endregion
 
     #region Private methods

@@ -181,13 +181,13 @@ public class TodoRepository : Repository<Todo>, ITodoRepository
     protected override string BuildInsertQuery()
     {
         return
-            $"INSERT INTO {TableName} (Id, Description, ProjectId, DueTime, Priority) VALUES (@Id, @Description, @ProjectId, @DueTime, @Priority)";
+            $"INSERT INTO {TableName} (Id, Description, ProjectId, DueTime, Priority, IsCompleted) VALUES (@Id, @Description, @ProjectId, @DueTime, @Priority, @IsCompleted)";
     }
 
     protected override string BuildUpdateQuery()
     {
         return
-            $"UPDATE {TableName} SET Description = @Description, ProjectId = @ProjectId, DueTime = @DueTime, Priority = @Priority WHERE Id = @Id";
+            $"UPDATE {TableName} SET Description = @Description, ProjectId = @ProjectId, DueTime = @DueTime, Priority = @Priority, IsCompleted = @IsCompleted WHERE Id = @Id";
     }
 
     #endregion
