@@ -18,18 +18,9 @@ public class RemoveCommand : Command<RemoveOptions>
 
     public override async Task<int> Run(RemoveOptions options)
     {
-        if (string.IsNullOrEmpty(options.Resource)) return 1;
-        if (string.IsNullOrEmpty(options.ResourceId)) return 1;
+        if (string.IsNullOrEmpty(options.FrameId)) return 1;
 
-        return options.Resource switch
-        {
-            "project" => await ProjectRepository.DeleteAsync(options.ResourceId),
-            "tag" => await TagRepository.DeleteAsync(options.ResourceId),
-            "frame" => await FrameRepository.DeleteAsync(options.ResourceId),
-            _ => false
-        }
-            ? 0
-            : 1;
+        return await FrameRepository.DeleteAsync(options.FrameId) ? 0 : 1;
     }
 
     #endregion

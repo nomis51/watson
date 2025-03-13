@@ -2,12 +2,9 @@
 
 namespace Watson.Models.CommandLine;
 
-[Verb("remove", HelpText = "Remove a project, tag or frame")]
+[Verb("remove", HelpText = "Remove a frame")]
 public class RemoveOptions
 {
-    [Value(0, MetaName = "resource", Required = true, HelpText = "project, tag or frame")]
-    public string Resource { get; set; } = null!;
-
-    [Value(1, MetaName = "resourceId", Required = true, HelpText = "Resource ID")]
-    public string ResourceId { get; set; } = null!;
+    [Value(1, MetaName = "frameId", Required = true, HelpText = "Frame ID")]
+    public string FrameId { get; set; } = null!;
 }

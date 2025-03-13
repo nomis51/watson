@@ -47,53 +47,12 @@ public class RemoveCommandTests : CommandTest
     #region Tests
 
     [Fact]
-    public async Task Run_ShouldDeleteProject()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "project",
-            ResourceId = "id"
-        };
-        await DbContext.Connection.ExecuteAsync("INSERT INTO Projects (Id,Name) VALUES ('id','project')");
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(0);
-        var count = DbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Projects WHERE Id = 'id'");
-        count.ShouldBe(0);
-    }
-
-    [Fact]
-    public async Task Run_ShouldDeleteTag()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "tag",
-            ResourceId = "id"
-        };
-        await DbContext.Connection.ExecuteAsync("INSERT INTO Tags (Id,Name) VALUES ('id','tag')");
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(0);
-        var count = DbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Tags WHERE Id = 'id'");
-        count.ShouldBe(0);
-    }
-
-    [Fact]
     public async Task Run_ShouldDeleteFrame()
     {
         // Arrange
         var options = new RemoveOptions
         {
-            Resource = "frame",
-            ResourceId = "id"
+            FrameId = "id"
         };
         await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
@@ -104,74 +63,6 @@ public class RemoveCommandTests : CommandTest
         result.ShouldBe(0);
         var count = DbContext.Connection.QueryFirst<int>("SELECT COUNT(*) FROM Frames WHERE Id = 'id'");
         count.ShouldBe(0);
-    }
-
-    [Fact]
-    public async Task Run_ShouldFail_WhenResourceIsInvalid()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "invalid",
-            ResourceId = "id"
-        };
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Run_ShouldFail_WhenResourceIdIsInvalid()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "project",
-            ResourceId = "invalid"
-        };
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Run_ShouldFail_WhenResourceNotProvided()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "",
-            ResourceId = "id"
-        };
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Run_ShouldFail_WhenResourceIdNotProvided()
-    {
-        // Arrange
-        var options = new RemoveOptions
-        {
-            Resource = "project",
-            ResourceId = ""
-        };
-
-        // Act
-        var result = await _sut.Run(options);
-
-        // Assert
-        result.ShouldBe(1);
     }
 
     #endregion
