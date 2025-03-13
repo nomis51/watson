@@ -31,21 +31,6 @@ watson cancel
 
 Cancel the currently running frame.
 
-## create
-
-```
-watson create [resource] [name]
-```
-
-Create a new *resource* with the specified name. A resource can be a project or a tag.
-
-#### Examples
-
-```
-watson create project cooking
-watson create tag pizza
-```
-
 ## edit
 
 ```
@@ -67,21 +52,6 @@ Edit an existing frame<small>*</small>.
 
 ```
 watson edit watching-tv avengers --id 02af5e --from "2025-01-01 14:45"
-```
-
-## list
-
-```
-watson list [resource]
-```
-
-List all items of the specified *resources*. A resource can be a project or a tag.
-
-#### Examples
-
-```
-watson list projects
-watson list tags
 ```
 
 ## log
@@ -121,32 +91,15 @@ watson log -w --project cooking --ignore-tag pizza
 ## remove
 
 ```
-watson remove [resource] [id]
+watson remove [id]
 ```
 
-Remove the specified *resource* with the specified ID. A resource can be a frame, a project or a tag.
+Remove the frame with the specified ID.
 
 #### Examples
 
 ```
-watson remove frame 02af5e
-watson remove project 82af5e
-watson remove tag 02af5e
-```
-
-## rename
-
-```
-watson rename [resource] [id] [new name]
-```
-
-Rename the specified *resource* with the specified ID. A resource can a project or a tag.
-
-#### Examples
-
-```
-watson rename project 82af5e cooking
-watson rename tag 02af5e pizza
+watson remove 02af5e
 ```
 
 ## restart
@@ -323,4 +276,66 @@ watson todo list
 watson todo edit 02af5e "Cook that crazy pizza I saw on YouTube" cooking pizza --due "2026-01-01 12:45" --priority 2
 watson todo complete 02af5e
 waton todo reset 02af5e
+```
+
+## project
+
+```
+watson project [action] [arguments] [options]
+```
+
+Perform actions on projects, such as
+
+- Create a project
+- Remove a project
+- List projects
+- Rename a project
+
+#### Actions
+
+| Action | Description      |
+|--------|------------------|
+| add    | Create a project |
+| remove | Remove a project |
+| list   | List projects    |
+| rename | Rename a project |
+
+#### Examples
+
+```
+watson project add cooking
+watson project remove 82af5e
+watson project list
+watson project rename 82af5e eating
+```
+
+## tag
+
+```
+watson tag [action] [arguments] [options]
+```
+
+Perform actions on tags, such as
+
+- Create a tag
+- Remove a tag
+- List tags
+- Rename a tag
+
+#### Actions
+
+| Action | Description  |
+|--------|--------------|
+| add    | Create a tag |
+| remove | Remove a tag |
+| list   | List tags    |
+| rename | Rename a tag |
+
+#### Examples
+
+```
+watson tag add pizza
+watson tag remove 02af5e
+watson tag list
+watson tag rename 02af5e burger
 ```
