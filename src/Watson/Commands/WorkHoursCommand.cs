@@ -1,4 +1,5 @@
-﻿using Watson.Core.Models.Settings;
+﻿using Watson.Commands.Abstractions;
+using Watson.Core.Models.Settings;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
