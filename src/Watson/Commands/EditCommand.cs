@@ -40,6 +40,14 @@ public class EditCommand : Command<EditOptions>
             frame.Time = fromTime!.Value.Ticks;
         }
 
+        var tagList = options.Tags.ToList();
+        if (tagList.Count > 0)
+        {
+            if (await TagRepository.EnsureTagsExistsAsync(tagList)) return 1;
+
+            await FrameRepository.AssociateTagsAsync(frame.Id, tagList);
+        }
+
         return await FrameRepository.UpdateAsync(frame) ? 0 : 1;
     }
 
