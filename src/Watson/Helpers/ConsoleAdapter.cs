@@ -21,7 +21,7 @@ public class ConsoleAdapter : IConsoleAdapter
 
     public void WriteLine(string text, params object[] args)
     {
-        _ansiConsole.MarkupLine("{0}", args);
+        _ansiConsole.MarkupLine(text, args);
     }
 
     public void WriteLine()

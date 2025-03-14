@@ -48,7 +48,8 @@ public class AddCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                new ConsoleAdapter()
             )
         );
     }

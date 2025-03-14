@@ -41,7 +41,8 @@ public class LogCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                new ConsoleAdapter()
             )
         );
     }
