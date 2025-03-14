@@ -47,7 +47,7 @@ public class StopCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldStopCurrentFrame()
     {
         // Arrange
@@ -64,7 +64,7 @@ public class StopCommandTests : CommandWithConsoleTest
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldStopFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange

@@ -41,7 +41,7 @@ public class ProjectRepositoryTests : IDisposable
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task DoesNameExistsAsync_ShouldReturnTrue()
     {
         // Arrange
@@ -59,7 +59,7 @@ public class ProjectRepositoryTests : IDisposable
         result.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task DoesNameExistsAsync_ShouldReturnFalse_WhenNameDoesNotExist()
     {
         // Arrange
@@ -72,7 +72,7 @@ public class ProjectRepositoryTests : IDisposable
         result.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByNameAsync_ShouldReturnProject()
     {
         // Arrange
@@ -90,7 +90,7 @@ public class ProjectRepositoryTests : IDisposable
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByNameAsync_ShouldReturnNull_WhenNameDoesNotExist()
     {
         // Arrange
@@ -103,7 +103,7 @@ public class ProjectRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task EnsureNameExistsAsync_ShouldReturnExistingProject_WhenNameExists()
     {
         // Arrange
@@ -123,7 +123,7 @@ public class ProjectRepositoryTests : IDisposable
             .ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task EnsureNameExistsAsync_ShouldReturnNewProject_WhenNameDoesNotExist()
     {
         // Arrange
@@ -138,7 +138,7 @@ public class ProjectRepositoryTests : IDisposable
             .ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task RenameAsync_ShouldRename()
     {
         // Arrange
@@ -161,7 +161,7 @@ public class ProjectRepositoryTests : IDisposable
             .ShouldBe(newName);
     }
 
-    [Fact]
+    [Test]
     public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
     {
         // Arrange

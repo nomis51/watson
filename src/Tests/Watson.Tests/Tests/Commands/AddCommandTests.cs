@@ -58,7 +58,7 @@ public class AddCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtNow_WithNoTag()
     {
         // Arrange
@@ -81,7 +81,7 @@ public class AddCommandTests : CommandWithConsoleTest
         (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtNow_WithTags()
     {
         // Arrange
@@ -109,7 +109,7 @@ public class AddCommandTests : CommandWithConsoleTest
         (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
@@ -128,7 +128,7 @@ public class AddCommandTests : CommandWithConsoleTest
         (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenToTimeProvidedWithoutFromTime()
     {
         // Arrange
@@ -146,7 +146,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenToTimeIsBeforeFromTime()
     {
         // Arrange
@@ -166,7 +166,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenToTimeIsInTheFuture()
     {
         // Arrange
@@ -186,7 +186,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenFromTimeIsInTheFuture()
     {
         // Arrange
@@ -206,7 +206,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenProjectNotSpecified()
     {
         // Arrange
@@ -222,7 +222,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenUnableToParseFromTime()
     {
         // Arrange
@@ -239,7 +239,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenUnableToParseToTime()
     {
         // Arrange
@@ -256,7 +256,7 @@ public class AddCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsToday()
     {
         // Arrange
@@ -294,7 +294,7 @@ public class AddCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsNotToday()
     {
         // Arrange
@@ -331,7 +331,7 @@ public class AddCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenFrameIsRunning()
     {
         // Arrange
@@ -359,7 +359,7 @@ public class AddCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenFromTimeIsOutOfWorkHours()
     {
         // Arrange

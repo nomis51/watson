@@ -47,7 +47,7 @@ public class RestartCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRestartCurrentFrame()
     {
         // Arrange
@@ -65,7 +65,7 @@ public class RestartCommandTests : CommandWithConsoleTest
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRestartSpecifiedFrame()
     {
         // Arrange

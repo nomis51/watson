@@ -48,7 +48,7 @@ public class WorkHoursCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddCustomWorkHours_WhenStart()
     {
         // Arrange
@@ -70,7 +70,7 @@ public class WorkHoursCommandTests : CommandWithConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddCustomWorkHours_WhenEnd()
     {
         // Arrange
@@ -92,7 +92,7 @@ public class WorkHoursCommandTests : CommandWithConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldResetCustomWorkHours()
     {
         // Arrange

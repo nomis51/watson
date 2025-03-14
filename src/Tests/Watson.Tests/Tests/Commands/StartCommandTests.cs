@@ -58,7 +58,7 @@ public class StartCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtNow()
     {
         // Arrange
@@ -82,7 +82,7 @@ public class StartCommandTests : CommandWithConsoleTest
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class StartCommandTests : CommandWithConsoleTest
         (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenAtTimeSpecified()
     {
         // Arrange

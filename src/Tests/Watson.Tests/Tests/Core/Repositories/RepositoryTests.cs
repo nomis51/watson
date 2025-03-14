@@ -43,7 +43,7 @@ public class RepositoryTests : IDisposable
 
     #region Tests
 
-    [Fact]
+    [Test]
     public void Ctor_ShouldCallInitializeTable()
     {
         // Arrange
@@ -55,7 +55,7 @@ public class RepositoryTests : IDisposable
         result!.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByAsync_ShouldReturnItem()
     {
         // Arrange
@@ -76,7 +76,7 @@ public class RepositoryTests : IDisposable
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByAsync_ShouldReturnNull()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class RepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnAllItems()
     {
         // Arrange
@@ -107,7 +107,7 @@ public class RepositoryTests : IDisposable
         result.Count().ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task InsertAsync_ShouldAssignId()
     {
         // Arrange
@@ -121,7 +121,7 @@ public class RepositoryTests : IDisposable
         model.Id.ShouldNotBeNullOrEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task InsertAsync_ShouldUseAsIs_WhenIdAlreadySet()
     {
         // Arrange
@@ -135,7 +135,7 @@ public class RepositoryTests : IDisposable
         model.Id.ShouldBe("id");
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateAsync_ShouldReturnTrue()
     {
         // Arrange
@@ -159,7 +159,7 @@ public class RepositoryTests : IDisposable
             .ShouldBe("name2");
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateAsync_ShouldReturnFalse_WhenIdNotSet()
     {
         // Arrange
@@ -172,7 +172,7 @@ public class RepositoryTests : IDisposable
         result.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteAsync_ShouldDeleteItem()
     {
         // Arrange
@@ -196,7 +196,7 @@ public class RepositoryTests : IDisposable
             .ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteManyAsync_ShouldDeleteItems()
     {
         // Arrange
@@ -214,7 +214,7 @@ public class RepositoryTests : IDisposable
             .ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public void CreateIndexIfNotExists_ShouldCreateIndex()
     {
         // Arrange
@@ -233,7 +233,7 @@ public class RepositoryTests : IDisposable
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public void CreateIndexIfNotExists_ShouldNotCreateIndex_WhenIndexAlreadyExists()
     {
         // Arrange

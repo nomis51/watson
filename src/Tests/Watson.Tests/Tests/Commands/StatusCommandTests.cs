@@ -50,7 +50,7 @@ public class StatusCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayCurrentFrameStatus()
     {
         // Arrange
@@ -81,7 +81,7 @@ public class StatusCommandTests : CommandWithConsoleTest
 #pragma warning restore SYSLIB1045
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenNotFrameAreCurrentlyRunning()
     {
         // Arrange
@@ -95,7 +95,7 @@ public class StatusCommandTests : CommandWithConsoleTest
         GetConsoleOutput().ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayElapsedUntilNow_WhenFrameIsRunning()
     {
         // Arrange
@@ -120,7 +120,7 @@ public class StatusCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldTakeLunchTimeIntoAccount()
     {
         // Arrange
@@ -155,7 +155,7 @@ public class StatusCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldTakeLunchTimeIntoAccount_WhenFrameStillRunningAfterLunchTime()
     {
         // Arrange
@@ -191,7 +191,7 @@ public class StatusCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldOutputNoTagBrackets_WhenNoTagProvided()
     {
         // Arrange
@@ -213,7 +213,7 @@ public class StatusCommandTests : CommandWithConsoleTest
         output.ShouldStartWith(expectedOutput);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayLunchTimeDuration_WhenFrameStillRunningAfterLunchTime()
     {
         // Arrange

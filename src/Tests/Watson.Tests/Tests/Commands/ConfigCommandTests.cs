@@ -46,7 +46,7 @@ public class ConfigCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_Get_ShouldDisplaySettingValue_WhenExists()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class ConfigCommandTests : CommandWithConsoleTest
         output.ShouldStartWith("workTime.startTime: 01:00:00");
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Get_ShouldFail_WhenSettingDoesNotExist()
     {
         // Arrange
@@ -90,7 +90,7 @@ public class ConfigCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Set_ShouldSetSettingValue_WhenExists()
     {
         // Arrange
@@ -121,7 +121,7 @@ public class ConfigCommandTests : CommandWithConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Set_ShouldFail_WhenSettingDoesNotExist()
     {
         // Arrange

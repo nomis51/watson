@@ -51,7 +51,7 @@ public class LogCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDisplayToday_WhenDay()
     {
         // Arrange

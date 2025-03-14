@@ -47,7 +47,7 @@ public class EditCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldEditProject()
     {
         // Arrange
@@ -81,7 +81,7 @@ public class EditCommandTests : CommandWithConsoleTest
         count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenFrameDoesNotExist()
     {
         // Arrange
@@ -98,7 +98,7 @@ public class EditCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenNowFrameDoesNotExist()
     {
         // Arrange
@@ -114,7 +114,7 @@ public class EditCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldUpdateTime_WhenFromTimeIsSpecified()
     {
         // Arrange

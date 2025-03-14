@@ -46,7 +46,7 @@ public class RemoveCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDeleteFrame()
     {
         // Arrange

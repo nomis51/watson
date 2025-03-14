@@ -46,7 +46,7 @@ public class FrameRepositoryTests : IDisposable
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task GetByIdAsync_ShouldFrameWithProjectAndTags_WhenIdExists()
     {
         // Arrange
@@ -88,7 +88,7 @@ public class FrameRepositoryTests : IDisposable
         result.Tags.First().Name.ShouldBe("name");
     }
 
-    [Fact]
+    [Test]
     public async Task GetByIdAsync_ShouldReturnNull_WhenIdDoesNotExist()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class FrameRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnAllFramesWithProjectAndTags_WhenIdExists()
     {
         // Arrange
@@ -145,7 +145,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.First().Tags.First().Name.ShouldBe("name");
     }
 
-    [Fact]
+    [Test]
     public async Task GetNextFrameAsync_ShouldReturnNextFrame_WhenNextFrameExists()
     {
         // Arrange
@@ -172,7 +172,7 @@ public class FrameRepositoryTests : IDisposable
         result.Id.ShouldBe("id2");
     }
 
-    [Fact]
+    [Test]
     public async Task GetNextFrameAsync_ShouldReturnNull_WhenNextFrameDoesNotExist()
     {
         // Arrange
@@ -192,7 +192,7 @@ public class FrameRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrame_WhenPreviousFrameExists()
     {
         // Arrange
@@ -219,7 +219,7 @@ public class FrameRepositoryTests : IDisposable
         result.Id.ShouldBe("id2");
     }
 
-    [Fact]
+    [Test]
     public async Task GetPreviousFrameAsync_ShouldReturnNull_WhenPreviousFrameDoesNotExist()
     {
         // Arrange
@@ -239,7 +239,7 @@ public class FrameRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShoudReturnFramesWithinDateRange_WhenFramesExists()
     {
         // Arrange
@@ -261,7 +261,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShoudReturnEmptyList_WhenFramesDoesNotExist()
     {
         // Arrange
@@ -283,7 +283,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task AssociateTagsAsync_ShouldCreateManyRelationships_WhenTagsExists()
     {
         // Arrange
@@ -312,7 +312,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task AssociateTagsAsync_ShouldDoNothing_WhenFrameDoesNotExist()
     {
         // Arrange
@@ -328,7 +328,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task InsertAsync_ShouldInsertFrame()
     {
         // Arrange
@@ -347,7 +347,7 @@ public class FrameRepositoryTests : IDisposable
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateAsync_ShouldUpdateFrame()
     {
         // Arrange
@@ -376,7 +376,7 @@ public class FrameRepositoryTests : IDisposable
         result.Time.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnFramesWithinRange()
     {
         // Arrange
@@ -411,7 +411,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnFramesWithinRangeAndProject()
     {
         // Arrange
@@ -446,7 +446,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnFramesWithinRangeAndTags()
     {
         // Arrange
@@ -494,7 +494,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnFramesWithinRangeAndTagsAndProject()
     {
         // Arrange
@@ -549,7 +549,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task GetAsync_ShouldReturnFramesWithinRangeAndTagsAndProjectAndIgnoreProjectsAndIgnoreTags()
     {
         // Arrange
@@ -604,7 +604,7 @@ public class FrameRepositoryTests : IDisposable
         resultLst.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrameOfTimeDate()
     {
         // Arrange
@@ -623,7 +623,7 @@ public class FrameRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetNextFrameAsync_ShouldReturnNextFrameOfTimeDate()
     {
         // Arrange

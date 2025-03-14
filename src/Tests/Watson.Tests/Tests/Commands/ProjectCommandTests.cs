@@ -47,7 +47,7 @@ public class ProjectCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldListProjects()
     {
         // Arrange
@@ -69,7 +69,7 @@ public class ProjectCommandTests : CommandWithConsoleTest
         lines[1].ShouldBe("id2: project2");
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDeleteProject()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class ProjectCommandTests : CommandWithConsoleTest
         count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRenameProject()
     {
         // Arrange
@@ -111,7 +111,7 @@ public class ProjectCommandTests : CommandWithConsoleTest
         project.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldCreateProject_WhenDoesntExists()
     {
         // Arrange

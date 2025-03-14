@@ -47,7 +47,7 @@ public class CancelCommandTests : CommandWithConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldCancelLastFrame_WhenItExists()
     {
         // Arrange
@@ -63,7 +63,7 @@ public class CancelCommandTests : CommandWithConsoleTest
         frame.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenLastFrameDoesNotExist()
     {
         // Arrange
@@ -76,7 +76,7 @@ public class CancelCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenLastFrameIsAnEmptyFrame()
     {
         // Arrange

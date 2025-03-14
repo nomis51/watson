@@ -42,7 +42,7 @@ public class TagRepositoryTests : IDisposable
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task DoesNameExistsAsync_ShouldReturnTrue()
     {
         // Arrange
@@ -60,7 +60,7 @@ public class TagRepositoryTests : IDisposable
         result.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task DoesNameExistsAsync_ShouldReturnFalse_WhenNameDoesNotExist()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class TagRepositoryTests : IDisposable
         result.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByNameAsync_ShouldReturnProject()
     {
         // Arrange
@@ -91,7 +91,7 @@ public class TagRepositoryTests : IDisposable
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByNameAsync_ShouldReturnNull_WhenNameDoesNotExist()
     {
         // Arrange
@@ -104,7 +104,7 @@ public class TagRepositoryTests : IDisposable
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task RenameAsync_ShouldRename()
     {
         // Arrange
@@ -127,7 +127,7 @@ public class TagRepositoryTests : IDisposable
             .ShouldBe(newName);
     }
 
-    [Fact]
+    [Test]
     public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
     {
         // Arrange
@@ -140,7 +140,7 @@ public class TagRepositoryTests : IDisposable
         result.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task EnsureTagsExists_ShouldInsertTags_WhenTagsDoNotExist()
     {
         // Arrange
