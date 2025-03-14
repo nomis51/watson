@@ -48,7 +48,6 @@ public class LogCommand : Command<LogOptions>
         }
         else if (options.Week)
         {
-            // TODO: check for custom work time (week start day)
             var settings = await SettingsRepository.GetSettings();
 
             var date = DateTime.Now;
@@ -96,7 +95,6 @@ public class LogCommand : Command<LogOptions>
 
     private async Task DisplayFrames(IEnumerable<Frame> frames, bool reversed)
     {
-        // TODO: check for custom work time
         var settings = await SettingsRepository.GetSettings();
         var endTime = settings.GetTodaysWorkTime().EndTime;
         var lunchTimeDuration = settings.GetTodaysWorkTime().LunchEndTime - settings.GetTodaysWorkTime().LunchStartTime;

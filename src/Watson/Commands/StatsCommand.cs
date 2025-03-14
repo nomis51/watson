@@ -72,7 +72,6 @@ public class StatsCommand : Command<StatsOptions>
         }
         else if (options.Week)
         {
-            // TODO: check for custom work time (week start day)
             var settings = await SettingsRepository.GetSettings();
 
             var date = DateTime.Now;
