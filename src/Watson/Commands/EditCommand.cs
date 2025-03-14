@@ -43,7 +43,7 @@ public class EditCommand : Command<EditOptions>
         var tagList = options.Tags.ToList();
         if (tagList.Count > 0)
         {
-            if (await TagRepository.EnsureTagsExistsAsync(tagList)) return 1;
+            if (!await TagRepository.EnsureTagsExistsAsync(tagList)) return 1;
 
             await FrameRepository.AssociateTagsAsync(frame.Id, tagList);
         }
