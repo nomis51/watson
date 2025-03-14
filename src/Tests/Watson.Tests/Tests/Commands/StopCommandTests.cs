@@ -13,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StopCommandTests : CommandTest
+public class StopCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +38,7 @@ public class StopCommandTests : CommandTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }

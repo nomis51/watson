@@ -1,5 +1,4 @@
-﻿using Spectre.Console;
-using Watson.Commands.Abstractions;
+﻿using Watson.Commands.Abstractions;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 

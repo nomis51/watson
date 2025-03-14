@@ -13,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class TagCommandTests : ConsoleTest
+public class TagCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +38,7 @@ public class TagCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -63,8 +63,8 @@ public class TagCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var lines = ConsoleHelper.GetMockOutputAsLines();
-        lines.Length.ShouldBe(2);
+        var lines = GetConsoleOutputLines();
+        lines.Count.ShouldBe(2);
         lines[0].ShouldBe("id1: tag1");
         lines[1].ShouldBe("id2: tag2");
     }

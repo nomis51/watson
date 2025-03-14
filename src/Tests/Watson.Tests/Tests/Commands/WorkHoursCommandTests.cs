@@ -12,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class WorkHoursCommandTests : ConsoleTest
+public class WorkHoursCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -39,7 +39,7 @@ public class WorkHoursCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }

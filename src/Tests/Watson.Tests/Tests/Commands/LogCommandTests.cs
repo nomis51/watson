@@ -14,7 +14,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class LogCommandTests : ConsoleTest
+public class LogCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -42,7 +42,7 @@ public class LogCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -96,13 +96,13 @@ public class LogCommandTests : ConsoleTest
         var expectedLines = new[]
         {
             $"{DateTime.Today:dddd dd MMMM yyyy} (6h 15m)",
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 "id 08:45 to 09:15 [blue]00h 30m[/] [green]project[/] ([purple]tag[/], [purple]tag2[/])"),
         };
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -122,7 +122,7 @@ public class LogCommandTests : ConsoleTest
         var lastLine = Regex.Replace(lines[^1].Trim(), @"\s+", " ");
         lastLine.StartsWith("id2 09:15 to ").ShouldBeTrue();
         lastLine.EndsWith(
-                ConsoleHelper.GetSpectreMarkupOutput(" [green]project2[/] ([purple]tag[/])"))
+                GenerateSpectreMarkupOutput(" [green]project2[/] ([purple]tag[/])"))
             .ShouldBeTrue();
     }
 

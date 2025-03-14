@@ -12,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class ConfigCommandTests : ConsoleTest
+public class ConfigCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -37,7 +37,7 @@ public class ConfigCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -66,7 +66,7 @@ public class ConfigCommandTests : ConsoleTest
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);

@@ -14,7 +14,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class AddCommandTests : ConsoleTest
+public class AddCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -49,7 +49,7 @@ public class AddCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -283,13 +283,13 @@ public class AddCommandTests : ConsoleTest
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
-        var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
-                $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}[/] to [blue]{hour.ToString().PadLeft(2, '0')}:{(minute + 1).ToString().PadLeft(2, '0')}[/] (00h 01m)");
+        var expectedOutput = GenerateSpectreMarkupOutput(
+            $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}[/] to [blue]{hour.ToString().PadLeft(2, '0')}:{(minute + 1).ToString().PadLeft(2, '0')}[/] (00h 01m)"
+        );
         result.ShouldBe(0);
         output.ShouldStartWith(expectedOutput);
     }
@@ -319,12 +319,12 @@ public class AddCommandTests : ConsoleTest
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]2025-01-02 15:45[/] to [blue]2025-01-02 15:46[/] (00h 01m)");
 
         result.ShouldBe(0);
@@ -348,12 +348,12 @@ public class AddCommandTests : ConsoleTest
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         var frameId = await DbContext.Connection.QueryFirstAsync<string>("SELECT Id FROM Frames");
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]{hour.ToString().PadLeft(2, '0')}:{minute.ToString().PadLeft(2, '0')}[/]");
         result.ShouldBe(0);
         output.ShouldStartWith(expectedOutput);

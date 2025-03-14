@@ -15,7 +15,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class TodoCommandTests : ConsoleTest
+public class TodoCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -40,7 +40,7 @@ public class TodoCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -216,7 +216,7 @@ public class TodoCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         var expectedTable = CreateTable([
             [
@@ -229,7 +229,7 @@ public class TodoCommandTests : ConsoleTest
                 new Markup(time.ToString("yyyy-MM-dd HH:mm")).Centered()
             ]
         ]);
-        var expectedOutput = ConsoleHelper.GetSpectreRenderableOutput(expectedTable);
+        var expectedOutput = GenerateSpectreRenderableOutput(expectedTable);
         output.ShouldBe(expectedOutput);
     }
 

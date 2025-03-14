@@ -20,6 +20,8 @@ public abstract class CommandTest : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
+
         DbContext.Connection.Close();
         DbContext.Connection.Dispose();
 

@@ -13,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class ProjectCommandTests : ConsoleTest
+public class ProjectCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +38,7 @@ public class ProjectCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -63,8 +63,8 @@ public class ProjectCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var lines = ConsoleHelper.GetMockOutputAsLines();
-        lines.Length.ShouldBe(2);
+        var lines = GetConsoleOutputLines();
+        lines.Count.ShouldBe(2);
         lines[0].ShouldBe("id1: project1");
         lines[1].ShouldBe("id2: project2");
     }

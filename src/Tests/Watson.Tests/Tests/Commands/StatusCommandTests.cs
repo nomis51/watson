@@ -14,7 +14,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StatusCommandTests : ConsoleTest
+public class StatusCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -41,7 +41,7 @@ public class StatusCommandTests : ConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                new ConsoleAdapter()
+                ConsoleAdapter
             )
         );
     }
@@ -65,12 +65,12 @@ public class StatusCommandTests : ConsoleTest
         var options = new StatusOptions();
 
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 "id: [green]project[/] ([purple]tag[/]) started at [blue]15:45[/] (1m 15s)");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -92,7 +92,7 @@ public class StatusCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(1);
-        ConsoleHelper.GetMockOutput().ShouldBeEmpty();
+        GetConsoleOutput().ShouldBeEmpty();
     }
 
     [Fact]
@@ -108,12 +108,12 @@ public class StatusCommandTests : ConsoleTest
         var options = new StatusOptions();
 
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] (00h 00m)");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -143,12 +143,12 @@ public class StatusCommandTests : ConsoleTest
 
         var expectedMinutes = (Convert.ToInt32(60 - time.TimeOfDay.Minutes) - 1).ToString().PadLeft(2, '0');
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] (00h {expectedMinutes}m)");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -179,12 +179,12 @@ public class StatusCommandTests : ConsoleTest
         var expectedDuration =
             new TimeHelper().FormatDuration(new TimeSpan(0, DateTime.Now.Minute + (60 - DateTime.Now.Minute), 0));
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] ({expectedDuration})");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -201,12 +201,12 @@ public class StatusCommandTests : ConsoleTest
         var options = new StatusOptions();
 
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"id: [green]project[/] started at [blue]{DateTime.Now:HH:mm}[/] (00h 00m)");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
@@ -237,12 +237,12 @@ public class StatusCommandTests : ConsoleTest
         var expectedDuration =
             new TimeHelper().FormatDuration(new TimeSpan(0, DateTime.Now.Minute + (60 - DateTime.Now.Minute), 0));
         var expectedOutput =
-            ConsoleHelper.GetSpectreMarkupOutput(
+            GenerateSpectreMarkupOutput(
                 $"id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] ({expectedDuration}) [yellow](+01h 00m lunch)[/]");
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
