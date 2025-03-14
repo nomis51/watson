@@ -1,5 +1,4 @@
-﻿using Spectre.Console;
-using Watson.Commands.Abstractions;
+﻿using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -27,7 +26,7 @@ public class AddCommand : Command<AddOptions>
         if (fromTime.HasValue && (fromTime.Value.TimeOfDay < settings.WorkTime.StartTime ||
                                   fromTime.Value.TimeOfDay > settings.WorkTime.EndTime))
         {
-            AnsiConsole.MarkupLine("[yellow]Time is out of work hours[/]");
+            Console.MarkupLine("[yellow]Time is out of work hours[/]");
             return 1;
         }
 
@@ -99,7 +98,7 @@ public class AddCommand : Command<AddOptions>
     {
         var fromTime = TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay);
         var toTime = TimeHelper.FormatTime(nextFrame.TimeAsDateTime.TimeOfDay);
-        AnsiConsole.MarkupLine(
+        Console.MarkupLine(
             "{0}: [green]{1}[/] ([purple]{2}[/]) added from [blue]{3}[/] to [blue]{4}[/] ({5})",
             frame.Id,
             frame.Project?.Name ?? "-",

@@ -139,7 +139,7 @@ public class StatsCommand : Command<StatsOptions>
             }
         }
 
-        AnsiConsole.Write(
+        Console.Write(
             new BarChart()
                 .Label("[bold underline]Projects statistics[/]")
                 .Width(60)

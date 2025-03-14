@@ -13,6 +13,7 @@ public class DependencyResolver : IDependencyResolver
     public IFrameHelper FrameHelper { get; }
     public ISettingsRepository SettingsRepository { get; }
     public ITodoRepository TodoRepository { get; }
+    public IConsoleAdapter ConsoleAdapter { get; }
 
     public DependencyResolver(
         IProjectRepository projectRepository,
@@ -21,7 +22,8 @@ public class DependencyResolver : IDependencyResolver
         ITimeHelper timeHelper,
         IFrameHelper frameHelper,
         ISettingsRepository settingsRepository,
-        ITodoRepository todoRepository
+        ITodoRepository todoRepository,
+        IConsoleAdapter consoleAdapter
     )
     {
         ProjectRepository = projectRepository;
@@ -31,5 +33,6 @@ public class DependencyResolver : IDependencyResolver
         FrameHelper = frameHelper;
         SettingsRepository = settingsRepository;
         TodoRepository = todoRepository;
+        ConsoleAdapter = consoleAdapter;
     }
 }

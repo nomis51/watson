@@ -12,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class WorkHoursCommandTests : ConsoleTest
+public class WorkHoursCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +38,8 @@ public class WorkHoursCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -47,7 +48,7 @@ public class WorkHoursCommandTests : ConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddCustomWorkHours_WhenStart()
     {
         // Arrange
@@ -69,7 +70,7 @@ public class WorkHoursCommandTests : ConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddCustomWorkHours_WhenEnd()
     {
         // Arrange
@@ -91,7 +92,7 @@ public class WorkHoursCommandTests : ConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldResetCustomWorkHours()
     {
         // Arrange

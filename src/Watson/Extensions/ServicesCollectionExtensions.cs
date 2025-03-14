@@ -25,6 +25,7 @@ public static class ServicesCollectionExtensions
         RegisterServices(services);
 
         services.AddScoped<IFileSystem, FileSystem>();
+        services.AddSingleton<IConsoleAdapter, ConsoleAdapter>();
         services.AddSingleton<ICli, Cli>();
         return services;
     }

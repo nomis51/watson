@@ -36,7 +36,7 @@ public class FrameHelperTests
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task CreateFrameAtTheBeginningOfTheDay_ShouldReturnTrue()
     {
         // Arrange
@@ -67,7 +67,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameAtTheBeginningOfTheDay_ShouldReturnFalse_WhenInsertFails()
     {
         // Arrange
@@ -92,7 +92,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameAtTheBeginningOfTheDay_ShouldReturnFalse_WhenUpdateFails()
     {
         // Arrange
@@ -117,7 +117,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameContainedInAFrame_ShouldReturnTrue()
     {
         // Arrange
@@ -148,7 +148,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameContainedInAFrame_ShouldReturnFalse_WhenInsertFails()
     {
         // Arrange
@@ -173,7 +173,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameContainedInAFrame_ShouldReturnFalse_WhenPreviousInsertFails()
     {
         // Arrange
@@ -199,7 +199,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverTwoFrames_ShouldReturnTrue()
     {
         // Arrange
@@ -230,7 +230,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverTwoFrames_ShouldReturnFalse_WhenInsertFails()
     {
         // Arrange
@@ -256,7 +256,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverTwoFrames_ShouldReturnFalse_WhenUpdateFails()
     {
         // Arrange
@@ -282,7 +282,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverMultipleFrames_ShouldReturnTrue()
     {
         // Arrange
@@ -346,7 +346,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverMultipleFrames_ShouldReturnFalse_WhenDeleteFails()
     {
         // Arrange
@@ -392,7 +392,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverMultipleFrames_ShouldReturnFalse_WhenInsertFails()
     {
         // Arrange
@@ -438,7 +438,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverMultipleFrames_ShouldReturnFalse_WhenUpdateFails()
     {
         // Arrange
@@ -484,7 +484,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrameOverMultipleFrames_ShouldReturnTrue_WithNoFrameDeleted_WhenNothingOverlap()
     {
         // Arrange
@@ -535,7 +535,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimeIsNull()
     {
         // Arrange
@@ -552,7 +552,7 @@ public class FrameHelperTests
             .GetNextFrameAsync(Arg.Any<DateTime>());
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenNoNextFrame()
     {
         // Arrange
@@ -572,7 +572,7 @@ public class FrameHelperTests
             .GetPreviousFrameAsync(Arg.Any<DateTime>());
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenNoPreviousFrame()
     {
         // Arrange
@@ -611,7 +611,7 @@ public class FrameHelperTests
             ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnFalse_WhenFromTimeHasPrevious_ButToTimeHasnt()
     {
         // technically impossible case, but anyway
@@ -653,7 +653,7 @@ public class FrameHelperTests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenFromTimePreviousFrameIsToTimePreviousFrame()
     {
         // Arrange
@@ -690,7 +690,7 @@ public class FrameHelperTests
         ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimePreviousFrameIsFromTimeNextFrame()
     {
         // Arrange
@@ -729,7 +729,7 @@ public class FrameHelperTests
         ));
     }
 
-    [Fact]
+    [Test]
     public async Task CreateFrame_ShouldReturnTrue_WhenToTimeFramesAndFromTimeFramesAreSparse()
     {
         // Arrange

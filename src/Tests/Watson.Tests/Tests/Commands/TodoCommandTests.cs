@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Dapper;
+﻿using Dapper;
 using NSubstitute;
 using Shouldly;
 using Spectre.Console;
@@ -16,7 +15,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class TodoCommandTests : ConsoleTest
+public class TodoCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -40,7 +39,8 @@ public class TodoCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -49,7 +49,7 @@ public class TodoCommandTests : ConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddTodo()
     {
         // Arrange
@@ -80,7 +80,7 @@ public class TodoCommandTests : ConsoleTest
         todo.DueTimeAsDateTime.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddTodo_WithTags()
     {
         // Arrange
@@ -107,7 +107,7 @@ public class TodoCommandTests : ConsoleTest
         nbTodoTags.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddTodo_WithPriority()
     {
         // Arrange
@@ -130,7 +130,7 @@ public class TodoCommandTests : ConsoleTest
         todo.Priority.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddTodo_WithDueTime()
     {
         // Arrange
@@ -155,7 +155,7 @@ public class TodoCommandTests : ConsoleTest
         todo.DueTimeAsDateTime!.Value.ToString("yyyy-MM-dd").ShouldBe(options.DueTime);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRemoveTodo_WhenExists()
     {
         // Arrange
@@ -178,7 +178,7 @@ public class TodoCommandTests : ConsoleTest
         todo.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFailToRemove_WhenTodoDoesNotExist()
     {
         // Arrange
@@ -195,7 +195,7 @@ public class TodoCommandTests : ConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldListTodos()
     {
         // Arrange
@@ -216,7 +216,7 @@ public class TodoCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         var expectedTable = CreateTable([
             [
@@ -229,13 +229,13 @@ public class TodoCommandTests : ConsoleTest
                 new Markup(time.ToString("yyyy-MM-dd HH:mm")).Centered()
             ]
         ]);
-        var expectedOutput = ConsoleHelper.GetSpectreRenderableOutput(expectedTable);
+        var expectedOutput = GenerateSpectreRenderableOutput(expectedTable);
         output.ShouldBe(expectedOutput);
     }
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [Arguments(true)]
+    [Arguments(false)]
+    [Test]
     public async Task Run_ShouldToggleCompletion_WhenTodoExists(bool isCompleted)
     {
         // Arrange
@@ -260,13 +260,13 @@ public class TodoCommandTests : ConsoleTest
         todo.IsCompleted.ShouldBe(isCompleted);
     }
 
-    [InlineData("complete", true, false)]
-    [InlineData("done", true, false)]
-    [InlineData("uncomplete", false, true)]
-    [InlineData("undone", false, true)]
-    [InlineData("undo", false, true)]
-    [InlineData("reset", false, true)]
-    [Theory]
+    [Arguments("complete", true, false)]
+    [Arguments("done", true, false)]
+    [Arguments("uncomplete", false, true)]
+    [Arguments("undone", false, true)]
+    [Arguments("undo", false, true)]
+    [Arguments("reset", false, true)]
+    [Test]
     public async Task Run_ShouldToggleCompletion_WithDifferentAliases(string argument, bool expected, bool initial)
     {
         // Arrange
@@ -316,7 +316,7 @@ public class TodoCommandTests : ConsoleTest
         return table;
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldEditTodo_WhenTodoExists()
     {
         // Arrange

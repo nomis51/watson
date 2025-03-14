@@ -7,7 +7,7 @@ public class FrameTests
 {
     #region Tests
 
-    [Fact]
+    [Test]
     public void Ctor_ShouldHaveDateTimeFieldOfTimestamp()
     {
         // Arrange
@@ -23,7 +23,7 @@ public class FrameTests
         sut.TimeAsDateTime.ShouldBe(time);
     }
 
-    [Fact]
+    [Test]
     public void Ctor_ShouldHaveNowAsDefaultTimestamp()
     {
         // Arrange
@@ -38,7 +38,7 @@ public class FrameTests
         sut.Time.ShouldBeLessThanOrEqualTo(DateTime.Now.AddSeconds(gracePeriod).Ticks);
     }
 
-    [Fact]
+    [Test]
     public void CreateEmptyFrame_ShouldCreateEmptyFrame_WithProvidedTimestamp()
     {
         // Arrange

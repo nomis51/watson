@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Spectre.Console;
+﻿using Spectre.Console;
 using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
@@ -125,7 +124,7 @@ public class TodoCommand : Command<TodoOptions>
             );
         }
 
-        AnsiConsole.Write(table);
+        Console.Write(table);
 
         return 0;
     }

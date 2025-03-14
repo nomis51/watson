@@ -1,9 +1,5 @@
-﻿using System.Reflection;
-using System.Text.Json.Serialization;
-using Spectre.Console;
-using Watson.Commands.Abstractions;
+﻿using Watson.Commands.Abstractions;
 using Watson.Core.Extensions;
-using Watson.Core.Models.Settings;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -55,7 +51,7 @@ public class ConfigCommand : Command<ConfigOptions>
         var settings = await SettingsRepository.GetSettings();
         if (!settings.GetJsonPathValue(key, out var value)) return 1;
 
-        AnsiConsole.MarkupLine("{0}: {1}", key, value ?? "[grey](null)[/]");
+        Console.MarkupLine("{0}: {1}", key, value ?? "[grey](null)[/]");
         return 0;
     }
 

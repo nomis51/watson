@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Models.Settings;
@@ -15,7 +14,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class StartCommandTests : CommandTest
+public class StartCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -49,7 +48,8 @@ public class StartCommandTests : CommandTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -58,7 +58,7 @@ public class StartCommandTests : CommandTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtNow()
     {
         // Arrange
@@ -82,7 +82,7 @@ public class StartCommandTests : CommandTest
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class StartCommandTests : CommandTest
         (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenAtTimeSpecified()
     {
         // Arrange

@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
@@ -13,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class RemoveCommandTests : CommandTest
+public class RemoveCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -37,7 +36,8 @@ public class RemoveCommandTests : CommandTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -46,7 +46,7 @@ public class RemoveCommandTests : CommandTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDeleteFrame()
     {
         // Arrange

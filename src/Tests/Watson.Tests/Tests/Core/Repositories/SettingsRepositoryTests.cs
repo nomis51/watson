@@ -30,7 +30,7 @@ public class SettingsRepositoryTests
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task GetSettings_ShouldReturnDefaultSettings_WhenFileDoesNotExist()
     {
         // Arrange
@@ -42,7 +42,7 @@ public class SettingsRepositoryTests
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetSettings_ShouldReturnSettings_WhenFileExists()
     {
         // Arrange
@@ -65,7 +65,7 @@ public class SettingsRepositoryTests
         result.WorkTime.StartTime.ShouldBe(new TimeSpan(9, 0, 0));
     }
 
-    [Fact]
+    [Test]
     public async Task GetSettings_ShouldLogAndReturnDefault_WhenThrows()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class SettingsRepositoryTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task SaveSettings_ShouldSave()
     {
         // Arrange
@@ -109,7 +109,7 @@ public class SettingsRepositoryTests
             .File.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>());
     }
 
-    [Fact]
+    [Test]
     public async Task SaveSettings_ShouldLogAndThrow_WhenThrows()
     {
         // Arrange
@@ -137,7 +137,7 @@ public class SettingsRepositoryTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task GetSettings_ShouldCreateDefaultSettingsFile_WhenFileDoesNotExist()
     {
         // Arrange

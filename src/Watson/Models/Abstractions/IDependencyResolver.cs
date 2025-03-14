@@ -12,4 +12,5 @@ public interface IDependencyResolver
     IFrameHelper FrameHelper { get; }
     ISettingsRepository SettingsRepository { get; }
     ITodoRepository TodoRepository { get; }
+    IConsoleAdapter ConsoleAdapter { get; }
 }

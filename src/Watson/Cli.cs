@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
-using Watson.Extensions;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 

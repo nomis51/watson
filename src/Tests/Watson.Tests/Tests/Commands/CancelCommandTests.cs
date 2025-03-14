@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
@@ -14,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class CancelCommandTests : CommandTest
+public class CancelCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +37,8 @@ public class CancelCommandTests : CommandTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -47,7 +47,7 @@ public class CancelCommandTests : CommandTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldCancelLastFrame_WhenItExists()
     {
         // Arrange
@@ -63,7 +63,7 @@ public class CancelCommandTests : CommandTest
         frame.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenLastFrameDoesNotExist()
     {
         // Arrange
@@ -76,7 +76,7 @@ public class CancelCommandTests : CommandTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldFail_WhenLastFrameIsAnEmptyFrame()
     {
         // Arrange

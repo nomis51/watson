@@ -12,7 +12,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class ConfigCommandTests : ConsoleTest
+public class ConfigCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -36,7 +36,8 @@ public class ConfigCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -45,7 +46,7 @@ public class ConfigCommandTests : ConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_Get_ShouldDisplaySettingValue_WhenExists()
     {
         // Arrange
@@ -65,14 +66,14 @@ public class ConfigCommandTests : ConsoleTest
 
         // Act
         var result = await _sut.Run(options);
-        var output = ConsoleHelper.GetMockOutput();
+        var output = GetConsoleOutput();
 
         // Assert
         result.ShouldBe(0);
         output.ShouldStartWith("workTime.startTime: 01:00:00");
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Get_ShouldFail_WhenSettingDoesNotExist()
     {
         // Arrange
@@ -89,7 +90,7 @@ public class ConfigCommandTests : ConsoleTest
         result.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Set_ShouldSetSettingValue_WhenExists()
     {
         // Arrange
@@ -120,7 +121,7 @@ public class ConfigCommandTests : ConsoleTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task Run_Set_ShouldFail_WhenSettingDoesNotExist()
     {
         // Arrange

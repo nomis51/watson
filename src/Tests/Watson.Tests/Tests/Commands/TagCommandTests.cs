@@ -10,11 +10,10 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
-using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class TagCommandTests : ConsoleTest
+public class TagCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +37,8 @@ public class TagCommandTests : ConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -47,7 +47,7 @@ public class TagCommandTests : ConsoleTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldListProjects()
     {
         // Arrange
@@ -63,13 +63,13 @@ public class TagCommandTests : ConsoleTest
 
         // Assert
         result.ShouldBe(0);
-        var lines = ConsoleHelper.GetMockOutputAsLines();
-        lines.Length.ShouldBe(2);
+        var lines = GetConsoleOutputLines();
+        lines.Count.ShouldBe(2);
         lines[0].ShouldBe("id1: tag1");
         lines[1].ShouldBe("id2: tag2");
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldDeleteProject()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class TagCommandTests : ConsoleTest
         count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRenameProject()
     {
         // Arrange
@@ -111,7 +111,7 @@ public class TagCommandTests : ConsoleTest
         tag.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldCreateProject_WhenDoesntExists()
     {
         // Arrange

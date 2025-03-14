@@ -13,7 +13,7 @@ public class IdHelperTests
 
     #region Tests
 
-    [Fact]
+    [Test]
     public void GenerateId_ShouldReturnRandomIdOfLength()
     {
         // Arrange

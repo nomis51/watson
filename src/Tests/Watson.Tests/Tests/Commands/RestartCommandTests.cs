@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
@@ -14,7 +13,7 @@ using Watson.Tests.Abstractions;
 
 namespace Watson.Tests.Tests.Commands;
 
-public class RestartCommandTests : CommandTest
+public class RestartCommandTests : CommandWithConsoleTest
 {
     #region Members
 
@@ -38,7 +37,8 @@ public class RestartCommandTests : CommandTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper)
+                new TodoRepository(DbContext, idHelper),
+                ConsoleAdapter
             )
         );
     }
@@ -47,7 +47,7 @@ public class RestartCommandTests : CommandTest
 
     #region Tests
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRestartCurrentFrame()
     {
         // Arrange
@@ -65,7 +65,7 @@ public class RestartCommandTests : CommandTest
         (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
     }
 
-    [Fact]
+    [Test]
     public async Task Run_ShouldRestartSpecifiedFrame()
     {
         // Arrange
