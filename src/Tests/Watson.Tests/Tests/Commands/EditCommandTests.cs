@@ -51,10 +51,13 @@ public class EditCommandTests : CommandTest
     public async Task Run_ShouldEditProject()
     {
         // Arrange
+        var time = new DateTime(2022, 1, 1, 15, 45, 0);
         var options = new EditOptions
         {
             FrameId = "id",
-            Project = "newName"
+            Project = "newName",
+            Tags = ["newTag"],
+            FromTime = time.ToString("yyyy-MM-dd HH:mm")
         };
         await DbContext.Connection.ExecuteAsync("INSERT INTO Frames (Id,ProjectId,Time) VALUES ('id','id',1)");
 
@@ -69,6 +72,13 @@ public class EditCommandTests : CommandTest
         project.ShouldNotBeNull();
         var frame = await DbContext.Connection.QueryFirstAsync<Frame>("SELECT * FROM Frames");
         frame.ProjectId.ShouldBe(project.Id);
+        frame.TimeAsDateTime.ShouldBe(time);
+
+        var tags = await DbContext.Connection.QueryAsync<Tag>("SELECT * FROM Tags");
+        var tagsLst = tags.ToList();
+        var count = await DbContext.Connection.QueryFirstAsync<int>(
+            $"SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = '{frame.Id}' AND TagId IN ('{string.Join("', '", tagsLst.Select(e => e.Id))}')");
+        count.ShouldBe(1);
     }
 
     [Fact]

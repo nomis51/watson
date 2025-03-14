@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -71,7 +72,6 @@ public class StatsCommand : Command<StatsOptions>
         }
         else if (options.Week)
         {
-            // TODO: check for custom work time (week start day)
             var settings = await SettingsRepository.GetSettings();
 
             var date = DateTime.Now;

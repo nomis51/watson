@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Spectre.Console;
+using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -96,6 +97,7 @@ public class TodoCommand : Command<TodoOptions>
         var todos = await TodoRepository.GetAsync();
 
         var table = new Table();
+        table.Alignment(Justify.Left);
         table.Border(TableBorder.Rounded);
         table.AddColumn("ID");
         table.AddColumn("Description");

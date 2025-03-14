@@ -1,9 +1,8 @@
-﻿using Watson.Commands.Abstractions;
-using Watson.Core.Repositories.Abstractions;
+﻿using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models.Abstractions;
 
-namespace Watson.Commands;
+namespace Watson.Commands.Abstractions;
 
 public abstract class Command<TOptions> : ICommand<TOptions>
 {
