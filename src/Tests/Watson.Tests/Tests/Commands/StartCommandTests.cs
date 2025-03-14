@@ -2,7 +2,6 @@
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
 using Watson.Core.Models.Settings;

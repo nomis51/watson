@@ -116,7 +116,7 @@ public class LogCommand : Command<LogOptions>
             var groupFrames = group.OrderBy(e => e.Time)
                 .ToList();
             var totalTime = TimeHelper.GetDuration(groupFrames, endTime) - lunchTimeDuration;
-            AnsiConsole.WriteLine(
+            Console.WriteLine(
                 "{0} ({1})",
                 TimeHelper.FormatDate(group.Key),
                 $"{totalTime.Hours}h {totalTime.Minutes}m"
@@ -174,8 +174,8 @@ public class LogCommand : Command<LogOptions>
             var panel = new Panel(grid);
             panel.NoBorder();
             panel.PadLeft(5);
-            AnsiConsole.Write(panel);
-            AnsiConsole.WriteLine();
+            Console.Write(panel);
+            Console.WriteLine();
         }
     }
 

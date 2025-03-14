@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Dapper;
+﻿using Dapper;
 using NSubstitute;
 using Shouldly;
 using Spectre.Console;

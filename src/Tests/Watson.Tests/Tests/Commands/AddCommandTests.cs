@@ -11,7 +11,6 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
-using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 

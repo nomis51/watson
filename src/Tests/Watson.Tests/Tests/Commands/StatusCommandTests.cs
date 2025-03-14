@@ -3,7 +3,6 @@ using Dapper;
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;
-using Watson.Core;
 using Watson.Core.Helpers;
 using Watson.Core.Models.Settings;
 using Watson.Core.Repositories;
@@ -12,7 +11,6 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
-using Watson.Tests.Helpers;
 
 namespace Watson.Tests.Tests.Commands;
 
