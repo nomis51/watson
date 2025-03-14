@@ -62,30 +62,32 @@ public abstract class CommandWithConsoleTest : CommandTest, IDisposable
 
     protected static string GenerateSpectreMarkupOutput(string input, params object[]? args)
     {
-        var writer = new StringWriter();
-        var originalOut = AnsiConsole.Profile.Out;
-        AnsiConsole.Profile.Out = new AnsiConsoleOutput(writer);
+        using var writer = new StringWriter();
+        var ansiConsole = AnsiConsole.Create(new AnsiConsoleSettings());
+        var originalOut = ansiConsole.Profile.Out;
+        ansiConsole.Profile.Out = new AnsiConsoleOutput(writer);
 
         if (args is not null)
         {
-            AnsiConsole.MarkupLine(input, args);
+            ansiConsole.MarkupLine(input, args);
         }
         else
         {
-            AnsiConsole.MarkupLine(input);
+            ansiConsole.MarkupLine(input);
         }
 
-        AnsiConsole.Profile.Out = originalOut;
+        ansiConsole.Profile.Out = originalOut;
         return writer.ToString().Trim();
     }
 
     protected static string GenerateSpectreRenderableOutput(IRenderable renderable)
     {
-        var writer = new StringWriter();
-        var originalOut = AnsiConsole.Profile.Out;
-        AnsiConsole.Profile.Out = new AnsiConsoleOutput(writer);
-        AnsiConsole.Write(renderable);
-        AnsiConsole.Profile.Out = originalOut;
+        using var writer = new StringWriter();
+        var ansiConsole = AnsiConsole.Create(new AnsiConsoleSettings());
+        var originalOut = ansiConsole.Profile.Out;
+        ansiConsole.Profile.Out = new AnsiConsoleOutput(writer);
+        ansiConsole.Write(renderable);
+        ansiConsole.Profile.Out = originalOut;
         return writer.ToString().Trim();
     }
 
