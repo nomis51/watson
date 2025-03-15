@@ -155,6 +155,21 @@ public class Cli : ICli
             await new ProjectCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == RemoveCommand.CommandName)
+        {
+            await new RemoveCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == RestartCommand.CommandName)
+        {
+            await new RestartCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StatsCommand.CommandName)
+        {
+            await new StatsCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
         else if (commandName == StartCommand.CommandName)
         {
             await new StartCommand(_dependencyResolver)

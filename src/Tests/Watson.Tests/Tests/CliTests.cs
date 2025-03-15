@@ -239,6 +239,25 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+    #region Stats
+
+    [Arguments("proj", "projects")]
+    [Test]
+    public async Task Run_Stats_ShouldComplete_WithStatsType(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs("stats", input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    #endregion
+
     #endregion
 
     #region Private methods

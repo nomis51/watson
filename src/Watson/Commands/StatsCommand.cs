@@ -10,6 +10,8 @@ public class StatsCommand : Command<StatsOptions>
 {
     #region Constants
 
+    private const string ProjectsType = "projects";
+
     private readonly Color[] _colors =
     [
         Color.Red,
@@ -115,7 +117,16 @@ public class StatsCommand : Command<StatsOptions>
 
     public override Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        if (inputs.Length == 1)
+        {
+            if (ProjectsType.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(ProjectsType);
+                return Task.CompletedTask;
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     #endregion
@@ -126,7 +137,7 @@ public class StatsCommand : Command<StatsOptions>
     {
         switch (type)
         {
-            case "projects":
+            case ProjectsType:
                 DisplayProjectsStats(frames);
                 break;
         }
