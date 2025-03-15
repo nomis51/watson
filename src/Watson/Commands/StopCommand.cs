@@ -30,5 +30,10 @@ public class StopCommand : Command<StopOptions>
         return await FrameRepository.InsertAsync(emptyFrame) is not null ? 0 : 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

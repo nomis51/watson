@@ -51,5 +51,10 @@ public class EditCommand : Command<EditOptions>
         return await FrameRepository.UpdateAsync(frame) ? 0 : 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

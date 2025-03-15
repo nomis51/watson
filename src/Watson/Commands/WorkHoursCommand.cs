@@ -82,5 +82,10 @@ public class WorkHoursCommand : Command<WorkHoursOptions>
         return 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

@@ -28,6 +28,11 @@ public class ProjectCommand : Command<ProjectOptions>
         };
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     #region Private methods

@@ -113,6 +113,11 @@ public class StatsCommand : Command<StatsOptions>
         return 0;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     #region Private methods

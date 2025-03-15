@@ -1,4 +1,6 @@
-﻿using Watson.Commands.Abstractions;
+﻿using System.Reflection;
+using CommandLine;
+using Watson.Commands.Abstractions;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -35,6 +37,32 @@ public class StartCommand : Command<StartOptions>
 
         return new AddCommand(DependencyResolver)
             .Run(addOptions);
+    }
+
+    public override async Task ProvideCompletions(string[] inputs)
+    {
+        if (inputs.Length == 1)
+        {
+            var projects = await DependencyResolver.ProjectRepository.GetAsync();
+            var project =
+                projects.FirstOrDefault(e => e.Name.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase));
+            if (project is not null)
+            {
+                Console.WriteLine(project.Name);
+            }
+
+            return;
+        }
+
+        if (inputs.Length == 2)
+        {
+            var tags = await DependencyResolver.TagRepository.GetAsync();
+            var tag = tags.FirstOrDefault(e => e.Name.StartsWith(inputs[1], StringComparison.OrdinalIgnoreCase));
+            if (tag is not null)
+            {
+                Console.WriteLine(tag.Name);
+            }
+        }
     }
 
     #endregion

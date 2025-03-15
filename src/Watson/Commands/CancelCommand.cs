@@ -25,5 +25,10 @@ public class CancelCommand : Command<CancelOptions>
         return await FrameRepository.DeleteAsync(lastFrame.Id) ? 0 : 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }

@@ -1,4 +1,6 @@
-﻿using Watson.Core.Repositories.Abstractions;
+﻿using System.Reflection;
+using CommandLine;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models.Abstractions;
 
@@ -14,6 +16,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
 
     #region Props
 
+    public static string CommandName => typeof(TOptions).GetCustomAttribute<VerbAttribute>()!.Name;
     protected ITimeHelper TimeHelper => DependencyResolver.TimeHelper;
     protected IFrameHelper FrameHelper => DependencyResolver.FrameHelper;
     protected IFrameRepository FrameRepository => DependencyResolver.FrameRepository;
@@ -37,6 +40,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
     #region Public methods
 
     public abstract Task<int> Run(TOptions options);
+    public abstract Task ProvideCompletions(string[] inputs);
 
     #endregion
 }

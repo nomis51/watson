@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
@@ -10,8 +9,6 @@ LoggingHelper.Configure();
 
 try
 {
-    Console.OutputEncoding = Encoding.Unicode;
-
     var services = new ServiceCollection();
     return await services.AddAppResources()
         .BuildServiceProvider()

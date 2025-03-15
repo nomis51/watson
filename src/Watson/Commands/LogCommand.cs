@@ -89,6 +89,11 @@ public class LogCommand : Command<LogOptions>
         return 0;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     #region Private methods

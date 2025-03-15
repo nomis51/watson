@@ -28,6 +28,11 @@ public class TagCommand : Command<TagOptions>
         };
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     #region Private methods

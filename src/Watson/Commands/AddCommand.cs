@@ -1,4 +1,6 @@
-﻿using Watson.Commands.Abstractions;
+﻿using System.Reflection;
+using CommandLine;
+using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
@@ -39,6 +41,11 @@ public class AddCommand : Command<AddOptions>
         if (toTime >= DateTime.Now) return 1;
 
         return await CreateFrame(options.Project, fromTime, toTime, options.Tags);
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
     }
 
     #endregion
