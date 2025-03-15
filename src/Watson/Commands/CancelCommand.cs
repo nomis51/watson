@@ -27,7 +27,7 @@ public class CancelCommand : Command<CancelOptions>
 
     public override Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     #endregion
