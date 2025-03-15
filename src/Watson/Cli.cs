@@ -10,6 +10,12 @@ namespace Watson;
 
 public class Cli : ICli
 {
+    #region Constants
+
+    public const string CompletionCommandName = "complete";
+
+    #endregion
+
     #region Members
 
     private readonly ILogger<Cli> _logger;
@@ -31,7 +37,7 @@ public class Cli : ICli
 
     public Task<int> Run(string[] args)
     {
-        if (args.Length > 0 && args[0] == "complete")
+        if (args.Length > 0 && args[0] == CompletionCommandName)
         {
             _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
 
@@ -123,9 +129,6 @@ public class Cli : ICli
         {
             await new StartCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
-        }
-        else if ()
-        {
         }
 
         return 0;
