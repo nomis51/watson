@@ -103,6 +103,52 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+    #region Edit
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithProject()
+    {
+        // Arrange
+        var args = GetCompletionArgs("edit", "proj");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("project1");
+    }
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs("edit", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs("edit", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    #endregion
+
     #region Start
 
     [Test]
