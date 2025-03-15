@@ -31,10 +31,20 @@ public class CliTests : CommandWithConsoleTest
                 }
             ]);
 
+        var tagRepository = Substitute.For<ITagRepository>();
+        tagRepository.GetAsync()
+            .Returns([
+                new Tag
+                {
+                    Id = "id1",
+                    Name = "tag1"
+                }
+            ]);
+
         _sut = new Cli(new DependencyResolver(
             projectRepository,
             Substitute.For<IFrameRepository>(),
-            Substitute.For<ITagRepository>(),
+            tagRepository,
             Substitute.For<ITimeHelper>(),
             Substitute.For<IFrameHelper>(),
             Substitute.For<ISettingsRepository>(),
@@ -59,6 +69,34 @@ public class CliTests : CommandWithConsoleTest
         // Assert
         result.ShouldBe(0);
         GetConsoleOutput().ShouldBe("project1");
+    }
+
+    [Test]
+    public async Task Run_Start_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs("start", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    [Test]
+    public async Task Run_Start_ShouldCompelte_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs("start", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
     }
 
     #endregion

@@ -54,10 +54,11 @@ public class StartCommand : Command<StartOptions>
             return;
         }
 
-        if (inputs.Length == 2)
+        if (inputs.Length >= 2)
         {
+            var lastArg = inputs.Last();
             var tags = await DependencyResolver.TagRepository.GetAsync();
-            var tag = tags.FirstOrDefault(e => e.Name.StartsWith(inputs[1], StringComparison.OrdinalIgnoreCase));
+            var tag = tags.FirstOrDefault(e => e.Name.StartsWith(lastArg, StringComparison.OrdinalIgnoreCase));
             if (tag is not null)
             {
                 Console.WriteLine(tag.Name);
