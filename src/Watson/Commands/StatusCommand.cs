@@ -64,7 +64,7 @@ public class StatusCommand : Command<StatusOptions>
 
     public override Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     #endregion

@@ -25,7 +25,7 @@ public class RemoveCommand : Command<RemoveOptions>
 
     public override Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     #endregion
