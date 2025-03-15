@@ -145,6 +145,16 @@ public class Cli : ICli
             await new EditCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == LogCommand.CommandName)
+        {
+            await new LogCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == ProjectCommand.CommandName)
+        {
+            await new ProjectCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
         else if (commandName == StartCommand.CommandName)
         {
             await new StartCommand(_dependencyResolver)

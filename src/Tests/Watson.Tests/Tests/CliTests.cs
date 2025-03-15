@@ -149,6 +149,50 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+    #region Project
+
+    [Arguments("a", "add")]
+    [Arguments("c", "create")]
+    [Arguments("d", "delete")]
+    [Arguments("r", "remove")]
+    [Arguments("rem", "remove")]
+    [Arguments("ren", "rename")]
+    [Arguments("l", "list")]
+    [Test]
+    public async Task Run_Project_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs("project", input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Arguments("add")]
+    [Arguments("create")]
+    [Arguments("delete")]
+    [Arguments("remove")]
+    [Arguments("rename")]
+    [Test]
+    public async Task Run_Project_ShouldComplete_WithProject(string input)
+    {
+        // Arrange
+        var args = GetCompletionArgs("project", input, "proj");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("project1");
+    }
+
+    #endregion
+
     #region Start
 
     [Test]
