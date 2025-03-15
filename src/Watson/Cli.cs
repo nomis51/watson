@@ -190,6 +190,11 @@ public class Cli : ICli
             await new TagCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == TodoCommand.CommandName)
+        {
+            await new TodoCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
 
         return 0;
     }

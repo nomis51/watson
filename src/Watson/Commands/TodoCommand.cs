@@ -8,6 +8,23 @@ namespace Watson.Commands;
 
 public class TodoCommand : Command<TodoOptions>
 {
+    #region Constants
+
+    private const string AddAction = "add";
+    private const string CreateAction = "create";
+    private const string RemoveAction = "remove";
+    private const string DeleteAction = "delete";
+    private const string CompleteAction = "complete";
+    private const string DoneAction = "done";
+    private const string ListAction = "list";
+    private const string UncompleteAction = "uncomplete";
+    private const string UndoneAction = "undone";
+    private const string UndoAction = "undo";
+    private const string ResetAction = "reset";
+    private const string EditAction = "edit";
+
+    #endregion
+
     #region Constructors
 
     public TodoCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
@@ -22,19 +39,125 @@ public class TodoCommand : Command<TodoOptions>
     {
         return options.Action switch
         {
-            "add" => await AddTodo(options),
-            "remove" => await RemoveTodo(options),
-            "list" => await ListTodos(options),
-            "complete" or "done" => await ToggleCompletionTodo(options, true),
-            "uncomplete" or "undone" or "undo" or "reset" => await ToggleCompletionTodo(options, false),
-            "edit" => await EditTodo(options),
+            AddAction or CreateAction => await AddTodo(options),
+            RemoveAction or DeleteAction => await RemoveTodo(options),
+            ListAction => await ListTodos(options),
+            CompleteAction or DoneAction => await ToggleCompletionTodo(options, true),
+            UncompleteAction or UndoneAction or UndoAction or ResetAction => await ToggleCompletionTodo(options, false),
+            EditAction => await EditTodo(options),
             _ => 1
         };
     }
 
-    public override Task ProvideCompletions(string[] inputs)
+    public override async Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        if (inputs.Length == 1)
+        {
+            if (AddAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(AddAction);
+                return;
+            }
+
+            if (CreateAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(CreateAction);
+                return;
+            }
+
+            if (RemoveAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(RemoveAction);
+                return;
+            }
+
+            if (DeleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(DeleteAction);
+                return;
+            }
+
+            if (ListAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(ListAction);
+                return;
+            }
+
+            if (CompleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(CompleteAction);
+                return;
+            }
+
+            if (DoneAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(DoneAction);
+                return;
+            }
+
+            if (UncompleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(UncompleteAction);
+                return;
+            }
+
+            if (UndoAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(UndoAction);
+                return;
+            }
+
+            if (UndoneAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(UndoneAction);
+                return;
+            }
+
+            if (ResetAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(ResetAction);
+                return;
+            }
+
+            if (EditAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(EditAction);
+                return;
+            }
+        }
+
+        if (inputs.Length == 3)
+        {
+            if (inputs[0].Equals(EditAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(AddAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(CreateAction, StringComparison.OrdinalIgnoreCase))
+            {
+                var projects = await DependencyResolver.ProjectRepository.GetAsync();
+                var project =
+                    projects.FirstOrDefault(e => e.Name.StartsWith(inputs[2], StringComparison.OrdinalIgnoreCase));
+                if (project is not null)
+                {
+                    Console.WriteLine(project.Name);
+                    return;
+                }
+            }
+        }
+
+        if (inputs.Length == 4)
+        {
+            if (inputs[0].Equals(EditAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(AddAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(CreateAction, StringComparison.OrdinalIgnoreCase))
+            {
+                var tags = await DependencyResolver.TagRepository.GetAsync();
+                var tag = tags.FirstOrDefault(e => e.Name.StartsWith(inputs[3], StringComparison.OrdinalIgnoreCase));
+                if (tag is not null)
+                {
+                    Console.WriteLine(tag.Name);
+                    return;
+                }
+            }
+        }
     }
 
     #endregion
