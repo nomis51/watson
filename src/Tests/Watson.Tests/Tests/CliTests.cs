@@ -258,11 +258,56 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+
+    #region Project
+
+    [Arguments("a", "add")]
+    [Arguments("c", "create")]
+    [Arguments("d", "delete")]
+    [Arguments("r", "remove")]
+    [Arguments("rem", "remove")]
+    [Arguments("ren", "rename")]
+    [Arguments("l", "list")]
+    [Test]
+    public async Task Run_Tag_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs("tag", input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Arguments("add")]
+    [Arguments("create")]
+    [Arguments("delete")]
+    [Arguments("remove")]
+    [Arguments("rename")]
+    [Test]
+    public async Task Run_Tag_ShouldComplete_WithProject(string input)
+    {
+        // Arrange
+        var args = GetCompletionArgs("tag", input, "proj");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("project1");
+    }
+
+    #endregion
+
     #endregion
 
     #region Private methods
 
-    private string[] GetCompletionArgs(params string[] args)
+    private static string[] GetCompletionArgs(params string[] args)
     {
         return [Cli.CompletionCommandName, $"{nameof(Watson).ToLower()} {string.Join(' ', args)}"];
     }

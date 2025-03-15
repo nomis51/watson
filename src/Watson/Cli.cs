@@ -170,9 +170,24 @@ public class Cli : ICli
             await new StatsCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == StatusCommand.CommandName)
+        {
+            await new StatusCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
         else if (commandName == StartCommand.CommandName)
         {
             await new StartCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StopCommand.CommandName)
+        {
+            await new StopCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == TagCommand.CommandName)
+        {
+            await new TagCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
 
