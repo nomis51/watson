@@ -125,7 +125,12 @@ public class Cli : ICli
         var commandName = args[0];
         var actualArgs = args.Skip(1).ToArray();
 
-        if (commandName == StartCommand.CommandName)
+        if (commandName == AddCommand.CommandName)
+        {
+            await new AddCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StartCommand.CommandName)
         {
             await new StartCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);

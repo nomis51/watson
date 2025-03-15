@@ -57,6 +57,54 @@ public class CliTests : CommandWithConsoleTest
 
     #region Tests
 
+    #region Add
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithProject()
+    {
+        // Arrange
+        var args = GetCompletionArgs("add", "proj");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("project1");
+    }
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs("add", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs("add", "project", "ta");
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    #endregion
+
+    #region Start
+
     [Test]
     public async Task Run_Start_ShouldComplete_WithProject()
     {
@@ -86,7 +134,7 @@ public class CliTests : CommandWithConsoleTest
     }
 
     [Test]
-    public async Task Run_Start_ShouldCompelte_WithManyTags()
+    public async Task Run_Start_ShouldComplete_WithManyTags()
     {
         // Arrange
         var args = GetCompletionArgs("start", "project", "ta");
@@ -98,6 +146,8 @@ public class CliTests : CommandWithConsoleTest
         result.ShouldBe(0);
         GetConsoleOutput().ShouldBe("tag1");
     }
+
+    #endregion
 
     #endregion
 
