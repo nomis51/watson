@@ -130,6 +130,16 @@ public class Cli : ICli
             await new AddCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == CancelCommand.CommandName)
+        {
+            await new CancelCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == ConfigCommand.CommandName)
+        {
+            await new ConfigCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
         else if (commandName == StartCommand.CommandName)
         {
             await new StartCommand(_dependencyResolver)
