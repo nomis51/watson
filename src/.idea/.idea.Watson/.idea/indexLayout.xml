@@ -3,6 +3,7 @@
   <component name="UserContentModel">
     <attachedFolders>
       <Path>../.github</Path>
+      <Path>../completion</Path>
       <Path>../docs</Path>
     </attachedFolders>
     <explicitIncludes />
