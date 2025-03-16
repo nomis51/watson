@@ -52,5 +52,10 @@ public class RestartCommand : Command<RestartOptions>
         return 0;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 }

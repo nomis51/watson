@@ -62,5 +62,10 @@ public class StatusCommand : Command<StatusOptions>
         return 0;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 }

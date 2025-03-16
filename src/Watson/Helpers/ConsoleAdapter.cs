@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using System.Text;
+using Spectre.Console;
 using Spectre.Console.Rendering;
 using Watson.Helpers.Abstractions;
 
@@ -13,6 +14,15 @@ public class ConsoleAdapter : IConsoleAdapter
     #endregion
 
     #region Constructors
+
+    public ConsoleAdapter()
+    {
+        _ansiConsole.Profile.Encoding = Encoding.Unicode;
+    }
+
+    #endregion
+
+    #region Public methods
 
     public void WriteLine(string text)
     {
@@ -42,6 +52,16 @@ public class ConsoleAdapter : IConsoleAdapter
     public void Write(IRenderable renderable)
     {
         _ansiConsole.Write(renderable);
+    }
+
+    public void Write(string text)
+    {
+        _ansiConsole.Write(text);
+    }
+
+    public void SetEncoding(Encoding encoding)
+    {
+        _ansiConsole.Profile.Encoding = encoding;
     }
 
     #endregion

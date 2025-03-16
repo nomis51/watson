@@ -89,6 +89,11 @@ public class LogCommand : Command<LogOptions>
         return 0;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 
     #region Private methods

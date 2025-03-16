@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Text;
+using CommandLine;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
@@ -9,6 +10,12 @@ namespace Watson;
 
 public class Cli : ICli
 {
+    #region Constants
+
+    public const string CompletionCommandName = "complete";
+
+    #endregion
+
     #region Members
 
     private readonly ILogger<Cli> _logger;
@@ -30,6 +37,17 @@ public class Cli : ICli
 
     public Task<int> Run(string[] args)
     {
+        if (args.Length > 0 && args[0] == CompletionCommandName)
+        {
+            _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
+
+            var inputs = args.Skip(1)
+                .FirstOrDefault()?
+                .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .ToArray() ?? [];
+            return ProvideCompletion(inputs.Skip(1).ToArray());
+        }
+
         var parser = new Parser();
         return parser.ParseArguments<
                 AddOptions,
@@ -90,6 +108,100 @@ public class Cli : ICli
 
                     return Task.FromResult(1);
                 });
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task<int> ProvideCompletion(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("start");
+            return 0;
+        }
+
+        var commandName = args[0];
+        var actualArgs = args.Skip(1).ToArray();
+
+        if (commandName == AddCommand.CommandName)
+        {
+            await new AddCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == CancelCommand.CommandName)
+        {
+            await new CancelCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == ConfigCommand.CommandName)
+        {
+            await new ConfigCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == EditCommand.CommandName)
+        {
+            await new EditCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == LogCommand.CommandName)
+        {
+            await new LogCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == ProjectCommand.CommandName)
+        {
+            await new ProjectCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == RemoveCommand.CommandName)
+        {
+            await new RemoveCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == RestartCommand.CommandName)
+        {
+            await new RestartCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StatsCommand.CommandName)
+        {
+            await new StatsCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StatusCommand.CommandName)
+        {
+            await new StatusCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StartCommand.CommandName)
+        {
+            await new StartCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == StopCommand.CommandName)
+        {
+            await new StopCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == TagCommand.CommandName)
+        {
+            await new TagCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == TodoCommand.CommandName)
+        {
+            await new TodoCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == WorkHoursCommand.CommandName)
+        {
+            await new WorkHoursCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+
+        return 0;
     }
 
     #endregion

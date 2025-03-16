@@ -23,5 +23,10 @@ public class RemoveCommand : Command<RemoveOptions>
         return await FrameRepository.DeleteAsync(options.FrameId) ? 0 : 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 }

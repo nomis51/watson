@@ -6,6 +6,17 @@ namespace Watson.Commands;
 
 public class ProjectCommand : Command<ProjectOptions>
 {
+    #region Constants
+
+    private const string AddAction = "add";
+    private const string CreateAction = "create";
+    private const string RemoveAction = "remove";
+    private const string DeleteAction = "delete";
+    private const string RenameAction = "rename";
+    private const string ListAction = "list";
+
+    #endregion
+
     #region Constructors
 
     public ProjectCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
@@ -20,12 +31,74 @@ public class ProjectCommand : Command<ProjectOptions>
     {
         return options.Action switch
         {
-            "add" or "create" => await AddProject(options),
-            "remove" or "delete" => await RemoveProject(options),
-            "rename" => await RenameProject(options),
-            "list" => await ListProjects(options),
+            AddAction or CreateAction => await AddProject(options),
+            RemoveAction or DeleteAction => await RemoveProject(options),
+            RenameAction => await RenameProject(options),
+            ListAction => await ListProjects(options),
             _ => 1
         };
+    }
+
+    public override async Task ProvideCompletions(string[] inputs)
+    {
+        if (inputs.Length == 1)
+        {
+            if (AddAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(AddAction);
+                return;
+            }
+
+            if (CreateAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(CreateAction);
+                return;
+            }
+
+            if (RemoveAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(RemoveAction);
+                return;
+            }
+
+            if (DeleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(DeleteAction);
+                return;
+            }
+
+            if (RenameAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(RenameAction);
+                return;
+            }
+
+            if (ListAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(ListAction);
+                return;
+            }
+        }
+
+        if (inputs.Length == 2)
+        {
+            if (inputs[0].Equals(AddAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(CreateAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(RemoveAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(DeleteAction, StringComparison.OrdinalIgnoreCase) ||
+                inputs[0].Equals(RenameAction, StringComparison.OrdinalIgnoreCase))
+            {
+                var projects = await DependencyResolver.ProjectRepository.GetAsync();
+                var project =
+                    projects.FirstOrDefault(e => e.Name.StartsWith(inputs[1], StringComparison.OrdinalIgnoreCase));
+                if (project is not null)
+                {
+                    Console.WriteLine(project.Name);
+                }
+
+                return;
+            }
+        }
     }
 
     #endregion

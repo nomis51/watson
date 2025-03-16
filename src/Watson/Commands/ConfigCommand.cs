@@ -33,6 +33,11 @@ public class ConfigCommand : Command<ConfigOptions>
         return 1;
     }
 
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
     #endregion
 
     #region Private methods
