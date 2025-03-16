@@ -1,6 +1,8 @@
-﻿## add
+﻿‎
 
-```
+## add
+
+```shell
 watson add [project] [tag1] [tag2] ... [options]
 ```
 
@@ -17,6 +19,6 @@ Add a new frame for the specified project and tag(s) at the specified time<small
 
 #### Example
 
-```
+```shell
 watson add cookin pizza hawaiian --from "2025-01-01 14:45"
 ```

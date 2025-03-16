@@ -13,6 +13,7 @@ public class Cli : ICli
     #region Constants
 
     public const string CompletionCommandName = "complete";
+    public const string AliasCommandName = "alias";
 
     #endregion
 
@@ -35,22 +36,18 @@ public class Cli : ICli
 
     #region Public methods
 
-    public Task<int> Run(string[] args)
+    public async Task<int> Run(string[] args)
     {
-        if (args.Length > 0 && args[0] == CompletionCommandName)
-        {
-            _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
+        var exitCode = await HandleCompletion(args);
+        if (exitCode != -1) return exitCode;
 
-            var inputs = args.Skip(1)
-                .FirstOrDefault()?
-                .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .ToArray() ?? [];
-            return ProvideCompletion(inputs.Skip(1).ToArray());
-        }
+        exitCode = await HandleAlias(args);
+        if (exitCode != -1) return exitCode;
 
         var parser = new Parser();
-        return parser.ParseArguments<
+        return await parser.ParseArguments<
                 AddOptions,
+                AliasOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -68,6 +65,7 @@ public class Cli : ICli
             >(args)
             .MapResult<
                 AddOptions,
+                AliasOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -85,6 +83,7 @@ public class Cli : ICli
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
+                async options => await new AliasCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
@@ -114,6 +113,35 @@ public class Cli : ICli
 
     #region Private methods
 
+    private async Task<int> HandleAlias(string[] args)
+    {
+        if (args.Length < 1) return -1;
+
+        var alias = await _dependencyResolver.AliasRepository.GetByNameAsync(args[0]);
+        if (alias is null) return -1;
+
+        _dependencyResolver.ConsoleAdapter.MarkupLine("Executing command alias [blue]{0}[/]...", alias.Command);
+
+        return await Run(
+            alias.Arguments
+                .Concat(args.Skip(1))
+                .ToArray()
+        );
+    }
+
+    private async Task<int> HandleCompletion(string[] args)
+    {
+        if (args.Length <= 0 || args[0] != CompletionCommandName) return -1;
+
+        _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
+
+        var inputs = args.Skip(1)
+            .FirstOrDefault()?
+            .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToArray() ?? [];
+        return await ProvideCompletion(inputs.Skip(1).ToArray());
+    }
+
     private async Task<int> ProvideCompletion(string[] args)
     {
         if (args.Length == 0)
@@ -128,6 +156,11 @@ public class Cli : ICli
         if (commandName == AddCommand.CommandName)
         {
             await new AddCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
+        else if (commandName == AliasCommand.CommandName)
+        {
+            await new AliasCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
         else if (commandName == CancelCommand.CommandName)

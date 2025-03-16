@@ -11,7 +11,17 @@ theme:
 
 plugins:
   - search
-  - markdown_include
+  - include-markdown:
+      encoding: utf-8
+
+markdown_extensions:
+  - pymdownx.superfences
+  - codehilite:
+      guess_lang: false
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.details
 
 repo_url: https://github.com/nomis51/watson
 repo_name: Source code

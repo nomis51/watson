@@ -29,7 +29,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install MkDocs and Material Theme
-        run: pip install mkdocs-material markdown-include
+        run: pip install mkdocs-material mkdocs-include-markdown-plugin pymdown-extensions
 
       - name: Configure Git for Deployment
         run: |

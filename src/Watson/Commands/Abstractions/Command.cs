@@ -25,6 +25,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
     protected ISettingsRepository SettingsRepository => DependencyResolver.SettingsRepository;
     protected ITodoRepository TodoRepository => DependencyResolver.TodoRepository;
     protected IConsoleAdapter Console => DependencyResolver.ConsoleAdapter;
+    protected IAliasRepository AliasRepository => DependencyResolver.AliasRepository;
 
     #endregion
 
