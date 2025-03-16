@@ -83,3 +83,29 @@ And all frames are gonna adjust automatically, no more "when did it end? how lon
 But, how does it knows when the day ends?
 Well, there are settings for that. You can set your work hours in the settings of the application.
 By default, it's set to `8:00` to `16:00`.
+
+#### How can I add completion?
+
+The application supports completion for the following terminals :
+
+**powershell**
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; $script=irm "https://raw.githubusercontent.com/nomis51/watson/master/completion/powershell.ps1"; iex $script; $script | Out-File -Append $PROFILE
+```
+
+**bash**
+
+```bash
+bash -c 'curl -sL "https://raw.githubusercontent.com/nomis51/watson/master/completion/bash.sh" | tee -a ~/.bashrc | bash'
+```
+
+**zsh**
+
+```zsh
+zsh -c 'curl -sL "https://raw.githubusercontent.com/nomis51/watson/master/completion/zsh.sh" | tee -a ~/.zshrc | zsh'
+```
+
+
+
+
