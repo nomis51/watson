@@ -2,6 +2,7 @@
 using Shouldly;
 using Watson.Commands;
 using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
@@ -46,7 +47,8 @@ public class AliasCommandTests : CommandWithConsoleTest
                 Substitute.For<ISettingsRepository>(),
                 new TodoRepository(DbContext, idHelper),
                 ConsoleAdapter,
-                _aliasRepository
+                _aliasRepository,
+                Substitute.For<IProcessHelper>()
             )
         );
     }

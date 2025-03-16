@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using CommandLine;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models.Abstractions;
@@ -26,6 +27,7 @@ public abstract class Command<TOptions> : ICommand<TOptions>
     protected ITodoRepository TodoRepository => DependencyResolver.TodoRepository;
     protected IConsoleAdapter Console => DependencyResolver.ConsoleAdapter;
     protected IAliasRepository AliasRepository => DependencyResolver.AliasRepository;
+    protected IProcessHelper ProcessHelper => DependencyResolver.ProcessHelper;
 
     #endregion
 

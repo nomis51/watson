@@ -22,6 +22,8 @@ public static class ParserResultExtensions
         T15,
         T16,
         T17,
+        T18,
+        T19,
         TResult
     >(
         this ParserResult<object> result,
@@ -42,6 +44,8 @@ public static class ParserResultExtensions
         Func<T15, TResult> parsedFunc15,
         Func<T16, TResult> parsedFunc16,
         Func<T17, TResult> parsedFunc17,
+        Func<T18, TResult> parsedFunc18,
+        Func<T19, TResult> parsedFunc19,
         Func<IEnumerable<Error>, TResult> notParsedFunc
     )
     {
@@ -66,6 +70,8 @@ public static class ParserResultExtensions
             T15 value7 => parsedFunc15(value7),
             T16 parsedValue7 => parsedFunc16(parsedValue7),
             T17 value8 => parsedFunc17(value8),
+            T18 parsedValue8 => parsedFunc18(parsedValue8),
+            T19 value9 => parsedFunc19(value9),
             _ => throw new InvalidOperationException()
         };
     }

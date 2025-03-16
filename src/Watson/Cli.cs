@@ -5,6 +5,7 @@ using Watson.Abstractions;
 using Watson.Commands;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
+using Watson.Extensions;
 
 namespace Watson;
 
@@ -13,7 +14,6 @@ public class Cli : ICli
     #region Constants
 
     public const string CompletionCommandName = "complete";
-    public const string AliasCommandName = "alias";
 
     #endregion
 
@@ -48,9 +48,11 @@ public class Cli : ICli
         return await parser.ParseArguments<
                 AddOptions,
                 AliasOptions,
+                BugOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
+                GithubOptions,
                 LogOptions,
                 ProjectOptions,
                 RemoveOptions,
@@ -61,14 +63,17 @@ public class Cli : ICli
                 StopOptions,
                 TagOptions,
                 TodoOptions,
+                WikiOptions,
                 WorkHoursOptions
             >(args)
             .MapResult<
                 AddOptions,
                 AliasOptions,
+                BugOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
+                GithubOptions,
                 LogOptions,
                 ProjectOptions,
                 RemoveOptions,
@@ -79,14 +84,17 @@ public class Cli : ICli
                 StopOptions,
                 TagOptions,
                 TodoOptions,
+                WikiOptions,
                 WorkHoursOptions,
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
                 async options => await new AliasCommand(_dependencyResolver).Run(options),
+                async options => await new BugCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
+                async options => await new GithubCommand(_dependencyResolver).Run(options),
                 async options => await new LogCommand(_dependencyResolver).Run(options),
                 async options => await new ProjectCommand(_dependencyResolver).Run(options),
                 async options => await new RemoveCommand(_dependencyResolver).Run(options),
@@ -97,11 +105,16 @@ public class Cli : ICli
                 async options => await new StopCommand(_dependencyResolver).Run(options),
                 async options => await new TagCommand(_dependencyResolver).Run(options),
                 async options => await new TodoCommand(_dependencyResolver).Run(options),
+                async options => await new WikiCommand(_dependencyResolver).Run(options),
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
                 {
                     foreach (var error in errors)
                     {
+                        if (error.Tag is ErrorType.VersionRequestedError or
+                            ErrorType.HelpRequestedError or
+                            ErrorType.HelpVerbRequestedError) return Task.FromResult(0);
+
                         _logger.LogError("Error while parsing input arguments: {Error}", error);
                     }
 

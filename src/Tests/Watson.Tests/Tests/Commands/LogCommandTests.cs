@@ -4,6 +4,7 @@ using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Models.Settings;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
@@ -43,7 +44,8 @@ public class LogCommandTests : CommandWithConsoleTest
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
                 ConsoleAdapter,
-                Substitute.For<IAliasRepository>()
+                Substitute.For<IAliasRepository>(),
+                Substitute.For<IProcessHelper>()
             )
         );
     }
