@@ -47,6 +47,7 @@ public class Cli : ICli
         var parser = new Parser();
         return await parser.ParseArguments<
                 AddOptions,
+                AliasOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -64,6 +65,7 @@ public class Cli : ICli
             >(args)
             .MapResult<
                 AddOptions,
+                AliasOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -81,6 +83,7 @@ public class Cli : ICli
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
+                async options => await new AliasCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
@@ -112,14 +115,18 @@ public class Cli : ICli
 
     private async Task<int> HandleAlias(string[] args)
     {
-        if (args.Length < 1 || args[0] != AliasCommandName) return -1;
+        if (args.Length < 1) return -1;
 
-        var alias = await _dependencyResolver.AliasRepository.GetByNameAsync(args[1]);
+        var alias = await _dependencyResolver.AliasRepository.GetByNameAsync(args[0]);
         if (alias is null) return -1;
 
-        // TODO: run it;
+        _dependencyResolver.ConsoleAdapter.MarkupLine("Executing command alias [blue]{0}[/]...", alias.Command);
 
-        return 0;
+        return await Run(
+            alias.Arguments
+                .Concat(args.Skip(1))
+                .ToArray()
+        );
     }
 
     private async Task<int> HandleCompletion(string[] args)
