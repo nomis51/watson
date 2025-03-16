@@ -13,6 +13,7 @@ public class Cli : ICli
     #region Constants
 
     public const string CompletionCommandName = "complete";
+    public const string AliasCommandName = "alias";
 
     #endregion
 
@@ -35,21 +36,16 @@ public class Cli : ICli
 
     #region Public methods
 
-    public Task<int> Run(string[] args)
+    public async Task<int> Run(string[] args)
     {
-        if (args.Length > 0 && args[0] == CompletionCommandName)
-        {
-            _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
+        var exitCode = await HandleCompletion(args);
+        if (exitCode != -1) return exitCode;
 
-            var inputs = args.Skip(1)
-                .FirstOrDefault()?
-                .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .ToArray() ?? [];
-            return ProvideCompletion(inputs.Skip(1).ToArray());
-        }
+        exitCode = await HandleAlias(args);
+        if (exitCode != -1) return exitCode;
 
         var parser = new Parser();
-        return parser.ParseArguments<
+        return await parser.ParseArguments<
                 AddOptions,
                 CancelOptions,
                 ConfigOptions,
@@ -113,6 +109,31 @@ public class Cli : ICli
     #endregion
 
     #region Private methods
+
+    private async Task<int> HandleAlias(string[] args)
+    {
+        if (args.Length < 1 || args[0] != AliasCommandName) return -1;
+
+        var alias = await _dependencyResolver.AliasRepository.GetByNameAsync(args[1]);
+        if (alias is null) return -1;
+
+        // TODO: run it;
+
+        return 0;
+    }
+
+    private async Task<int> HandleCompletion(string[] args)
+    {
+        if (args.Length <= 0 || args[0] != CompletionCommandName) return -1;
+
+        _dependencyResolver.ConsoleAdapter.SetEncoding(Encoding.UTF8);
+
+        var inputs = args.Skip(1)
+            .FirstOrDefault()?
+            .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .ToArray() ?? [];
+        return await ProvideCompletion(inputs.Skip(1).ToArray());
+    }
 
     private async Task<int> ProvideCompletion(string[] args)
     {

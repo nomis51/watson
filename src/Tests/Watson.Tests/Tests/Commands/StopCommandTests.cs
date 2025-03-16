@@ -38,7 +38,8 @@ public class StopCommandTests : CommandWithConsoleTest
                 new FrameHelper(frameRepository),
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
-                ConsoleAdapter
+                ConsoleAdapter,
+                Substitute.For<IAliasRepository>()
             )
         );
     }

@@ -49,7 +49,8 @@ public class CliTests : CommandWithConsoleTest
             Substitute.For<IFrameHelper>(),
             Substitute.For<ISettingsRepository>(),
             Substitute.For<ITodoRepository>(),
-            ConsoleAdapter
+            ConsoleAdapter,
+            Substitute.For<IAliasRepository>()
         ), Substitute.For<ILogger<Cli>>());
     }
 

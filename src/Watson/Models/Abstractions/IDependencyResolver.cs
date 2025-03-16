@@ -13,4 +13,5 @@ public interface IDependencyResolver
     ISettingsRepository SettingsRepository { get; }
     ITodoRepository TodoRepository { get; }
     IConsoleAdapter ConsoleAdapter { get; }
+    IAliasRepository AliasRepository { get; }
 }
