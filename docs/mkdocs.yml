@@ -11,7 +11,11 @@ theme:
 
 plugins:
   - search
-  - markdown_include
+  - include-markdown:
+      encoding: utf-8
+
+markdown_extensions:
+  - pymdownx.snippets
 
 repo_url: https://github.com/nomis51/watson
 repo_name: Source code
