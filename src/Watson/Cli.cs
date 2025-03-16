@@ -195,6 +195,11 @@ public class Cli : ICli
             await new TodoCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
+        else if (commandName == WorkHoursCommand.CommandName)
+        {
+            await new WorkHoursCommand(_dependencyResolver)
+                .ProvideCompletions(actualArgs);
+        }
 
         return 0;
     }

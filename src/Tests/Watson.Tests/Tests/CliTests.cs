@@ -350,6 +350,27 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+    #region Workhours
+
+    [Arguments("r", "reset")]
+    [Arguments("s", "start")]
+    [Arguments("e", "end")]
+    [Test]
+    public async Task Run_Workhours_ShouldComplete_WithType(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs("workhours", input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    #endregion
+
     #endregion
 
     #region Private methods
