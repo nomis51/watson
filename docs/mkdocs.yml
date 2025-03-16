@@ -11,7 +11,7 @@ theme:
 
 plugins:
   - search
-  - markdown-include
+  - markdown_include
 
 repo_url: https://github.com/nomis51/watson
 repo_name: Source code

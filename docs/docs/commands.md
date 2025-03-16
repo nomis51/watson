@@ -1,6 +1,6 @@
 ﻿# Commands
 
-{% include "fragments/commands/add.md" %}
+!include "fragments/commands/add.md"
 
 ## cancel
 
