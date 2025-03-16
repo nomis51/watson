@@ -39,9 +39,17 @@ public class AliasCommand : Command<AliasOptions>
             if (arguments.Count < 3) return 1;
 
             var name = arguments[1];
+
+            var alias = await DependencyResolver.AliasRepository.GetByNameAsync(name);
+            if (alias is not null)
+            {
+                Console.MarkupLine("[red]Alias already exists.[/]");
+                return 1;
+            }
+
             var command = string.Join(' ', arguments.Skip(2));
 
-            var alias = new Alias
+            alias = new Alias
             {
                 Name = name,
                 Command = command
@@ -62,7 +70,14 @@ public class AliasCommand : Command<AliasOptions>
         {
             if (arguments.Count < 2) return 1;
 
-            if (!await DependencyResolver.AliasRepository.DeleteAsync(arguments[1]))
+            var alias = await DependencyResolver.AliasRepository.GetByNameAsync(arguments[1]);
+            if (alias is null)
+            {
+                Console.MarkupLine("[red]Alias not found.[/]");
+                return 1;
+            }
+
+            if (!await DependencyResolver.AliasRepository.DeleteAsync(alias.Id))
             {
                 Console.MarkupLine("[red]Failed to delete alias.[/]");
                 return 1;
