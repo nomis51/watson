@@ -84,7 +84,7 @@ But, how does it knows when the day ends?
 Well, there are settings for that. You can set your work hours in the settings of the application.
 By default, it's set to `8:00` to `16:00`.
 
-#### How can I add completion?
+#### How can I enable completion?
 
 The application supports completion for the following terminals :
 

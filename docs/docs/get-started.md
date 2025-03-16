@@ -41,3 +41,13 @@ And you can also list of all the `frames` within a time period with the `log` co
 
 For more details about all the available commands and options run `watson help` or visit
 the [commands page](commands.md).
+
+### Completion
+
+The application supports completion for the following terminals :
+
+- powershell
+- bash
+- zsh
+
+For more details on how to enable completion, see the [completion page](faq.md#how-can-i-enable-completion).
