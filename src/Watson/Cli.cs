@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 using CommandLine;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
@@ -44,8 +46,7 @@ public class Cli : ICli
         exitCode = await HandleAlias(args);
         if (exitCode != -1) return exitCode;
 
-        var parser = new Parser();
-        return await parser.ParseArguments<
+        return await Parser.Default.ParseArguments<
                 AddOptions,
                 AliasOptions,
                 CancelOptions,
@@ -102,6 +103,10 @@ public class Cli : ICli
                 {
                     foreach (var error in errors)
                     {
+                        if (error.Tag is ErrorType.VersionRequestedError or
+                            ErrorType.HelpRequestedError or
+                            ErrorType.HelpVerbRequestedError) return Task.FromResult(0);
+
                         _logger.LogError("Error while parsing input arguments: {Error}", error);
                     }
 
