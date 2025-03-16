@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Dapper;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
+using Watson.Core.Helpers;
 using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models;
@@ -14,6 +17,7 @@ public class CliTests : CommandWithConsoleTest
     #region Members
 
     private readonly Cli _sut;
+    private readonly IFrameRepository _frameRepository = Substitute.For<IFrameRepository>();
 
     #endregion
 
@@ -43,14 +47,14 @@ public class CliTests : CommandWithConsoleTest
 
         _sut = new Cli(new DependencyResolver(
             projectRepository,
-            Substitute.For<IFrameRepository>(),
+            _frameRepository,
             tagRepository,
             Substitute.For<ITimeHelper>(),
             Substitute.For<IFrameHelper>(),
             Substitute.For<ISettingsRepository>(),
             Substitute.For<ITodoRepository>(),
             ConsoleAdapter,
-            Substitute.For<IAliasRepository>()
+            new AliasRepository(DbContext, new IdHelper())
         ), Substitute.For<ILogger<Cli>>());
     }
 
@@ -100,6 +104,45 @@ public class CliTests : CommandWithConsoleTest
         // Assert
         result.ShouldBe(0);
         GetConsoleOutput().ShouldBe("tag1");
+    }
+
+    #endregion
+
+    #region Alias
+
+    [Arguments("c", "create")]
+    [Arguments("s", "set")]
+    [Arguments("a", "add")]
+    [Arguments("r", "remove")]
+    [Arguments("d", "delete")]
+    [Test]
+    public async Task Run_Alias_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs("alias", input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Test]
+    public async Task Run_Alias_ShouldExecuteCommandAssociatedWithAlias()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            "INSERT INTO Aliases (Id, Name, Command) VALUES ('id1', 'test', 'status')");
+
+        // Act
+        var result = await _sut.Run(["test"]);
+
+        // Assert
+        result.ShouldBe(1);
+        await _frameRepository.Received(1)
+            .GetPreviousFrameAsync(Arg.Any<DateTime>());
     }
 
     #endregion
@@ -258,7 +301,6 @@ public class CliTests : CommandWithConsoleTest
     }
 
     #endregion
-
 
     #region Tag
 

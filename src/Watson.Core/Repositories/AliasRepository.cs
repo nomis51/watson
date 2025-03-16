@@ -34,24 +34,24 @@ public class AliasRepository : Repository<Alias>, IAliasRepository
     protected override void InitializeTable()
     {
         DbContext.Connection.Execute(
-            """
-            CREATE TABLE IF NOT EXISTS Aliases (
-               Id TEXT NOT NULL PRIMARY KEY UNIQUE,
-               Name TEXT NOT NULL UNIQUE,
-               Command TEXT NOT NULL
-            );
-            """
+            $"""
+             CREATE TABLE IF NOT EXISTS {TableName} (
+                Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                Name TEXT NOT NULL UNIQUE,
+                Command TEXT NOT NULL
+             );
+             """
         );
     }
 
     protected override string BuildInsertQuery()
     {
-        return "INSERT INTO Aliases (Id, Name, Command) VALUES (@Id, @Name, @Command)";
+        return $"INSERT INTO {TableName} (Id, Name, Command) VALUES (@Id, @Name, @Command)";
     }
 
     protected override string BuildUpdateQuery()
     {
-        return "UPDATE Aliases SET Command = @Command WHERE Id = @Id";
+        return $"UPDATE {TableName} SET Command = @Command WHERE Id = @Id";
     }
 
     #endregion

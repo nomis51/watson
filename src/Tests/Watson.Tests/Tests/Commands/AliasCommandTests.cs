@@ -154,7 +154,7 @@ public class AliasCommandTests : CommandWithConsoleTest
     }
 
     [Test]
-    public async Task Run_ShouldFaileToCreate_WhenAliasAlreadyExists()
+    public async Task Run_ShouldFailToCreate_WhenAliasAlreadyExists()
     {
         // Arrange
         var options = new AliasOptions
@@ -175,6 +175,24 @@ public class AliasCommandTests : CommandWithConsoleTest
         GetConsoleOutput().ShouldBe(
             GenerateSpectreMarkupOutput("[red]Alias already exists.[/]")
         );
+    }
+
+    [Test]
+    public async Task Run_ShouldFailToCreate_WhenAliasIsReserved()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = ["create", "status", "status"]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+        await _aliasRepository.DidNotReceive()
+            .InsertAsync(Arg.Any<Alias>());
     }
 
     #endregion

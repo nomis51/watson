@@ -1,5 +1,7 @@
-﻿using Watson.Commands.Abstractions;
+﻿using System.Reflection;
+using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -40,8 +42,7 @@ public class AliasCommand : Command<AliasOptions>
 
             var name = arguments[1];
 
-            var alias = await DependencyResolver.AliasRepository.GetByNameAsync(name);
-            if (alias is not null)
+            if (!await IsAliasNameValid(name))
             {
                 Console.MarkupLine("[red]Alias already exists.[/]");
                 return 1;
@@ -49,7 +50,7 @@ public class AliasCommand : Command<AliasOptions>
 
             var command = string.Join(' ', arguments.Skip(2));
 
-            alias = new Alias
+            var alias = new Alias
             {
                 Name = name,
                 Command = command
@@ -104,9 +105,74 @@ public class AliasCommand : Command<AliasOptions>
         return 0;
     }
 
+
     public override Task ProvideCompletions(string[] inputs)
     {
-        throw new NotImplementedException();
+        if (inputs.Length == 1)
+        {
+            if (AddAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(AddAction);
+                return Task.CompletedTask;
+            }
+
+            if (CreateAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(CreateAction);
+                return Task.CompletedTask;
+            }
+
+            if (SetAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(SetAction);
+                return Task.CompletedTask;
+            }
+
+            if (DeleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(DeleteAction);
+                return Task.CompletedTask;
+            }
+
+            if (RemoveAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(RemoveAction);
+                return Task.CompletedTask;
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task<bool> IsAliasNameValid(string name)
+    {
+        var alias = await AliasRepository.GetByNameAsync(name);
+        if (alias is not null) return false;
+
+        var types = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(e =>
+                e.Namespace is not null &&
+                e.Namespace.StartsWith($"{nameof(Watson)}.Commands") &&
+                e.Name.EndsWith("Command")
+            );
+        foreach (var type in types)
+        {
+            var commandName =
+                type.GetProperty(nameof(AddCommand.CommandName),
+                        BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?
+                    .GetValue(null)?
+                    .ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(commandName)) continue;
+
+            if (commandName.Equals(name, StringComparison.OrdinalIgnoreCase)) return false;
+        }
+
+        return true;
     }
 
     #endregion
