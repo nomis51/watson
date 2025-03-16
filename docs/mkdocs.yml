@@ -15,7 +15,13 @@ plugins:
       encoding: utf-8
 
 markdown_extensions:
-  - pymdownx.snippets
+  - pymdownx.superfences
+  - codehilite:
+      guess_lang: false
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.details
 
 repo_url: https://github.com/nomis51/watson
 repo_name: Source code
