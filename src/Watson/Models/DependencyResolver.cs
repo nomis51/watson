@@ -1,4 +1,5 @@
-﻿using Watson.Core.Repositories.Abstractions;
+﻿using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models.Abstractions;
 
@@ -15,6 +16,7 @@ public class DependencyResolver : IDependencyResolver
     public ITodoRepository TodoRepository { get; }
     public IConsoleAdapter ConsoleAdapter { get; }
     public IAliasRepository AliasRepository { get; }
+    public IProcessHelper ProcessHelper { get; }
 
     public DependencyResolver(
         IProjectRepository projectRepository,
@@ -25,7 +27,8 @@ public class DependencyResolver : IDependencyResolver
         ISettingsRepository settingsRepository,
         ITodoRepository todoRepository,
         IConsoleAdapter consoleAdapter,
-        IAliasRepository aliasRepository
+        IAliasRepository aliasRepository,
+        IProcessHelper processHelper
     )
     {
         ProjectRepository = projectRepository;
@@ -37,5 +40,6 @@ public class DependencyResolver : IDependencyResolver
         TodoRepository = todoRepository;
         ConsoleAdapter = consoleAdapter;
         AliasRepository = aliasRepository;
+        ProcessHelper = processHelper;
     }
 }

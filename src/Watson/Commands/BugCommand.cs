@@ -27,36 +27,7 @@ public class BugCommand : Command<BugOptions>
 
     public override Task<int> Run(BugOptions options)
     {
-        string command;
-        string arguments;
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            command = "cmd";
-            arguments = $"/C start {BugReportUrl}";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            command = "open";
-            arguments = BugReportUrl;
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            command = "xdg-open";
-            arguments = BugReportUrl;
-        }
-        else
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = command,
-            Arguments = arguments,
-            UseShellExecute = true
-        });
-
+        ProcessHelper.OpenInBrowser(BugReportUrl);
         return Task.FromResult(0);
     }
 

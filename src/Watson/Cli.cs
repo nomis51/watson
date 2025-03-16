@@ -14,7 +14,6 @@ public class Cli : ICli
     #region Constants
 
     public const string CompletionCommandName = "complete";
-    public const string AliasCommandName = "alias";
 
     #endregion
 
@@ -53,6 +52,7 @@ public class Cli : ICli
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
+                GithubOptions,
                 LogOptions,
                 ProjectOptions,
                 RemoveOptions,
@@ -63,6 +63,7 @@ public class Cli : ICli
                 StopOptions,
                 TagOptions,
                 TodoOptions,
+                WikiOptions,
                 WorkHoursOptions
             >(args)
             .MapResult<
@@ -72,6 +73,7 @@ public class Cli : ICli
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
+                GithubOptions,
                 LogOptions,
                 ProjectOptions,
                 RemoveOptions,
@@ -82,6 +84,7 @@ public class Cli : ICli
                 StopOptions,
                 TagOptions,
                 TodoOptions,
+                WikiOptions,
                 WorkHoursOptions,
                 Task<int>
             >(
@@ -91,6 +94,7 @@ public class Cli : ICli
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
+                async options => await new GithubCommand(_dependencyResolver).Run(options),
                 async options => await new LogCommand(_dependencyResolver).Run(options),
                 async options => await new ProjectCommand(_dependencyResolver).Run(options),
                 async options => await new RemoveCommand(_dependencyResolver).Run(options),
@@ -101,6 +105,7 @@ public class Cli : ICli
                 async options => await new StopCommand(_dependencyResolver).Run(options),
                 async options => await new TagCommand(_dependencyResolver).Run(options),
                 async options => await new TodoCommand(_dependencyResolver).Run(options),
+                async options => await new WikiCommand(_dependencyResolver).Run(options),
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
                 {

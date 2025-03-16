@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Rendering;
 using Watson.Commands;
 using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
@@ -41,7 +42,8 @@ public class TodoCommandTests : CommandWithConsoleTest
                 _settingsRepository,
                 new TodoRepository(DbContext, idHelper),
                 ConsoleAdapter,
-                Substitute.For<IAliasRepository>()
+                Substitute.For<IAliasRepository>(),
+                Substitute.For<IProcessHelper>()
             )
         );
     }

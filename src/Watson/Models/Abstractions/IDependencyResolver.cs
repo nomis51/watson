@@ -1,4 +1,5 @@
-﻿using Watson.Core.Repositories.Abstractions;
+﻿using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 
 namespace Watson.Models.Abstractions;
@@ -14,4 +15,5 @@ public interface IDependencyResolver
     ITodoRepository TodoRepository { get; }
     IConsoleAdapter ConsoleAdapter { get; }
     IAliasRepository AliasRepository { get; }
+    IProcessHelper ProcessHelper { get; }
 }

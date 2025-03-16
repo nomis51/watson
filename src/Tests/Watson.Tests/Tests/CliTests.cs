@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
 using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Models.Database;
 using Watson.Core.Repositories;
 using Watson.Core.Repositories.Abstractions;
@@ -54,7 +55,8 @@ public class CliTests : CommandWithConsoleTest
             Substitute.For<ISettingsRepository>(),
             Substitute.For<ITodoRepository>(),
             ConsoleAdapter,
-            new AliasRepository(DbContext, new IdHelper())
+            new AliasRepository(DbContext, new IdHelper()),
+            Substitute.For<IProcessHelper>()
         ), Substitute.For<ILogger<Cli>>());
     }
 
