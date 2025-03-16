@@ -1,12 +1,11 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using CommandLine;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
+using Watson.Extensions;
 
 namespace Watson;
 
@@ -46,9 +45,11 @@ public class Cli : ICli
         exitCode = await HandleAlias(args);
         if (exitCode != -1) return exitCode;
 
-        return await Parser.Default.ParseArguments<
+        var parser = new Parser();
+        return await parser.ParseArguments<
                 AddOptions,
                 AliasOptions,
+                BugOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -67,6 +68,7 @@ public class Cli : ICli
             .MapResult<
                 AddOptions,
                 AliasOptions,
+                BugOptions,
                 CancelOptions,
                 ConfigOptions,
                 EditOptions,
@@ -85,6 +87,7 @@ public class Cli : ICli
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
                 async options => await new AliasCommand(_dependencyResolver).Run(options),
+                async options => await new BugCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
                 async options => await new EditCommand(_dependencyResolver).Run(options),
