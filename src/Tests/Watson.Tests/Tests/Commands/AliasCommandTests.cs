@@ -10,6 +10,7 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
+using Xunit;
 
 namespace Watson.Tests.Tests.Commands;
 
@@ -195,6 +196,27 @@ public class AliasCommandTests : CommandWithConsoleTest
         result.ShouldBe(1);
         await _aliasRepository.DidNotReceive()
             .InsertAsync(Arg.Any<Alias>());
+    }
+
+    [Test]
+    public async Task Run_ShouldCreateAlias_WithOptions()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = ["breakfast", "start", "cooking", "bacon", "--at", "8"],
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _aliasRepository.Received()
+            .InsertAsync(Arg.Is<Alias>(e =>
+                e.Name == "breakfast" &&
+                e.Command == "start cooking bacon --at 8"
+            ));
     }
 
     #endregion

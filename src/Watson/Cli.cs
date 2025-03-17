@@ -44,10 +44,12 @@ public class Cli : ICli
         exitCode = await HandleAlias(args);
         if (exitCode != -1) return exitCode;
 
+        exitCode = await HandleAliasCreation(args);
+        if (exitCode != -1) return exitCode;
+
         var parser = new Parser();
         return await parser.ParseArguments<
                 AddOptions,
-                AliasOptions,
                 BugOptions,
                 CancelOptions,
                 ConfigOptions,
@@ -68,7 +70,6 @@ public class Cli : ICli
             >(args)
             .MapResult<
                 AddOptions,
-                AliasOptions,
                 BugOptions,
                 CancelOptions,
                 ConfigOptions,
@@ -89,7 +90,6 @@ public class Cli : ICli
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
-                async options => await new AliasCommand(_dependencyResolver).Run(options),
                 async options => await new BugCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
@@ -125,6 +125,17 @@ public class Cli : ICli
     #endregion
 
     #region Private methods
+
+    private async Task<int> HandleAliasCreation(string[] args)
+    {
+        if (args.Length < 1 || !args[0].Equals(AliasCommand.CommandName, StringComparison.InvariantCulture)) return -1;
+
+        return await new AliasCommand(_dependencyResolver)
+            .Run(new AliasOptions
+            {
+                Arguments = args
+            });
+    }
 
     private async Task<int> HandleAlias(string[] args)
     {
