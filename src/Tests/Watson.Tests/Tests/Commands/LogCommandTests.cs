@@ -94,7 +94,7 @@ public class LogCommandTests : CommandWithConsoleTest
         await DbContext.Connection.ExecuteAsync("INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES ('id3','id2','id')");
         var options = new LogOptions
         {
-            Day = true
+            Day = 0
         };
         var expectedLines = new[]
         {
