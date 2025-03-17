@@ -10,7 +10,6 @@ using Watson.Helpers;
 using Watson.Models;
 using Watson.Models.CommandLine;
 using Watson.Tests.Abstractions;
-using Xunit;
 
 namespace Watson.Tests.Tests.Commands;
 
