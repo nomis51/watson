@@ -59,10 +59,30 @@ public class LogCommand : Command<LogOptions>
             fromTime = date;
             toTime = date.AddDays(6);
         }
-        else if (options.Day)
+        else if (options.LastWeek)
         {
-            fromTime = DateTime.Now.Date;
-            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
+            var settings = await SettingsRepository.GetSettings();
+
+            var date = DateTime.Now;
+            while (date.DayOfWeek != settings.WorkTime.WeekStartDay)
+            {
+                date = date.AddDays(-1);
+            }
+
+            fromTime = date.AddDays(-7);
+            toTime = date.AddDays(-1);
+        }
+        else if (options.Day != -1)
+        {
+            fromTime = DateTime.Now.Date.AddDays(-options.Day);
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
+                .AddDays(-options.Day);
+        }
+        else if (options.Yesterday)
+        {
+            fromTime = DateTime.Now.Date.AddDays(-1);
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
+                .AddDays(-1);
         }
         else if (options.All)
         {

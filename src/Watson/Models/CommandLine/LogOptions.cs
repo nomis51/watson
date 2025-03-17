@@ -14,7 +14,7 @@ public class LogOptions
     [Option('r', "reverse", HelpText = "Display in reverse order")]
     public bool Reverse { get; set; }
 
-    [Option('y', "year", HelpText = "Display frames of the current year")]
+    [Option('q', "year", HelpText = "Display frames of the current year")]
     public bool Year { get; set; }
 
     [Option('m', "month", HelpText = "Display frames of the current month")]
@@ -23,8 +23,14 @@ public class LogOptions
     [Option('w', "week", HelpText = "Display frames of the current week")]
     public bool Week { get; set; }
 
-    [Option('d', "day", HelpText = "Display frames of the current day")]
-    public bool Day { get; set; } = true;
+    [Option('l', "last-week", HelpText = "Display frames of last week")]
+    public bool LastWeek { get; set; }
+
+    [Option('d', "day", HelpText = "Display frames of the current day", Default = -1)]
+    public int Day { get; set; }
+
+    [Option('y', "yesterday", HelpText = "Display frame of yesterday")]
+    public bool Yesterday { get; set; }
 
     [Option('a', "all", HelpText = "Display all frames")]
     public bool All { get; set; }
