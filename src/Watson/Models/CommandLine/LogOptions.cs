@@ -26,7 +26,7 @@ public class LogOptions
     [Option('l', "last-week", HelpText = "Display frames of last week")]
     public bool LastWeek { get; set; }
 
-    [Option('d', "day", HelpText = "Display frames of the current day", Default = -1)]
+    [Option('d', "day", HelpText = "Display frames of the current day")]
     public int Day { get; set; }
 
     [Option('y', "yesterday", HelpText = "Display frame of yesterday")]

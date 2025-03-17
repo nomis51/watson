@@ -72,12 +72,6 @@ public class LogCommand : Command<LogOptions>
             fromTime = date.AddDays(-7);
             toTime = date.AddDays(-1);
         }
-        else if (options.Day != -1)
-        {
-            fromTime = DateTime.Now.Date.AddDays(-options.Day);
-            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
-                .AddDays(-options.Day);
-        }
         else if (options.Yesterday)
         {
             fromTime = DateTime.Now.Date.AddDays(-1);
@@ -88,6 +82,12 @@ public class LogCommand : Command<LogOptions>
         {
             fromTime = DateTime.MinValue;
             toTime = DateTime.MaxValue;
+        }
+        else if (options.Day >= 0)
+        {
+            fromTime = DateTime.Now.Date.AddDays(-Math.Abs(options.Day));
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
+                .AddDays(-Math.Abs(options.Day));
         }
 
         if (!fromTime.HasValue || !toTime.HasValue) return 1;
