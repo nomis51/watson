@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using CommandLine;
+using CommandLine.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
@@ -44,31 +46,36 @@ public class Cli : ICli
         exitCode = await HandleAlias(args);
         if (exitCode != -1) return exitCode;
 
-        var parser = new Parser();
-        return await parser.ParseArguments<
+        exitCode = await HandleAliasCreation(args);
+        if (exitCode != -1) return exitCode;
+
+        var parser = new Parser(e =>
+        {
+            e.AutoHelp = true;
+            e.AutoVersion = true;
+        });
+        var parserResult = parser.ParseArguments<
+            AddOptions,
+            BugOptions,
+            CancelOptions,
+            ConfigOptions,
+            EditOptions,
+            GithubOptions,
+            LogOptions,
+            ProjectOptions,
+            RemoveOptions,
+            RestartOptions,
+            StartOptions,
+            StatsOptions,
+            StatusOptions,
+            StopOptions,
+            TagOptions,
+            TodoOptions,
+            WikiOptions,
+            WorkHoursOptions
+        >(args);
+        return await parserResult.MapResult<
                 AddOptions,
-                AliasOptions,
-                BugOptions,
-                CancelOptions,
-                ConfigOptions,
-                EditOptions,
-                GithubOptions,
-                LogOptions,
-                ProjectOptions,
-                RemoveOptions,
-                RestartOptions,
-                StartOptions,
-                StatsOptions,
-                StatusOptions,
-                StopOptions,
-                TagOptions,
-                TodoOptions,
-                WikiOptions,
-                WorkHoursOptions
-            >(args)
-            .MapResult<
-                AddOptions,
-                AliasOptions,
                 BugOptions,
                 CancelOptions,
                 ConfigOptions,
@@ -89,7 +96,6 @@ public class Cli : ICli
                 Task<int>
             >(
                 async options => await new AddCommand(_dependencyResolver).Run(options),
-                async options => await new AliasCommand(_dependencyResolver).Run(options),
                 async options => await new BugCommand(_dependencyResolver).Run(options),
                 async options => await new CancelCommand(_dependencyResolver).Run(options),
                 async options => await new ConfigCommand(_dependencyResolver).Run(options),
@@ -109,12 +115,23 @@ public class Cli : ICli
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
                 {
-                    foreach (var error in errors)
+                    var lstErrors = errors.ToList();
+                    if (lstErrors.IsHelp())
                     {
-                        if (error.Tag is ErrorType.VersionRequestedError or
-                            ErrorType.HelpRequestedError or
-                            ErrorType.HelpVerbRequestedError) return Task.FromResult(0);
+                        var helpText = HelpText.AutoBuild(parserResult);
+                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText);
+                        return Task.FromResult(0);
+                    }
 
+                    if (lstErrors.IsVersion())
+                    {
+                        var helpText = HelpText.AutoBuild(parserResult);
+                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText.Heading);
+                        return Task.FromResult(0);
+                    }
+
+                    foreach (var error in lstErrors)
+                    {
                         _logger.LogError("Error while parsing input arguments: {Error}", error);
                     }
 
@@ -125,6 +142,17 @@ public class Cli : ICli
     #endregion
 
     #region Private methods
+
+    private async Task<int> HandleAliasCreation(string[] args)
+    {
+        if (args.Length < 1 || !args[0].Equals(AliasCommand.CommandName, StringComparison.InvariantCulture)) return -1;
+
+        return await new AliasCommand(_dependencyResolver)
+            .Run(new AliasOptions
+            {
+                Arguments = args
+            });
+    }
 
     private async Task<int> HandleAlias(string[] args)
     {
