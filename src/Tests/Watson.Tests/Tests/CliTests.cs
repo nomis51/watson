@@ -416,6 +416,50 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
+    [Arguments("help")]
+    [Arguments("--help")]
+    [Test]
+    public async Task Run_Help_ShouldPrintHelp(string input)
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run([input]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        output.ShouldStartWith(nameof(Watson));
+    }
+
+    [Test]
+    public async Task Run_Help_ShouldPrintHelp_WithSubcommand()
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run(["status", "--help"]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        output.ShouldStartWith(nameof(Watson));
+    }
+
+    [Test]
+    public async Task Run_Version_ShouldPrintVersion()
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run(["version"]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        output.ShouldStartWith(nameof(Watson));
+    }
+    
     #endregion
 
     #region Private methods

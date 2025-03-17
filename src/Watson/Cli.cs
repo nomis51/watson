@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using CommandLine;
+using CommandLine.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;
@@ -47,28 +49,32 @@ public class Cli : ICli
         exitCode = await HandleAliasCreation(args);
         if (exitCode != -1) return exitCode;
 
-        var parser = new Parser();
-        return await parser.ParseArguments<
-                AddOptions,
-                BugOptions,
-                CancelOptions,
-                ConfigOptions,
-                EditOptions,
-                GithubOptions,
-                LogOptions,
-                ProjectOptions,
-                RemoveOptions,
-                RestartOptions,
-                StartOptions,
-                StatsOptions,
-                StatusOptions,
-                StopOptions,
-                TagOptions,
-                TodoOptions,
-                WikiOptions,
-                WorkHoursOptions
-            >(args)
-            .MapResult<
+        var parser = new Parser(e =>
+        {
+            e.AutoHelp = true;
+            e.AutoVersion = true;
+        });
+        var parserResult = parser.ParseArguments<
+            AddOptions,
+            BugOptions,
+            CancelOptions,
+            ConfigOptions,
+            EditOptions,
+            GithubOptions,
+            LogOptions,
+            ProjectOptions,
+            RemoveOptions,
+            RestartOptions,
+            StartOptions,
+            StatsOptions,
+            StatusOptions,
+            StopOptions,
+            TagOptions,
+            TodoOptions,
+            WikiOptions,
+            WorkHoursOptions
+        >(args);
+        return await parserResult.MapResult<
                 AddOptions,
                 BugOptions,
                 CancelOptions,
@@ -109,12 +115,23 @@ public class Cli : ICli
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
                 {
-                    foreach (var error in errors)
+                    var lstErrors = errors.ToList();
+                    if (lstErrors.IsHelp())
                     {
-                        if (error.Tag is ErrorType.VersionRequestedError or
-                            ErrorType.HelpRequestedError or
-                            ErrorType.HelpVerbRequestedError) return Task.FromResult(0);
+                        var helpText = HelpText.AutoBuild(parserResult);
+                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText);
+                        return Task.FromResult(0);
+                    }
 
+                    if (lstErrors.IsVersion())
+                    {
+                        var helpText = HelpText.AutoBuild(parserResult);
+                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText.Heading);
+                        return Task.FromResult(0);
+                    }
+
+                    foreach (var error in lstErrors)
+                    {
                         _logger.LogError("Error while parsing input arguments: {Error}", error);
                     }
 
