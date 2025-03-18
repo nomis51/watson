@@ -1,0 +1,1 @@
+﻿dotMemory.exe start ./src/Watson/bin/Debug/net8.0/Watson.exe --save-to-dir=./scripts/.dotMemory/snapshots -- $args

@@ -15,5 +15,5 @@ $dotnetTestFilters = @(
 
 $joinedDotCoverFilters = $dotCoverFilters -join ";"
 $joinedDotnetTestFilters = $dotnetTestFilters -join ";"
-dotnet dotcover cover-dotnet --ReportType=HTML --Output=./.coverage/report.html --HideAutoProperties --Filters="$joinedDotCoverFilters" -- test --no-build --filter "$joinedDotnetTestFilters"
-Invoke-Item ./.coverage/report.html
+dotnet dotcover cover-dotnet --ReportType=HTML --Output=./src/Tests/Watson.Tests/.coverage/report.html --HideAutoProperties --Filters="$joinedDotCoverFilters" -- test --no-build --filter "$joinedDotnetTestFilters" ./src/Tests/Watson.Tests
+Invoke-Item ./src/Tests/Watson.Tests/.coverage/report.html
