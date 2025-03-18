@@ -5,6 +5,7 @@
       <Path>../.github</Path>
       <Path>../completion</Path>
       <Path>../docs</Path>
+      <Path>../scripts</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />
