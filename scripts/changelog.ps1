@@ -1,0 +1,1 @@
+﻿gh api repos/:owner/:repo/commits --jq '.[] | "- \(.commit.message)"'
