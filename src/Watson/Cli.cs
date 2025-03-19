@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using CommandLine;
 using CommandLine.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Watson.Abstractions;
 using Watson.Commands;

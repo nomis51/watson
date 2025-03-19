@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
-using Watson.Core.Repositories;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
