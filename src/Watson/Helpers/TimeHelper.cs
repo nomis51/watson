@@ -5,6 +5,12 @@ namespace Watson.Helpers;
 
 public class TimeHelper : ITimeHelper
 {
+    #region Constants
+
+    private const char TimePaddingChar = '0';
+
+    #endregion
+    
     #region Public methods
 
     public TimeSpan GetDuration(List<Frame> frames, TimeSpan dayEndHour)
@@ -28,14 +34,15 @@ public class TimeHelper : ITimeHelper
     {
         return string.Join(
             ':',
-            time.Hours.ToString().PadLeft(2, '0'),
-            time.Minutes.ToString().PadLeft(2, '0')
+            time.Hours.ToString().PadLeft(2, TimePaddingChar),
+            time.Minutes.ToString().PadLeft(2, TimePaddingChar)
         );
     }
 
     public string FormatDuration(TimeSpan duration)
     {
-        return $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m";
+        return
+            $"{duration.Hours.ToString().PadLeft(2, TimePaddingChar)}h {duration.Minutes.ToString().PadLeft(2, TimePaddingChar)}m";
     }
 
     public bool ParseDateTime(string? timeStr, out DateTime? dateTime)
