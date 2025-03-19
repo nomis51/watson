@@ -1,5 +1,6 @@
 ﻿using Watson.Commands.Abstractions;
 using Watson.Core.Models.Database;
+using Watson.Core.Models.Settings;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
@@ -26,8 +27,27 @@ public class AddCommand : Command<AddOptions>
         if (fromTime.HasValue && (fromTime.Value.TimeOfDay < settings.WorkTime.StartTime ||
                                   fromTime.Value.TimeOfDay > settings.WorkTime.EndTime))
         {
-            Console.MarkupLine("[yellow]Time is out of work hours[/]");
-            return 1;
+            var customWorkHours = settings.CustomWorkTimes.Find(e => e.Date.Date == DateTime.Today.Date);
+            if (customWorkHours is null)
+            {
+                customWorkHours = new SettingsCustomWorkTime
+                {
+                    Date = DateTime.Today,
+                    WorkTime = new SettingsWorkTime
+                    {
+                        StartTime = settings.WorkTime.StartTime,
+                        EndTime = settings.WorkTime.EndTime,
+                        LunchStartTime = settings.WorkTime.LunchStartTime,
+                        LunchEndTime = settings.WorkTime.LunchEndTime,
+                        WeekStartDay = settings.WorkTime.WeekStartDay
+                    }
+                };
+
+                settings.CustomWorkTimes.Add(customWorkHours);
+            }
+
+            customWorkHours.WorkTime.StartTime = fromTime.Value.TimeOfDay;
+            await SettingsRepository.SaveSettings(settings);
         }
 
         if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
