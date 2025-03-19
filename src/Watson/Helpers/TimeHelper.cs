@@ -131,8 +131,8 @@ public class TimeHelper : ITimeHelper
                     }
                     else
                     {
-                        if (!int.TryParse(input[0].ToString(), out hour)) return null;
-                        if (!int.TryParse(input[1].ToString(), out minute)) return null;
+                        if (!int.TryParse(input.AsSpan(0, 1), out hour)) return null;
+                        if (!int.TryParse(input.AsSpan(1, 1), out minute)) return null;
                     }
 
                     break;
@@ -140,21 +140,21 @@ public class TimeHelper : ITimeHelper
                 // Case 3: Three digits "078" -> 07:08, "123" -> 12:03, "945" -> 09:45
                 case 3:
                 {
-                    if (!int.TryParse(input[..2], out hour)) return null;
-                    if (!int.TryParse(input[2..], out minute)) return null;
+                    if (!int.TryParse(input.AsSpan(0, 2), out hour)) return null;
+                    if (!int.TryParse(input.AsSpan(2, input.Length - 2), out minute)) return null;
 
                     if (hour >= 24)
                     {
-                        if (!int.TryParse(input[0].ToString(), out hour)) return null;
-                        if (!int.TryParse(input[1..], out minute)) return null;
+                        if (!int.TryParse(input.AsSpan(0, 1), out hour)) return null;
+                        if (!int.TryParse(input.AsSpan(1, input.Length - 1), out minute)) return null;
                     }
 
                     break;
                 }
                 // Case 4: Four digits "1234" -> 12:34, "0435" -> 04:35
                 case 4:
-                    if (!int.TryParse(input[..2], out hour)) return null;
-                    if (!int.TryParse(input[2..], out minute)) return null;
+                    if (!int.TryParse(input.AsSpan(0, 2), out hour)) return null;
+                    if (!int.TryParse(input.AsSpan(2, input.Length - 2), out minute)) return null;
                     break;
 
                 default:
