@@ -5,6 +5,12 @@ namespace Watson.Helpers;
 
 public class TimeHelper : ITimeHelper
 {
+    #region Constants
+
+    private const char TimePaddingChar = '0';
+
+    #endregion
+    
     #region Public methods
 
     public TimeSpan GetDuration(List<Frame> frames, TimeSpan dayEndHour)
@@ -28,14 +34,15 @@ public class TimeHelper : ITimeHelper
     {
         return string.Join(
             ':',
-            time.Hours.ToString().PadLeft(2, '0'),
-            time.Minutes.ToString().PadLeft(2, '0')
+            time.Hours.ToString().PadLeft(2, TimePaddingChar),
+            time.Minutes.ToString().PadLeft(2, TimePaddingChar)
         );
     }
 
     public string FormatDuration(TimeSpan duration)
     {
-        return $"{duration.Hours.ToString().PadLeft(2, '0')}h {duration.Minutes.ToString().PadLeft(2, '0')}m";
+        return
+            $"{duration.Hours.ToString().PadLeft(2, TimePaddingChar)}h {duration.Minutes.ToString().PadLeft(2, TimePaddingChar)}m";
     }
 
     public bool ParseDateTime(string? timeStr, out DateTime? dateTime)
@@ -124,8 +131,8 @@ public class TimeHelper : ITimeHelper
                     }
                     else
                     {
-                        if (!int.TryParse(input[0].ToString(), out hour)) return null;
-                        if (!int.TryParse(input[1].ToString(), out minute)) return null;
+                        if (!int.TryParse(input.AsSpan(0, 1), out hour)) return null;
+                        if (!int.TryParse(input.AsSpan(1, 1), out minute)) return null;
                     }
 
                     break;
@@ -133,21 +140,21 @@ public class TimeHelper : ITimeHelper
                 // Case 3: Three digits "078" -> 07:08, "123" -> 12:03, "945" -> 09:45
                 case 3:
                 {
-                    if (!int.TryParse(input[..2], out hour)) return null;
-                    if (!int.TryParse(input[2..], out minute)) return null;
+                    if (!int.TryParse(input.AsSpan(0, 2), out hour)) return null;
+                    if (!int.TryParse(input.AsSpan(2, input.Length - 2), out minute)) return null;
 
                     if (hour >= 24)
                     {
-                        if (!int.TryParse(input[0].ToString(), out hour)) return null;
-                        if (!int.TryParse(input[1..], out minute)) return null;
+                        if (!int.TryParse(input.AsSpan(0, 1), out hour)) return null;
+                        if (!int.TryParse(input.AsSpan(1, input.Length - 1), out minute)) return null;
                     }
 
                     break;
                 }
                 // Case 4: Four digits "1234" -> 12:34, "0435" -> 04:35
                 case 4:
-                    if (!int.TryParse(input[..2], out hour)) return null;
-                    if (!int.TryParse(input[2..], out minute)) return null;
+                    if (!int.TryParse(input.AsSpan(0, 2), out hour)) return null;
+                    if (!int.TryParse(input.AsSpan(2, input.Length - 2), out minute)) return null;
                     break;
 
                 default:
