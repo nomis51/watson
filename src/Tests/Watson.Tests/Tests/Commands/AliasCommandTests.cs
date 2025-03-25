@@ -45,7 +45,6 @@ public class AliasCommandTests : CommandWithConsoleTest
                 new TimeHelper(),
                 new FrameHelper(Substitute.For<IFrameRepository>()),
                 Substitute.For<ISettingsRepository>(),
-                new TodoRepository(DbContext, idHelper),
                 ConsoleAdapter,
                 _aliasRepository,
                 Substitute.For<IProcessHelper>()

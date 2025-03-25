@@ -21,8 +21,7 @@ public static class ParserExtensions
         T14,
         T15,
         T16,
-        T17,
-        T18
+        T17
     >(this Parser parser, IEnumerable<string> args)
     {
         return parser.ParseArguments(
@@ -43,8 +42,7 @@ public static class ParserExtensions
             typeof(T14),
             typeof(T15),
             typeof(T16),
-            typeof(T17),
-            typeof(T18)
+            typeof(T17)
         );
     }
 }

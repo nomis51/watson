@@ -54,7 +54,6 @@ public static class ServicesCollectionExtensions
         services.AddSingleton<IProjectRepository, ProjectRepository>();
         services.AddSingleton<ITagRepository, TagRepository>();
         services.AddSingleton<ISettingsRepository, SettingsRepository>();
-        services.AddSingleton<ITodoRepository, TodoRepository>();
         services.AddSingleton<IAliasRepository, AliasRepository>();
     }
 

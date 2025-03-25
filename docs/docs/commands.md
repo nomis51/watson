@@ -16,7 +16,6 @@
 {% include "fragments/commands/status.md" %}
 {% include "fragments/commands/stop.md" %}
 {% include "fragments/commands/tag.md" %}
-{% include "fragments/commands/todo.md" %}
 {% include "fragments/commands/wiki.md" %}
 {% include "fragments/commands/workhours.md" %}
 

@@ -37,7 +37,6 @@ public class ConfigCommandTests : CommandWithConsoleTest
                 new TimeHelper(),
                 new FrameHelper(frameRepository),
                 _settingsRepository,
-                new TodoRepository(DbContext, idHelper),
                 ConsoleAdapter,
                 Substitute.For<IAliasRepository>(),
                 Substitute.For<IProcessHelper>()
