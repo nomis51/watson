@@ -1,4 +1,5 @@
-﻿using Watson.Core.Models.Database;
+﻿using System.Globalization;
+using Watson.Core.Models.Database;
 using Watson.Helpers.Abstractions;
 
 namespace Watson.Helpers;
@@ -25,9 +26,9 @@ public class TimeHelper : ITimeHelper
         return dayEndHour - frames[0].TimeAsDateTime.TimeOfDay;
     }
 
-    public string FormatDate(DateTime date, string format = "dddd dd MMMM yyyy")
+    public string FormatDate(DateTime date, string format = "dddd dd MMMM yyyy", CultureInfo? culture = null)
     {
-        return date.ToString(format);
+        return date.ToString(format, culture ?? CultureInfo.CurrentCulture);
     }
 
     public string FormatTime(TimeSpan time)

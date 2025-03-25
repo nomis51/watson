@@ -22,7 +22,7 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
-    #region Cosntructors
+    #region Constructors
 
     public CliTests()
     {
@@ -53,7 +53,6 @@ public class CliTests : CommandWithConsoleTest
             Substitute.For<ITimeHelper>(),
             Substitute.For<IFrameHelper>(),
             Substitute.For<ISettingsRepository>(),
-            Substitute.For<ITodoRepository>(),
             ConsoleAdapter,
             new AliasRepository(DbContext, new IdHelper()),
             Substitute.For<IProcessHelper>()
@@ -337,53 +336,6 @@ public class CliTests : CommandWithConsoleTest
     {
         // Arrange
         var args = GetCompletionArgs("tag", input, "proj");
-
-        // Act
-        var result = await _sut.Run(args);
-
-        // Assert
-        result.ShouldBe(0);
-        GetConsoleOutput().ShouldBe("project1");
-    }
-
-    #endregion
-
-    #region Todo
-
-    [Arguments("a", "add")]
-    [Arguments("c", "create")]
-    [Arguments("d", "delete")]
-    [Arguments("r", "remove")]
-    [Arguments("e", "edit")]
-    [Arguments("l", "list")]
-    [Arguments("co", "complete")]
-    [Arguments("do", "done")]
-    [Arguments("u", "uncomplete")]
-    [Arguments("und", "undo")]
-    [Arguments("undon", "undone")]
-    [Arguments("res", "reset")]
-    [Test]
-    public async Task Run_Todo_ShouldComplete_WithAction(string input, string expected)
-    {
-        // Arrange
-        var args = GetCompletionArgs("todo", input);
-
-        // Act
-        var result = await _sut.Run(args);
-
-        // Assert
-        result.ShouldBe(0);
-        GetConsoleOutput().ShouldBe(expected);
-    }
-
-    [Arguments("add")]
-    [Arguments("create")]
-    [Arguments("edit")]
-    [Test]
-    public async Task Run_Todo_ShouldComplete_WithProject(string input)
-    {
-        // Arrange
-        var args = GetCompletionArgs("todo", input, "description", "proj");
 
         // Act
         var result = await _sut.Run(args);

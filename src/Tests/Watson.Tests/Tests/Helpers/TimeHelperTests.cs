@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using System.Globalization;
+using Shouldly;
 using Watson.Core.Models.Database;
 using Watson.Helpers;
 
@@ -235,7 +236,7 @@ public class TimeHelperTests
         var date = DateTime.Parse(input);
 
         // Act
-        var result = _sut.FormatDate(date, format);
+        var result = _sut.FormatDate(date, format, CultureInfo.InvariantCulture);
 
         // Assert
         result.ShouldBe(expected);

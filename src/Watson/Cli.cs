@@ -69,7 +69,6 @@ public class Cli : ICli
             StatusOptions,
             StopOptions,
             TagOptions,
-            TodoOptions,
             WikiOptions,
             WorkHoursOptions
         >(args);
@@ -89,7 +88,6 @@ public class Cli : ICli
                 StatusOptions,
                 StopOptions,
                 TagOptions,
-                TodoOptions,
                 WikiOptions,
                 WorkHoursOptions,
                 Task<int>
@@ -109,7 +107,6 @@ public class Cli : ICli
                 async options => await new StatusCommand(_dependencyResolver).Run(options),
                 async options => await new StopCommand(_dependencyResolver).Run(options),
                 async options => await new TagCommand(_dependencyResolver).Run(options),
-                async options => await new TodoCommand(_dependencyResolver).Run(options),
                 async options => await new WikiCommand(_dependencyResolver).Run(options),
                 async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
                 errors =>
@@ -261,11 +258,6 @@ public class Cli : ICli
         else if (commandName == TagCommand.CommandName)
         {
             await new TagCommand(_dependencyResolver)
-                .ProvideCompletions(actualArgs);
-        }
-        else if (commandName == TodoCommand.CommandName)
-        {
-            await new TodoCommand(_dependencyResolver)
                 .ProvideCompletions(actualArgs);
         }
         else if (commandName == WorkHoursCommand.CommandName)

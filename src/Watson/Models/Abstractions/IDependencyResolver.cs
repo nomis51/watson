@@ -12,7 +12,6 @@ public interface IDependencyResolver
     ITimeHelper TimeHelper { get; }
     IFrameHelper FrameHelper { get; }
     ISettingsRepository SettingsRepository { get; }
-    ITodoRepository TodoRepository { get; }
     IConsoleAdapter ConsoleAdapter { get; }
     IAliasRepository AliasRepository { get; }
     IProcessHelper ProcessHelper { get; }
