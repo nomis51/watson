@@ -48,12 +48,9 @@ public class FrameHelperTests
             ProjectId = "to time next frame"
         };
         var toTime = DateTime.Now.AddSeconds(-1);
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await CreateFrameAtTheBeginningOfTheDay(frame, toTime, toTimeNextFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -78,15 +75,12 @@ public class FrameHelperTests
             Time = 0,
         };
         var toTime = DateTime.Now.AddSeconds(-1);
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
             .Returns(default(Frame));
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await CreateFrameAtTheBeginningOfTheDay(frame, toTime, toTimeNextFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -103,15 +97,12 @@ public class FrameHelperTests
             Time = 0,
         };
         var toTime = DateTime.Now.AddSeconds(-1);
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameAtTheBeginningOfTheDay", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.UpdateAsync(toTimeNextFrame)
             .Returns(false);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+        var result = await CreateFrameAtTheBeginningOfTheDay(frame, toTime, toTimeNextFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -129,12 +120,9 @@ public class FrameHelperTests
             Time = 0,
             ProjectId = "from time previous frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameContainedInAFrame", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await CreateFrameContainedInAFrame(frame, toTime, fromTimePreviousFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -159,15 +147,12 @@ public class FrameHelperTests
             Id = "id2",
             Time = 0,
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameContainedInAFrame", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
             .Returns(default(Frame));
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await CreateFrameContainedInAFrame(frame, toTime, fromTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -185,15 +170,12 @@ public class FrameHelperTests
             Time = 0,
             ProjectId = "from time previous frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameContainedInAFrame", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(Arg.Is<Frame>(f => f.ProjectId == "from time previous frame"))
             .Returns(default(Frame));
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+        var result = await CreateFrameContainedInAFrame(frame, toTime, fromTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -211,12 +193,9 @@ public class FrameHelperTests
             Time = 0,
             ProjectId = "to time previous frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverTwoFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await CreateFrameOverTwoFrames(frame, toTime, toTimePreviousFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -242,15 +221,12 @@ public class FrameHelperTests
             Time = 0,
             ProjectId = "to time previous frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverTwoFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.InsertAsync(frame)
             .Returns(default(Frame));
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await CreateFrameOverTwoFrames(frame, toTime, toTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -268,15 +244,12 @@ public class FrameHelperTests
             Time = 0,
             ProjectId = "to time previous frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverTwoFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.UpdateAsync(Arg.Is<Frame>(f => f.ProjectId == "to time previous frame"))
             .Returns(false);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+        var result = await CreateFrameOverTwoFrames(frame, toTime, toTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -311,15 +284,12 @@ public class FrameHelperTests
                 Id = "id5"
             }
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await CreateFrameOverMultipleFrames(frame, toTime, toTimeNextFrame, toTimePreviousFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -375,9 +345,6 @@ public class FrameHelperTests
                 Id = "id5"
             }
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
@@ -386,7 +353,7 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await CreateFrameOverMultipleFrames(frame, toTime, toTimeNextFrame, toTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -421,9 +388,6 @@ public class FrameHelperTests
                 Id = "id5"
             }
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
@@ -432,7 +396,7 @@ public class FrameHelperTests
             .Returns(default(Frame));
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await CreateFrameOverMultipleFrames(frame, toTime, toTimeNextFrame, toTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -467,9 +431,6 @@ public class FrameHelperTests
                 Id = "id5"
             }
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(framesToDelete);
@@ -478,7 +439,7 @@ public class FrameHelperTests
             .Returns(false);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await CreateFrameOverMultipleFrames(frame, toTime, toTimeNextFrame, toTimePreviousFrame);
 
         // Assert
         result.ShouldBeNull();
@@ -502,15 +463,12 @@ public class FrameHelperTests
             Time = 3,
             ProjectId = "to time next frame"
         };
-        var sut = _sut.GetType()
-            .GetMethod("CreateFrameOverMultipleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
-        sut.ShouldNotBeNull();
 
         _frameRepository.GetAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns([]);
 
         // Act
-        var result = await (Task<Frame?>)sut.Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
+        var result = await CreateFrameOverMultipleFrames(frame, toTime, toTimeNextFrame, toTimePreviousFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -771,6 +729,43 @@ public class FrameHelperTests
         result.ShouldNotBeNull();
         await _frameRepository.Received()
             .DeleteManyAsync(Arg.Any<IEnumerable<string>>());
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private Task<Frame?> CreateFrameOverTwoFrames(Frame frame, DateTime toTime, Frame toTimePreviousFrame)
+    {
+        return (Task<Frame?>)_sut.GetType()
+            .GetMethod(nameof(CreateFrameOverTwoFrames), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(_sut, [frame, toTime, toTimePreviousFrame])!;
+    }
+
+    private Task<Frame?> CreateFrameContainedInAFrame(Frame frame, DateTime toTime, Frame fromTimePreviousFrame)
+    {
+        return (Task<Frame?>)_sut.GetType()
+            .GetMethod(nameof(CreateFrameContainedInAFrame), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(_sut, [frame, toTime, fromTimePreviousFrame])!;
+    }
+
+    private Task<Frame?> CreateFrameAtTheBeginningOfTheDay(Frame frame, DateTime toTime, Frame toTimeNextFrame)
+    {
+        return (Task<Frame?>)_sut.GetType()
+            .GetMethod(nameof(CreateFrameAtTheBeginningOfTheDay), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(_sut, [frame, toTime, toTimeNextFrame])!;
+    }
+
+    private Task<Frame?> CreateFrameOverMultipleFrames(
+        Frame frame,
+        DateTime toTime,
+        Frame toTimeNextFrame,
+        Frame toTimePreviousFrame
+    )
+    {
+        return (Task<Frame?>)_sut.GetType()
+            .GetMethod(nameof(CreateFrameOverMultipleFrames), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(_sut, [frame, toTime, toTimeNextFrame, toTimePreviousFrame])!;
     }
 
     #endregion

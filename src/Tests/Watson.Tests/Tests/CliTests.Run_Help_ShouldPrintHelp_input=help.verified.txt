@@ -1,0 +1,41 @@
+﻿Watson.Tests 1.0.0+9756ff48b1e5916656667f3c451d6a579aae62fb
+Copyright (C) 2025 Watson.Tests
+
+  add          Add a new frame
+
+  bug          Submit a bug report
+
+  cancel       Cancel the currently running task
+
+  config       Get or set a setting key
+
+  edit         Edit an existing frame
+
+  github       Open the GitHub repository
+
+  log          Display frames within given timespan
+
+  project      Manage projects
+
+  remove       Remove a frame
+
+  restart      Restart a frame
+
+  start        Add a frame at the current time
+
+  stats        Display statistics
+
+  status       Display the status of the current frame
+
+  stop         Stop the currently running frame
+
+  tag          Manage tags
+
+  wiki         Open the wiki
+
+  workhours    Set custom work hours for the day
+
+  help         Display more information on a specific command.
+
+  version      Display version information.
+

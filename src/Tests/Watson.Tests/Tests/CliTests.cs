@@ -381,7 +381,7 @@ public class CliTests : CommandWithConsoleTest
         // Assert
         result.ShouldBe(0);
         var output = GetConsoleOutput();
-        output.ShouldStartWith(nameof(Watson));
+        await Verify(output);
     }
 
     [Test]
@@ -395,7 +395,7 @@ public class CliTests : CommandWithConsoleTest
         // Assert
         result.ShouldBe(0);
         var output = GetConsoleOutput();
-        output.ShouldStartWith(nameof(Watson));
+        await Verify(output);
     }
 
     [Test]
@@ -409,9 +409,9 @@ public class CliTests : CommandWithConsoleTest
         // Assert
         result.ShouldBe(0);
         var output = GetConsoleOutput();
-        output.ShouldStartWith(nameof(Watson));
+        await Verify(output);
     }
-    
+
     #endregion
 
     #region Private methods
