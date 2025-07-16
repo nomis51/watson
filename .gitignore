@@ -401,3 +401,4 @@ FodyWeavers.xsd
 src/.idea/coverme
 docs/site
 scripts/.dotMemory
+*.received.*
