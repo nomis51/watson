@@ -1,10 +1,12 @@
-﻿using Watson.Core.Helpers.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Watson.Core.Helpers.Abstractions;
 using Watson.Core.Repositories.Abstractions;
 using Watson.Helpers.Abstractions;
 using Watson.Models.Abstractions;
 
 namespace Watson.Models;
 
+[ExcludeFromCodeCoverage]
 public class DependencyResolver : IDependencyResolver
 {
     public IProjectRepository ProjectRepository { get; }

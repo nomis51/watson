@@ -1,9 +1,11 @@
-﻿using Watson.Commands.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Watson.Commands.Abstractions;
 using Watson.Models.Abstractions;
 using Watson.Models.CommandLine;
 
 namespace Watson.Commands;
 
+[ExcludeFromCodeCoverage]
 public class BugCommand : Command<BugOptions>
 {
     #region Constants

@@ -1,7 +1,9 @@
-﻿using CommandLine;
+﻿using System.Diagnostics.CodeAnalysis;
+using CommandLine;
 
 namespace Watson.Models.CommandLine;
 
+[ExcludeFromCodeCoverage]
 [Verb("edit", HelpText = "Edit an existing frame")]
 public class EditOptions
 {

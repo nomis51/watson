@@ -1,7 +1,9 @@
-﻿using CommandLine;
+﻿using System.Diagnostics.CodeAnalysis;
+using CommandLine;
 
 namespace Watson.Models.CommandLine;
 
+[ExcludeFromCodeCoverage]
 [Verb("workhours", HelpText = "Set custom work hours for the day")]
 public class WorkHoursOptions
 {

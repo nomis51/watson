@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ public class Cli : ICli
 
     #region Public methods
 
+    [ExcludeFromCodeCoverage]
     public async Task<int> Run(string[] args)
     {
         var exitCode = await HandleCompletion(args);
@@ -73,66 +75,66 @@ public class Cli : ICli
             WorkHoursOptions
         >(args);
         return await parserResult.MapResult<
-                AddOptions,
-                BugOptions,
-                CancelOptions,
-                ConfigOptions,
-                EditOptions,
-                GithubOptions,
-                LogOptions,
-                ProjectOptions,
-                RemoveOptions,
-                RestartOptions,
-                StartOptions,
-                StatsOptions,
-                StatusOptions,
-                StopOptions,
-                TagOptions,
-                WikiOptions,
-                WorkHoursOptions,
-                Task<int>
-            >(
-                async options => await new AddCommand(_dependencyResolver).Run(options),
-                async options => await new BugCommand(_dependencyResolver).Run(options),
-                async options => await new CancelCommand(_dependencyResolver).Run(options),
-                async options => await new ConfigCommand(_dependencyResolver).Run(options),
-                async options => await new EditCommand(_dependencyResolver).Run(options),
-                async options => await new GithubCommand(_dependencyResolver).Run(options),
-                async options => await new LogCommand(_dependencyResolver).Run(options),
-                async options => await new ProjectCommand(_dependencyResolver).Run(options),
-                async options => await new RemoveCommand(_dependencyResolver).Run(options),
-                async options => await new RestartCommand(_dependencyResolver).Run(options),
-                async options => await new StartCommand(_dependencyResolver).Run(options),
-                async options => await new StatsCommand(_dependencyResolver).Run(options),
-                async options => await new StatusCommand(_dependencyResolver).Run(options),
-                async options => await new StopCommand(_dependencyResolver).Run(options),
-                async options => await new TagCommand(_dependencyResolver).Run(options),
-                async options => await new WikiCommand(_dependencyResolver).Run(options),
-                async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
-                errors =>
+            AddOptions,
+            BugOptions,
+            CancelOptions,
+            ConfigOptions,
+            EditOptions,
+            GithubOptions,
+            LogOptions,
+            ProjectOptions,
+            RemoveOptions,
+            RestartOptions,
+            StartOptions,
+            StatsOptions,
+            StatusOptions,
+            StopOptions,
+            TagOptions,
+            WikiOptions,
+            WorkHoursOptions,
+            Task<int>
+        >(
+            async options => await new AddCommand(_dependencyResolver).Run(options),
+            async options => await new BugCommand(_dependencyResolver).Run(options),
+            async options => await new CancelCommand(_dependencyResolver).Run(options),
+            async options => await new ConfigCommand(_dependencyResolver).Run(options),
+            async options => await new EditCommand(_dependencyResolver).Run(options),
+            async options => await new GithubCommand(_dependencyResolver).Run(options),
+            async options => await new LogCommand(_dependencyResolver).Run(options),
+            async options => await new ProjectCommand(_dependencyResolver).Run(options),
+            async options => await new RemoveCommand(_dependencyResolver).Run(options),
+            async options => await new RestartCommand(_dependencyResolver).Run(options),
+            async options => await new StartCommand(_dependencyResolver).Run(options),
+            async options => await new StatsCommand(_dependencyResolver).Run(options),
+            async options => await new StatusCommand(_dependencyResolver).Run(options),
+            async options => await new StopCommand(_dependencyResolver).Run(options),
+            async options => await new TagCommand(_dependencyResolver).Run(options),
+            async options => await new WikiCommand(_dependencyResolver).Run(options),
+            async options => await new WorkHoursCommand(_dependencyResolver).Run(options),
+            errors =>
+            {
+                var lstErrors = errors.ToList();
+                if (lstErrors.IsHelp())
                 {
-                    var lstErrors = errors.ToList();
-                    if (lstErrors.IsHelp())
-                    {
-                        var helpText = HelpText.AutoBuild(parserResult);
-                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText);
-                        return Task.FromResult(0);
-                    }
+                    var helpText = HelpText.AutoBuild(parserResult);
+                    _dependencyResolver.ConsoleAdapter.WriteLine(helpText);
+                    return Task.FromResult(0);
+                }
 
-                    if (lstErrors.IsVersion())
-                    {
-                        var helpText = HelpText.AutoBuild(parserResult);
-                        _dependencyResolver.ConsoleAdapter.WriteLine(helpText.Heading);
-                        return Task.FromResult(0);
-                    }
+                if (lstErrors.IsVersion())
+                {
+                    var helpText = HelpText.AutoBuild(parserResult);
+                    _dependencyResolver.ConsoleAdapter.WriteLine(helpText.Heading);
+                    return Task.FromResult(0);
+                }
 
-                    foreach (var error in lstErrors)
-                    {
-                        _logger.LogError("Error while parsing input arguments: {Error}", error);
-                    }
+                foreach (var error in lstErrors)
+                {
+                    _logger.LogError("Error while parsing input arguments: {Error}", error);
+                }
 
-                    return Task.FromResult(1);
-                });
+                return Task.FromResult(1);
+            });
     }
 
     #endregion

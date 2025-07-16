@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Watson.Core.Helpers.Abstractions;
 
 namespace Watson.Core.Helpers;
 
+[ExcludeFromCodeCoverage]
 public class ProcessHelper : IProcessHelper
 {
     #region Public methods

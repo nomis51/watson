@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dapper;
 using NSubstitute;
 using Shouldly;
 using Watson.Commands;

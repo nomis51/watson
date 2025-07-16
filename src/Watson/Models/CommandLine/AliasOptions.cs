@@ -1,7 +1,9 @@
-﻿using CommandLine;
+﻿using System.Diagnostics.CodeAnalysis;
+using CommandLine;
 
 namespace Watson.Models.CommandLine;
 
+[ExcludeFromCodeCoverage]
 [Verb("alias", HelpText = "Create or remove a command alias")]
 public class AliasOptions
 {

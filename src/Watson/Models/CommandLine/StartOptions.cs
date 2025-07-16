@@ -1,7 +1,9 @@
-﻿using CommandLine;
+﻿using System.Diagnostics.CodeAnalysis;
+using CommandLine;
 
 namespace Watson.Models.CommandLine;
 
+[ExcludeFromCodeCoverage]
 [Verb("start", HelpText = "Add a frame at the current time")]
 public class StartOptions
 {
