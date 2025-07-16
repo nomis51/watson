@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Diagnostics.CodeAnalysis;
+using NSubstitute;
 using Shouldly;
 using Watson.Commands;
 using Watson.Core.Helpers;

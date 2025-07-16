@@ -1,7 +1,9 @@
-﻿using Serilog;
+﻿using System.Diagnostics.CodeAnalysis;
+using Serilog;
 
 namespace Watson.Helpers;
 
+[ExcludeFromCodeCoverage]
 public static class LoggingHelper
 {
     #region Public methods

@@ -1,24 +1,38 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Watson.Abstractions;
 using Watson.Extensions;
 using Watson.Helpers;
 
-LoggingHelper.Configure();
+namespace Watson;
 
-try
+[ExcludeFromCodeCoverage]
+public abstract class Program
 {
-    var services = new ServiceCollection();
-    return await services.AddAppResources()
-        .BuildServiceProvider()
-        .GetService<ICli>()!
-        .Run(args);
-}
-catch (Exception e)
-{
-    if (Debugger.IsAttached) throw;
-    Log.Fatal(e, "An unhandled exception occurred.");
-}
+    #region Public methods
 
-return 1;
+    public static async Task<int> Main(string[] args)
+    {
+        LoggingHelper.Configure();
+
+        try
+        {
+            var services = new ServiceCollection();
+            return await services.AddAppResources()
+                .BuildServiceProvider()
+                .GetService<ICli>()!
+                .Run(args);
+        }
+        catch (Exception e)
+        {
+            if (Debugger.IsAttached) throw;
+            Log.Fatal(e, "An unhandled exception occurred.");
+        }
+
+        return 1;
+    }
+
+    #endregion
+}
