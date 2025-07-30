@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Models\Database\Alias.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.ComponentModel;
+using Watson.Core.Models.Database.Abstractions;
+
+namespace Watson.Core.Models.Database;
+
+[Description(&quot;Aliases&quot;)]
+public class Alias : DbModel
+{
+    public string Name { get; set; } = null!;
+    public string Command { get; set; } = null!;
+
+    public string[] Arguments =&gt;
+        Command.Split(&#39; &#39;, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,26,9,30,1],[9,31,9,35,1],[9,40,9,45,1],[10,29,10,33,1],[10,34,10,38,1],[10,43,10,48,1],[13,9,13,99,1]]);
+    </script>
+  </body>
+</html>

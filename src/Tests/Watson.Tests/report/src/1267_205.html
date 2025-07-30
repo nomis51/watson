@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\StopOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;stop&quot;, HelpText = &quot;Stop the currently running frame&quot;)]
+public class StopOptions
+{
+    [Option(&#39;a&#39;, &quot;at&quot;, HelpText = &quot;At time&quot;)]
+    public string? AtTime { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,29,11,33,1],[11,34,11,38,1]]);
+    </script>
+  </body>
+</html>

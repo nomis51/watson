@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Helpers\IdHelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Security.Cryptography;
+using Watson.Core.Helpers.Abstractions;
+
+namespace Watson.Core.Helpers;
+
+public class IdHelper : IIdHelper
+{
+    #region Public methods
+
+    public string GenerateId()
+    {
+        var timestamp = DateTime.Now.Ticks;
+        var randomValue = RandomNumberGenerator.GetInt32(0, 0xFFFF);
+        var combined = (timestamp &lt;&lt; 16) | (uint)randomValue;
+        return combined.ToString(&quot;x8&quot;)[^8..];
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,5,11,6,1],[12,9,12,44,1],[13,9,13,69,1],[14,9,14,62,1],[15,9,15,46,1],[16,5,16,6,1]]);
+    </script>
+  </body>
+</html>

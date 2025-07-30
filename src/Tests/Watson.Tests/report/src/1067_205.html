@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\StatsOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;stats&quot;, HelpText = &quot;Display statistics&quot;)]
+public class StatsOptions
+{
+    [Value(0, MetaName = &quot;type&quot;, Required = true, HelpText = &quot;Type of statistics&quot;)]
+    public string Type { get; set; } = null!;
+
+    [Option(&#39;f&#39;, &quot;from&quot;, HelpText = &quot;From time&quot;)]
+    public string FromTime { get; set; } = string.Empty;
+
+    [Option(&#39;t&#39;, &quot;to&quot;, HelpText = &quot;To time&quot;)]
+    public string ToTime { get; set; } = string.Empty;
+
+    [Option(&#39;y&#39;, &quot;year&quot;, HelpText = &quot;Display frames of the current year&quot;)]
+    public bool Year { get; set; }
+
+    [Option(&#39;m&#39;, &quot;month&quot;, HelpText = &quot;Display frames of the current month&quot;)]
+    public bool Month { get; set; }
+
+    [Option(&#39;w&#39;, &quot;week&quot;, HelpText = &quot;Display frames of the current week&quot;)]
+    public bool Week { get; set; }
+
+    [Option(&#39;d&#39;, &quot;day&quot;, HelpText = &quot;Display frames of the current day&quot;)]
+    public bool Day { get; set; } = true;
+
+    [Option(&#39;a&#39;, &quot;all&quot;, HelpText = &quot;Display all frames&quot;)]
+    public bool All { get; set; }
+
+    [Option(&#39;p&#39;, &quot;project&quot;, HelpText = &quot;Display frames of the project(s) only&quot;)]
+    public string? Projects { get; set; }
+
+    [Option(&#39;t&#39;, &quot;tag&quot;, HelpText = &quot;Display frames of the tag(s) only&quot;)]
+    public string? Tags { get; set; }
+
+    [Option(&#39;i&#39;, &quot;ignore-project&quot;, HelpText = &quot;Ignore frames of the project(s)&quot;)]
+    public string? IgnoredProjects { get; set; }
+
+    [Option(&#39;g&#39;, &quot;ignore-tag&quot;, HelpText = &quot;Ignore frames of the tag(s)&quot;)]
+    public string? IgnoredTags { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,40,11,45,0],[14,44,14,56,0],[17,42,17,54,0],[29,37,29,41,0]]);
+    </script>
+  </body>
+</html>

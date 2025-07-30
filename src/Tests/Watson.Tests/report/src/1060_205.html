@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\ConfigOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;config&quot;, HelpText = &quot;Get or set a setting key&quot;)]
+public class ConfigOptions
+{
+    [Value(0, MetaName = &quot;action&quot;, Required = true, HelpText = &quot;get or set&quot;)]
+    public string Action { get; set; } = &quot;get&quot;;
+
+    [Value(1, MetaName = &quot;key&quot;, Required = true, HelpText = &quot;Setting&#39;s key name&quot;)]
+    public string Key { get; set; } = null!;
+
+    [Value(2, MetaName = &quot;value&quot;, Required = false, HelpText = &quot;Setting&#39;s value&quot;)]
+    public string? Value { get; set; } = null!;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,42,11,47,1],[14,39,14,44,1],[17,42,17,47,1]]);
+    </script>
+  </body>
+</html>

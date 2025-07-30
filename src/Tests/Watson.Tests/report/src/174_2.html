@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\FrameRepositoryTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Shouldly;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+
+namespace Watson.Tests.Tests.Core.Repositories;
+
+public class FrameRepositoryTests : IDisposable
+{
+    #region Members
+
+    private readonly IAppDbContext _dbContext;
+    private readonly FrameRepository _sut;
+    private readonly string _dbFilePath = Path.GetTempFileName();
+
+    #endregion
+
+    #region Constructors
+
+    public FrameRepositoryTests()
+    {
+        var idHelper = new IdHelper();
+        _dbContext = new AppDbContext($&quot;Data Source={_dbFilePath};Cache=Shared;Pooling=False&quot;);
+        _sut = new FrameRepository(_dbContext, new IdHelper());
+
+        _ = new ProjectRepository(_dbContext, idHelper);
+        _ = new TagRepository(_dbContext, idHelper);
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dbContext.Connection.Close();
+        _dbContext.Connection.Dispose();
+
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task GetByIdAsync_ShouldFrameWithProjectAndTags_WhenIdExists()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;name&quot;
+        });
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;name&quot;
+        });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                FrameId = id,
+                TagId = &quot;id&quot;
+            });
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Project.ShouldNotBeNull();
+        result.Project.Name.ShouldBe(&quot;name&quot;);
+        result.Tags.ShouldNotBeNull();
+        result.Tags.Count.ShouldBe(1);
+        result.Tags.First().Name.ShouldBe(&quot;name&quot;);
+    }
+
+    [Test]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenIdDoesNotExist()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnAllFramesWithProjectAndTags_WhenIdExists()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;name&quot;
+        });
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;name&quot;
+        });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                FrameId = id,
+                TagId = &quot;id&quot;
+            });
+
+        // Act
+        var result = await _sut.GetAsync();
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(1);
+        resultLst.First().Project.ShouldNotBeNull();
+        resultLst.First().Project!.Name.ShouldBe(&quot;name&quot;);
+        resultLst.First().Tags.ShouldNotBeNull();
+        resultLst.First().Tags.Count.ShouldBe(1);
+        resultLst.First().Tags.First().Name.ShouldBe(&quot;name&quot;);
+    }
+
+    [Test]
+    public async Task GetNextFrameAsync_ShouldReturnNextFrame_WhenNextFrameExists()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.AddMinutes(1).Ticks
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.AddSeconds(30).Ticks
+            });
+
+        // Act
+        var result = await _sut.GetNextFrameAsync(DateTime.Now);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(&quot;id2&quot;);
+    }
+
+    [Test]
+    public async Task GetNextFrameAsync_ShouldReturnNull_WhenNextFrameDoesNotExist()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+
+        // Act
+        var result = await _sut.GetNextFrameAsync(new DateTime(2));
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrame_WhenPreviousFrameExists()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.Ticks
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.AddSeconds(20).Ticks
+            });
+
+        // Act
+        var result = await _sut.GetPreviousFrameAsync(DateTime.Now.AddMinutes(1));
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(&quot;id2&quot;);
+    }
+
+    [Test]
+    public async Task GetPreviousFrameAsync_ShouldReturnNull_WhenPreviousFrameDoesNotExist()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+
+        // Act
+        var result = await _sut.GetPreviousFrameAsync(new DateTime(0));
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task GetAsync_ShoudReturnFramesWithinDateRange_WhenFramesExists()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(0), new DateTime(2));
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task GetAsync_ShoudReturnEmptyList_WhenFramesDoesNotExist()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(2), new DateTime(4));
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task AssociateTagsAsync_ShouldCreateManyRelationships_WhenTagsExists()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;name&quot;
+        });
+
+        // Act
+        await _sut.AssociateTagsAsync(id, [&quot;name&quot;]);
+
+        // Assert
+        var result =
+            await _dbContext.Connection.QueryAsync(
+                &quot;SELECT * FROM Frames_Tags WHERE FrameId = @Id&quot;, new { Id = id });
+        var resultLst = result.ToList();
+        resultLst.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task AssociateTagsAsync_ShouldDoNothing_WhenFrameDoesNotExist()
+    {
+        // Arrange
+
+        // Act
+        await _sut.AssociateTagsAsync(&quot;id&quot;, [&quot;name&quot;]);
+
+        // Assert    
+        var result =
+            await _dbContext.Connection.QueryAsync(
+                &quot;SELECT * FROM Frames_Tags WHERE FrameId = @Id&quot;, new { Id = &quot;id&quot; });
+        var resultLst = result.ToList();
+        resultLst.Count.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task InsertAsync_ShouldInsertFrame()
+    {
+        // Arrange
+        var frame = new Frame
+        {
+            ProjectId = &quot;id&quot;,
+            Time = 1
+        };
+
+        // Act
+        await _sut.InsertAsync(frame);
+
+        // Assert
+        var result = await _dbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(
+            &quot;SELECT * FROM Frames WHERE Id = @Id&quot;, new { frame.Id });
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task UpdateAsync_ShouldUpdateFrame()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = id,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        var frame = new Frame
+        {
+            Id = id,
+            ProjectId = &quot;id&quot;,
+            Time = 2
+        };
+
+        // Act
+        await _sut.UpdateAsync(frame);
+
+        // Assert
+        var result = await _dbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(
+            &quot;SELECT * FROM Frames WHERE Id = @Id&quot;, new { frame.Id });
+        result.ShouldNotBeNull();
+        result.Time.ShouldBe(2);
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnFramesWithinRange()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id3&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 3
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], [], [], []);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(2);
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnFramesWithinRangeAndProject()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id3&quot;,
+                ProjectId = &quot;id2&quot;,
+                Time = 3
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [&quot;id&quot;], [], [], []);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(2);
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnFramesWithinRangeAndTags()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id3&quot;,
+                ProjectId = &quot;id2&quot;,
+                Time = 3
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                FrameId = &quot;id&quot;,
+                TagId = &quot;id&quot;
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                Name = &quot;name&quot;
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [], [&quot;id&quot;], [], []);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnFramesWithinRangeAndTagsAndProject()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id1&quot;,
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id3&quot;,
+                ProjectId = &quot;id2&quot;,
+                Time = 3
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                FrameId = &quot;id&quot;,
+                TagId = &quot;id&quot;
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                FrameId = &quot;id2&quot;,
+                TagId = &quot;id&quot;
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                Name = &quot;name&quot;
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [&quot;id&quot;], [&quot;id&quot;], [], []);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnFramesWithinRangeAndTagsAndProjectAndIgnoreProjectsAndIgnoreTags()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = 1
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                ProjectId = &quot;id1&quot;,
+                Time = 2
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id3&quot;,
+                ProjectId = &quot;id2&quot;,
+                Time = 3
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                FrameId = &quot;id&quot;,
+                TagId = &quot;id&quot;
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (@Id,@FrameId,@TagId)&quot;, new
+            {
+                Id = &quot;id2&quot;,
+                FrameId = &quot;id2&quot;,
+                TagId = &quot;id&quot;
+            });
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                Name = &quot;name&quot;
+            });
+
+        // Act
+        var result = await _sut.GetAsync(new DateTime(1), new DateTime(2), [&quot;id&quot;], [&quot;id&quot;], [&quot;id&quot;], [&quot;id&quot;]);
+
+        // Assert
+        var resultLst = result.ToList();
+        resultLst.ShouldNotBeNull();
+        resultLst.Count.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task GetPreviousFrameAsync_ShouldReturnPreviousFrameOfTimeDate()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.AddDays(-1)
+            });
+
+        // Act
+        var result = await _sut.GetPreviousFrameAsync(DateTime.Now);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task GetNextFrameAsync_ShouldReturnNextFrameOfTimeDate()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (@Id,@ProjectId,@Time)&quot;, new
+            {
+                Id = &quot;id&quot;,
+                ProjectId = &quot;id&quot;,
+                Time = DateTime.Now.AddDays(1)
+            });
+
+        // Act
+        var result = await _sut.GetNextFrameAsync(DateTime.Now);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,5,17,66,1],[23,5,23,34,1],[24,5,24,6,1],[25,9,25,39,1],[26,9,26,96,1],[27,9,27,64,1],[29,9,29,57,1],[30,9,30,53,1],[31,5,31,6,1],[34,5,34,6,1],[35,9,35,35,1],[36,9,36,39,1],[37,9,37,41,1],[39,9,39,38,1],[40,9,40,10,1],[41,13,41,38,1],[42,9,42,10,1],[43,5,43,6,1],[51,5,51,6,1],[54,9,60,16,1],[61,9,65,12,1],[66,9,70,12,1],[71,9,77,16,1],[80,9,80,50,1],[83,9,83,34,1],[84,9,84,42,1],[85,9,85,46,1],[86,9,86,39,1],[87,9,87,39,1],[88,9,88,51,1],[89,5,89,6,1],[93,5,93,6,1],[98,9,98,50,1],[101,9,101,31,1],[102,5,102,6,1],[106,5,106,6,1],[109,9,115,16,1],[116,9,120,12,1],[121,9,125,12,1],[126,9,132,16,1],[135,9,135,44,1],[138,9,138,41,1],[139,9,139,37,1],[140,9,140,37,1],[141,9,141,53,1],[142,9,142,58,1],[143,9,143,50,1],[144,9,144,50,1],[145,9,145,62,1],[146,5,146,6,1],[150,5,150,6,1],[152,9,158,16,1],[159,9,165,16,1],[168,9,168,65,1],[171,9,171,34,1],[172,9,172,35,1],[173,5,173,6,1],[177,5,177,6,1],[180,9,186,16,1],[189,9,189,68,1],[192,9,192,31,1],[193,5,193,6,1],[197,5,197,6,1],[199,9,205,16,1],[206,9,212,16,1],[215,9,215,83,1],[218,9,218,34,1],[219,9,219,35,1],[220,5,220,6,1],[224,5,224,6,1],[227,9,233,16,1],[236,9,236,72,1],[239,9,239,31,1],[240,5,240,6,1],[244,5,244,6,1],[247,9,253,16,1],[256,9,256,76,1],[259,9,259,41,1],[260,9,260,37,1],[261,9,261,37,1],[262,5,262,6,1],[266,5,266,6,1],[269,9,275,16,1],[278,9,278,76,1],[281,9,281,41,1],[282,9,282,37,1],[283,9,283,37,1],[284,5,284,6,1],[288,5,288,6,1],[291,9,297,16,1],[298,9,302,12,1],[305,9,305,53,1],[308,9,310,83,1],[311,9,311,41,1],[312,9,312,37,1],[313,5,313,6,1],[317,5,317,6,1],[321,9,321,55,1],[324,9,326,85,1],[327,9,327,41,1],[328,9,328,37,1],[329,5,329,6,1],[333,5,333,6,1],[335,9,339,11,1],[342,9,342,39,1],[345,9,346,70,1],[347,9,347,34,1],[348,5,348,6,1],[352,5,352,6,1],[355,9,361,16,1],[362,9,367,11,1],[370,9,370,39,1],[373,9,374,70,1],[375,9,375,34,1],[376,9,376,33,1],[377,5,377,6,1],[381,5,381,6,1],[383,9,389,16,1],[390,9,396,16,1],[397,9,403,16,1],[406,9,406,92,1],[409,9,409,41,1],[410,9,410,37,1],[411,9,411,37,1],[412,5,412,6,1],[416,5,416,6,1],[418,9,424,16,1],[425,9,431,16,1],[432,9,438,16,1],[441,9,441,96,1],[444,9,444,41,1],[445,9,445,37,1],[446,9,446,37,1],[447,5,447,6,1],[451,5,451,6,1],[453,9,459,16,1],[460,9,466,16,1],[467,9,473,16,1],[474,9,480,16,1],[481,9,486,16,1],[489,9,489,96,1],[492,9,492,41,1],[493,9,493,37,1],[494,9,494,37,1],[495,5,495,6,1],[499,5,499,6,1],[501,9,507,16,1],[508,9,514,16,1],[515,9,521,16,1],[522,9,528,16,1],[529,9,535,16,1],[536,9,541,16,1],[544,9,544,100,1],[547,9,547,41,1],[548,9,548,37,1],[549,9,549,37,1],[550,5,550,6,1],[554,5,554,6,1],[556,9,562,16,1],[563,9,569,16,1],[570,9,576,16,1],[577,9,583,16,1],[584,9,590,16,1],[591,9,596,16,1],[599,9,599,108,1],[602,9,602,41,1],[603,9,603,37,1],[604,9,604,37,1],[605,5,605,6,1],[609,5,609,6,1],[611,9,617,16,1],[620,9,620,69,1],[623,9,623,31,1],[624,5,624,6,1],[628,5,628,6,1],[630,9,636,16,1],[639,9,639,65,1],[642,9,642,31,1],[643,5,643,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\LogCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Text.RegularExpressions;
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class LogCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly LogCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public LogCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        _settingsRepository.GetSettings()
+            .Returns(new Settings());
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new LogCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldDisplayToday_WhenDay()
+    {
+        // Arrange
+        var time = new DateTime(
+            DateTime.Now.Year,
+            DateTime.Now.Month,
+            DateTime.Now.Day,
+            8,
+            45,
+            0
+        );
+        var time2 = new DateTime(
+            DateTime.Now.Year,
+            DateTime.Now.Month,
+            DateTime.Now.Day,
+            9,
+            15,
+            0
+        );
+
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new
+            {
+                Time = time.Ticks
+            });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id2&#39;,&#39;id2&#39;,@Time)&quot;,
+            new
+            {
+                Time = time2.Ticks
+            });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id2&#39;,&#39;project2&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id2&#39;,&#39;tag2&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id2&#39;,&#39;id&#39;,&#39;id2&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id3&#39;,&#39;id2&#39;,&#39;id&#39;)&quot;);
+        var options = new LogOptions
+        {
+            Day = 0
+        };
+        var expectedLines = new[]
+        {
+            $&quot;{DateTime.Today:dddd dd MMMM yyyy} (6h 15m)&quot;,
+            GenerateSpectreMarkupOutput(
+                &quot;id 08:45 to 09:15 [blue]00h 30m[/] [green]project[/] ([purple]tag[/], [purple]tag2[/])&quot;),
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        var lines = output.Split(Environment.NewLine,
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i &lt; expectedLines.Length; ++i)
+        {
+            if (i &gt;= lines.Length) Assert.Fail(&quot;Missing line: &quot; + expectedLines[i]);
+            var line = Regex.Replace(lines[i].Trim(), @&quot;\s+&quot;, &quot; &quot;);
+
+            if (i + 1 &lt; lines.Length)
+            {
+                line.ShouldBe(expectedLines[i]);
+            }
+        }
+
+        var lastLine = Regex.Replace(lines[^1].Trim(), @&quot;\s+&quot;, &quot; &quot;);
+        lastLine.StartsWith(&quot;id2 09:15 to &quot;).ShouldBeTrue();
+        lastLine.EndsWith(
+                GenerateSpectreMarkupOutput(&quot; [green]project2[/] ([purple]tag[/])&quot;))
+            .ShouldBeTrue();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,5,22,102,1],[29,5,29,29,1],[30,5,30,6,1],[31,9,31,39,1],[33,9,34,38,1],[36,9,36,72,1],[37,9,49,11,1],[50,5,50,6,1],[58,5,58,6,1],[60,9,67,11,1],[68,9,75,11,1],[77,9,81,16,1],[82,9,86,16,1],[87,9,87,107,1],[88,9,88,109,1],[89,9,89,99,1],[90,9,90,101,1],[91,9,91,119,1],[92,9,92,121,1],[93,9,93,121,1],[94,9,97,11,1],[98,9,103,11,1],[106,9,106,46,1],[107,9,107,41,1],[110,9,110,28,1],[111,9,112,85,1],[113,14,113,23,1],[113,25,113,49,1],[113,51,113,54,1],[114,9,114,10,1],[115,13,115,35,1],[115,36,115,85,0],[116,13,116,68,1],[118,13,118,38,1],[119,13,119,14,1],[120,17,120,49,1],[121,13,121,14,1],[122,9,122,10,1],[124,9,124,69,1],[125,9,125,61,1],[126,9,128,29,1],[129,5,129,6,1]]);
+    </script>
+  </body>
+</html>

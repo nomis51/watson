@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\StatusCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class StatusCommand : Command&lt;StatusOptions&gt;
+{
+    #region Constructors
+
+    public StatusCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(StatusOptions options)
+    {
+        var frame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
+        if (frame is null) return 1;
+
+        var settings = await SettingsRepository.GetSettings();
+        var endTime = DateTime.Now;
+
+        if (DateTime.Now.TimeOfDay &gt;= settings.WorkTime.LunchStartTime &amp;&amp;
+            DateTime.Now.TimeOfDay &lt;= settings.WorkTime.LunchEndTime)
+        {
+            endTime = new DateTime(
+                DateTime.Now.Year,
+                DateTime.Now.Month,
+                DateTime.Now.Day,
+                settings.WorkTime.LunchStartTime.Hours,
+                settings.WorkTime.LunchStartTime.Minutes,
+                settings.WorkTime.LunchStartTime.Seconds
+            );
+        }
+
+        var needToSubtractLunchTime = frame.TimeAsDateTime.TimeOfDay &lt; settings.WorkTime.LunchStartTime &amp;&amp;
+                                      DateTime.Now.TimeOfDay &gt; settings.WorkTime.LunchEndTime;
+
+        Console.MarkupLine(
+            &quot;{0}: {1}{2} started at {3} ({4}){5}&quot;,
+            frame.Id,
+            $&quot;[green]{frame.Project?.Name ?? &quot;-&quot;}[/]&quot;,
+            frame.Tags.Count == 0
+                ? string.Empty
+                : $&quot; ([purple]{string.Join(&quot;[/], [purple]&quot;, frame.Tags.Select(e =&gt; e.Name))}[/])&quot;,
+            $&quot;[blue]{TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay)}[/]&quot;,
+            TimeHelper.FormatDuration(
+                endTime - frame.TimeAsDateTime -
+                (needToSubtractLunchTime
+                    ? (settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)
+                    : TimeSpan.Zero)
+            ),
+            !needToSubtractLunchTime
+                ? string.Empty
+                : $&quot; [yellow](+{TimeHelper.FormatDuration(settings.WorkTime.LunchEndTime - settings.WorkTime.LunchStartTime)} lunch)[/]&quot;
+        );
+
+        return 0;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,68,11,92,1],[12,5,12,6,1],[13,5,13,6,1],[20,5,20,6,1],[21,9,21,79,1],[22,9,22,27,1],[22,28,22,37,1],[24,9,24,63,1],[25,9,25,36,1],[27,9,28,70,1],[29,9,29,10,1],[30,13,37,15,1],[38,9,38,10,1],[40,9,41,95,1],[43,9,49,84,1],[49,84,49,90,1],[49,90,60,11,1],[62,9,62,18,1],[63,5,63,6,1],[66,5,66,6,0],[67,9,67,35,0],[68,5,68,6,0]]);
+    </script>
+  </body>
+</html>

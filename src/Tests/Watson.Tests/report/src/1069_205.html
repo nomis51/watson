@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\TagOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;tag&quot;, HelpText = &quot;Manage tags&quot;)]
+public class TagOptions
+{
+    [Value(0, MetaName = &quot;action&quot;, Required = true, HelpText = &quot;Action to perform&quot;)]
+    public string Action { get; set; } = null!;
+
+    [Value(1, MetaName = &quot;arguments&quot;, Required = false, HelpText = &quot;Arguments&quot;)]
+    public IEnumerable&lt;string&gt; Arguments { get; set; } = [];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,42,11,47,1],[14,58,14,60,1]]);
+    </script>
+  </body>
+</html>

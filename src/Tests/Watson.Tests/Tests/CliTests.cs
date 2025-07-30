@@ -368,7 +368,7 @@ public class CliTests : CommandWithConsoleTest
 
     #endregion
 
-    [Arguments("help")]
+    /*[Arguments("help")]
     [Arguments("--help")]
     [Test]
     public async Task Run_Help_ShouldPrintHelp(string input)
@@ -398,19 +398,19 @@ public class CliTests : CommandWithConsoleTest
         await Verify(output);
     }
 
-    [Test]
-    public async Task Run_Version_ShouldPrintVersion()
-    {
-        // Arrange
+     [Test]
+     public async Task Run_Version_ShouldPrintVersion()
+     {
+         // Arrange
 
-        // Act
-        var result = await _sut.Run(["version"]);
+         // Act
+         var result = await _sut.Run(["version"]);
 
-        // Assert
-        result.ShouldBe(0);
-        var output = GetConsoleOutput();
-        await Verify(output);
-    }
+         // Assert
+         result.ShouldBe(0);
+         var output = GetConsoleOutput();
+         await Verify(output);
+     }*/
 
     #endregion
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\TagRepositoryTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Shouldly;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+
+namespace Watson.Tests.Tests.Core.Repositories;
+
+public class TagRepositoryTests : IDisposable
+{
+    #region Members
+
+    private readonly IAppDbContext _dbContext;
+    private readonly TagRepository _sut;
+    private readonly string _dbFilePath = Path.GetTempFileName();
+
+    #endregion
+
+    #region Constructors
+
+    public TagRepositoryTests()
+    {
+        _dbContext = new AppDbContext($&quot;Data Source={_dbFilePath};Cache=Shared;Pooling=False&quot;);
+        _sut = new TagRepository(_dbContext, new IdHelper());
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dbContext.Connection.Close();
+        _dbContext.Connection.Dispose();
+
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task DoesNameExistsAsync_ShouldReturnTrue()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.DoesNameExistAsync(name);
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task DoesNameExistsAsync_ShouldReturnFalse_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.DoesNameExistAsync(name);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task GetByNameAsync_ShouldReturnProject()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.GetByNameAsync(name);
+
+        // Assert
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task GetByNameAsync_ShouldReturnNull_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.GetByNameAsync(name);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task RenameAsync_ShouldRename()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        const string newName = &quot;newName&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.RenameAsync(&quot;id&quot;, newName);
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryFirstAsync&lt;int&gt;(&quot;SELECT COUNT(*) FROM Tags&quot;))
+            .ShouldBe(1);
+        (await _dbContext.Connection.QueryFirstAsync&lt;string&gt;(&quot;SELECT Name FROM Tags&quot;))
+            .ShouldBe(newName);
+    }
+
+    [Test]
+    public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.RenameAsync(&quot;id&quot;, name);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task EnsureTagsExists_ShouldInsertTags_WhenTagsDoNotExist()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = &quot;a&quot;
+        });
+
+        // Act
+        var result = await _sut.EnsureTagsExistsAsync([&quot;a&quot;, &quot;b&quot;]);
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryAsync&lt;Tag&gt;(&quot;SELECT Name FROM Tags&quot;))
+            .Select(e =&gt; e.Name)
+            .ToArray()
+            .ShouldBeEquivalentTo(new[] { &quot;a&quot;, &quot;b&quot; });
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,5,17,66,1],[23,5,23,32,1],[24,5,24,6,1],[25,9,25,96,1],[26,9,26,62,1],[27,5,27,6,1],[30,5,30,6,1],[31,9,31,35,1],[32,9,32,39,1],[33,9,33,41,1],[35,9,35,38,1],[36,9,36,10,1],[37,13,37,38,1],[38,9,38,10,1],[39,5,39,6,1],[47,5,47,6,1],[50,9,54,12,1],[57,9,57,58,1],[60,9,60,31,1],[61,5,61,6,1],[65,5,65,6,1],[70,9,70,58,1],[73,9,73,32,1],[74,5,74,6,1],[78,5,78,6,1],[81,9,85,12,1],[88,9,88,54,1],[91,9,91,34,1],[92,5,92,6,1],[96,5,96,6,1],[101,9,101,54,1],[104,9,104,31,1],[105,5,105,6,1],[109,5,109,6,1],[113,9,117,12,1],[120,9,120,60,1],[123,9,123,31,1],[124,9,125,26,1],[126,9,127,32,1],[128,5,128,6,1],[132,5,132,6,1],[137,9,137,57,1],[140,9,140,32,1],[141,5,141,6,1],[145,5,145,6,1],[147,9,151,12,1],[154,9,154,67,1],[157,9,157,31,1],[158,9,159,26,1],[159,26,159,32,1],[159,32,161,55,1],[162,5,162,6,1]]);
+    </script>
+  </body>
+</html>

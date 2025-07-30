@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\AliasCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Reflection;
+using Watson.Commands.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class AliasCommand : Command&lt;AliasOptions&gt;
+{
+    #region Constants
+
+    private const string CreateAction = &quot;create&quot;;
+    private const string SetAction = &quot;set&quot;;
+    private const string AddAction = &quot;add&quot;;
+    private const string RemoveAction = &quot;remove&quot;;
+    private const string DeleteAction = &quot;delete&quot;;
+
+    #endregion
+
+    #region Constructors
+
+    public AliasCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(AliasOptions options)
+    {
+        var arguments = options.Arguments.ToList();
+        if (arguments.Count &lt; 2) return 1;
+
+        if (SetAction.StartsWith(arguments[0], StringComparison.OrdinalIgnoreCase) ||
+            AddAction.StartsWith(arguments[0], StringComparison.OrdinalIgnoreCase) ||
+            CreateAction.StartsWith(arguments[0], StringComparison.OrdinalIgnoreCase))
+        {
+            if (arguments.Count &lt; 3) return 1;
+
+            var name = arguments[1];
+
+            if (!await IsAliasNameValid(name))
+            {
+                Console.MarkupLine(&quot;[red]Alias already exists.[/]&quot;);
+                return 1;
+            }
+
+            var command = string.Join(&#39; &#39;, arguments.Skip(2));
+
+            var alias = new Alias
+            {
+                Name = name,
+                Command = command
+            };
+            alias = await DependencyResolver.AliasRepository.InsertAsync(alias);
+            if (alias is null)
+            {
+                Console.MarkupLine(&quot;[red]Failed to create alias.[/]&quot;);
+                return 1;
+            }
+
+            Console.MarkupLine(&quot;[green]Alias created.[/]&quot;);
+            return 0;
+        }
+
+        if (RemoveAction.StartsWith(arguments[0], StringComparison.OrdinalIgnoreCase) ||
+            DeleteAction.StartsWith(arguments[0], StringComparison.OrdinalIgnoreCase))
+        {
+            if (arguments.Count &lt; 2) return 1;
+
+            var alias = await DependencyResolver.AliasRepository.GetByNameAsync(arguments[1]);
+            if (alias is null)
+            {
+                Console.MarkupLine(&quot;[red]Alias not found.[/]&quot;);
+                return 1;
+            }
+
+            if (!await DependencyResolver.AliasRepository.DeleteAsync(alias.Id))
+            {
+                Console.MarkupLine(&quot;[red]Failed to delete alias.[/]&quot;);
+                return 1;
+            }
+
+            Console.MarkupLine(&quot;[green]Alias deleted.[/]&quot;);
+            return 0;
+        }
+
+        var newAlias = new Alias
+        {
+            Name = arguments[0],
+            Command = string.Join(&#39; &#39;, arguments.Skip(1))
+        };
+
+        newAlias = await DependencyResolver.AliasRepository.InsertAsync(newAlias);
+        if (newAlias is null)
+        {
+            Console.MarkupLine(&quot;[red]Failed to create alias.[/]&quot;);
+            return 1;
+        }
+
+        Console.MarkupLine(&quot;[green]Alias created.[/]&quot;);
+        return 0;
+    }
+
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        if (inputs.Length == 1)
+        {
+            if (AddAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(AddAction);
+                return Task.CompletedTask;
+            }
+
+            if (CreateAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(CreateAction);
+                return Task.CompletedTask;
+            }
+
+            if (SetAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(SetAction);
+                return Task.CompletedTask;
+            }
+
+            if (DeleteAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(DeleteAction);
+                return Task.CompletedTask;
+            }
+
+            if (RemoveAction.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine(RemoveAction);
+                return Task.CompletedTask;
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task&lt;bool&gt; IsAliasNameValid(string name)
+    {
+        var alias = await AliasRepository.GetByNameAsync(name);
+        if (alias is not null) return false;
+
+        var types = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(e =&gt;
+                e.Namespace is not null &amp;&amp;
+                e.Namespace.StartsWith($&quot;{nameof(Watson)}.Commands&quot;) &amp;&amp;
+                e.Name.EndsWith(&quot;Command&quot;)
+            );
+        foreach (var type in types)
+        {
+            var commandName =
+                type.GetProperty(nameof(AddCommand.CommandName),
+                        BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?
+                    .GetValue(null)?
+                    .ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(commandName)) continue;
+
+            if (commandName.Equals(name, StringComparison.OrdinalIgnoreCase)) return false;
+        }
+
+        return true;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,67,23,91,1],[24,5,24,6,1],[25,5,25,6,1],[32,5,32,6,1],[33,9,33,52,1],[34,9,34,33,1],[34,34,34,43,0],[36,9,38,87,1],[39,9,39,10,1],[40,13,40,37,1],[40,38,40,47,0],[42,13,42,37,1],[44,13,44,47,1],[45,13,45,14,1],[46,17,46,69,1],[47,17,47,26,1],[50,13,50,63,1],[52,13,56,15,1],[57,13,57,81,1],[58,13,58,31,1],[59,13,59,14,0],[60,17,60,71,0],[61,17,61,26,0],[64,13,64,60,1],[65,13,65,22,1],[68,9,69,87,1],[70,9,70,10,1],[71,13,71,37,1],[71,38,71,47,0],[73,13,73,95,1],[74,13,74,31,1],[75,13,75,14,1],[76,17,76,64,1],[77,17,77,26,1],[80,13,80,81,1],[81,13,81,14,0],[82,17,82,71,0],[83,17,83,26,0],[86,13,86,60,1],[87,13,87,22,1],[90,9,94,11,1],[96,9,96,83,1],[97,9,97,30,1],[98,9,98,10,0],[99,13,99,67,0],[100,13,100,22,0],[103,9,103,56,1],[104,9,104,18,1],[105,5,105,6,1],[109,5,109,6,1],[110,9,110,32,1],[111,9,111,10,1],[112,13,112,85,1],[113,13,113,14,1],[114,17,114,46,1],[115,17,115,43,1],[118,13,118,88,1],[119,13,119,14,1],[120,17,120,49,1],[121,17,121,43,1],[124,13,124,85,1],[125,13,125,14,1],[126,17,126,46,1],[127,17,127,43,1],[130,13,130,88,1],[131,13,131,14,1],[132,17,132,49,1],[133,17,133,43,1],[136,13,136,88,1],[137,13,137,14,1],[138,17,138,49,1],[139,17,139,43,1],[141,9,141,10,0],[143,9,143,35,0],[144,5,144,6,1],[151,5,151,6,1],[152,9,152,64,1],[153,9,153,31,1],[153,32,153,45,1],[155,9,158,17,1],[158,17,160,43,1],[160,43,161,15,1],[162,9,162,16,1],[162,18,162,26,1],[162,27,162,29,1],[162,30,162,35,1],[163,9,163,10,1],[164,13,168,49,1],[169,13,169,51,1],[169,52,169,61,0],[171,13,171,78,1],[171,79,171,92,1],[172,9,172,10,1],[174,9,174,21,1],[175,5,175,6,1]]);
+    </script>
+  </body>
+</html>

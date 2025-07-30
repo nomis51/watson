@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\StopCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class StopCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly StopCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public StopCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new StopCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldStopCurrentFrame()
+    {
+        // Arrange
+        var options = new StopOptions();
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        frame.ShouldNotBeNull();
+        frame.ProjectId.ShouldBeEmpty();
+        (DateTime.Now - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldStopFrameAtSpecifiedTime_WhenFromTimeSpecified()
+    {
+        // Arrange
+        var atTime = DateTime.Now.AddMinutes(-1);
+        var options = new StopOptions
+        {
+            AtTime = atTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        frame.ShouldNotBeNull();
+        frame.ProjectId.ShouldBeEmpty();
+        (atTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,102,1],[28,5,28,30,1],[29,5,29,6,1],[30,9,30,39,1],[32,9,32,72,1],[33,9,45,11,1],[46,5,46,6,1],[54,5,54,6,1],[56,9,56,41,1],[59,9,59,46,1],[62,9,62,28,1],[63,9,63,104,1],[64,9,64,33,1],[65,9,65,41,1],[66,9,66,80,1],[67,5,67,6,1],[71,5,71,6,1],[73,9,73,50,1],[74,9,77,11,1],[80,9,80,46,1],[83,9,83,28,1],[84,9,84,104,1],[85,9,85,33,1],[86,9,86,41,1],[87,9,87,74,1],[88,5,88,6,1]]);
+    </script>
+  </body>
+</html>

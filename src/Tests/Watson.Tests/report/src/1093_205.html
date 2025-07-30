@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\StopCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class StopCommand : Command&lt;StopOptions&gt;
+{
+    #region Constructors
+
+    public StopCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(StopOptions options)
+    {
+        if (string.IsNullOrEmpty(options.AtTime))
+        {
+            var frame = Frame.CreateEmpty(DateTime.Now.Ticks);
+            return await FrameRepository.InsertAsync(frame) is not null ? 0 : 1;
+        }
+
+        if (!TimeHelper.ParseDateTime(options.AtTime, out var atTime)) return 1;
+        var emptyFrame = Frame.CreateEmpty(atTime!.Value.Ticks);
+        return await FrameRepository.InsertAsync(emptyFrame) is not null ? 0 : 1;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,66,12,90,1],[13,5,13,6,1],[14,5,14,6,1],[21,5,21,6,1],[22,9,22,50,1],[23,9,23,10,1],[24,13,24,63,1],[25,13,25,81,1],[28,9,28,71,1],[28,72,28,81,0],[29,9,29,65,1],[30,9,30,82,1],[31,5,31,6,1],[34,5,34,6,0],[35,9,35,45,0]]);
+    </script>
+  </body>
+</html>

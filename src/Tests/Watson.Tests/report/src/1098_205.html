@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Program.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Watson.Abstractions;
+using Watson.Extensions;
+using Watson.Helpers;
+
+namespace Watson;
+
+[ExcludeFromCodeCoverage]
+public abstract class Program
+{
+    #region Public methods
+
+    public static async Task&lt;int&gt; Main(string[] args)
+    {
+        LoggingHelper.Configure();
+
+        try
+        {
+            var services = new ServiceCollection();
+            return await services.AddAppResources()
+                .BuildServiceProvider()
+                .GetService&lt;ICli&gt;()!
+                .Run(args);
+        }
+        catch (Exception e)
+        {
+            if (Debugger.IsAttached) throw;
+            Log.Fatal(e, &quot;An unhandled exception occurred.&quot;);
+        }
+
+        return 1;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,5,17,6,0],[18,9,18,35,0],[21,9,21,10,0],[22,13,22,52,0],[23,13,26,28,0],[28,9,28,28,0],[29,9,29,10,0],[30,13,30,37,0],[30,38,30,44,0],[31,13,31,62,0],[32,9,32,10,0],[34,9,34,18,0],[35,5,35,6,0]]);
+    </script>
+  </body>
+</html>

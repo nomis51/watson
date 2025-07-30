@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\RestartOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;restart&quot;, HelpText = &quot;Restart a frame&quot;)]
+public class RestartOptions
+{
+    [Value(0, MetaName = &quot;frameId&quot;, Required = false, HelpText = &quot;Frame ID&quot;)]
+    public string? FrameId { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,30,11,34,1],[11,35,11,39,1]]);
+    </script>
+  </body>
+</html>

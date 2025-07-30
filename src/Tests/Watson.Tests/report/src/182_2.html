@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Helpers\IdHelperTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Shouldly;
+using Watson.Core.Helpers;
+
+namespace Watson.Tests.Tests.Core.Helpers;
+
+public class IdHelperTests
+{
+    #region Members
+
+    private readonly IdHelper _sut = new();
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public void GenerateId_ShouldReturnRandomIdOfLength()
+    {
+        // Arrange
+
+        // Act
+        var id = _sut.GenerateId();
+
+        // Assert
+        id.ShouldNotBeEmpty();
+        id.Length.ShouldBe(8);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,5,10,44,1],[18,5,18,6,1],[22,9,22,36,1],[25,9,25,31,1],[26,9,26,31,1],[27,5,27,6,1]]);
+    </script>
+  </body>
+</html>

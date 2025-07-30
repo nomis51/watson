@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Models\FrameTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Shouldly;
+using Watson.Core.Models.Database;
+
+namespace Watson.Tests.Tests.Core.Models;
+
+public class FrameTests
+{
+    #region Tests
+
+    [Test]
+    public void Ctor_ShouldHaveDateTimeFieldOfTimestamp()
+    {
+        // Arrange
+        var time = DateTime.Now.AddMinutes(-2);
+
+        // Act
+        var sut = new Frame
+        {
+            Time = time.Ticks
+        };
+
+        // Assert
+        sut.TimeAsDateTime.ShouldBe(time);
+    }
+
+    [Test]
+    public void Ctor_ShouldHaveNowAsDefaultTimestamp()
+    {
+        // Arrange
+        const int gracePeriod = 3;
+
+        // Act
+        var sut = new Frame();
+
+        // Assert
+        sut.Time.ShouldBeGreaterThan(0);
+        sut.Time.ShouldBeGreaterThanOrEqualTo(DateTime.Now.AddSeconds(-gracePeriod).Ticks);
+        sut.Time.ShouldBeLessThanOrEqualTo(DateTime.Now.AddSeconds(gracePeriod).Ticks);
+    }
+
+    [Test]
+    public void CreateEmptyFrame_ShouldCreateEmptyFrame_WithProvidedTimestamp()
+    {
+        // Arrange
+        var time = DateTime.Now.AddMinutes(-2).Ticks;
+
+        // Act
+        var sut = Frame.CreateEmpty(time);
+
+        // Assert
+        sut.ProjectId.ShouldBeEmpty();
+        sut.Id.ShouldBeNull();
+        sut.Time.ShouldBe(time);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,6,1],[14,9,14,48,1],[17,9,20,11,1],[23,9,23,43,1],[24,5,24,6,1],[28,5,28,6,1],[33,9,33,31,1],[36,9,36,41,1],[37,9,37,92,1],[38,9,38,88,1],[39,5,39,6,1],[43,5,43,6,1],[45,9,45,54,1],[48,9,48,43,1],[51,9,51,39,1],[52,9,52,31,1],[53,9,53,33,1],[54,5,54,6,1]]);
+    </script>
+  </body>
+</html>

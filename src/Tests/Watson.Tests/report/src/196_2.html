@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\WorkHoursCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class WorkHoursCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly WorkHoursCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public WorkHoursCommandTests()
+    {
+        var idHelper = new IdHelper();
+        _settingsRepository.GetSettings()
+            .Returns(new Settings());
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new WorkHoursCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldAddCustomWorkHours_WhenStart()
+    {
+        // Arrange
+        var startTime = new TimeSpan(8, 56, 0);
+
+        // Act
+        var result = await _sut.Run(new WorkHoursOptions
+        {
+            Type = &quot;start&quot;,
+            Time = new TimeHelper().FormatTime(startTime)
+        });
+
+        // Assert
+        result.ShouldBe(0);
+        await _settingsRepository.Received()
+            .SaveSettings(Arg.Is&lt;Settings&gt;(e =&gt;
+                    e.CustomWorkTimes[0].WorkTime.StartTime == startTime
+                )
+            );
+    }
+
+    [Test]
+    public async Task Run_ShouldAddCustomWorkHours_WhenEnd()
+    {
+        // Arrange
+        var startTime = new TimeSpan(8, 56, 0);
+
+        // Act
+        var result = await _sut.Run(new WorkHoursOptions
+        {
+            Type = &quot;end&quot;,
+            Time = new TimeHelper().FormatTime(startTime)
+        });
+
+        // Assert
+        result.ShouldBe(0);
+        await _settingsRepository.Received()
+            .SaveSettings(Arg.Is&lt;Settings&gt;(e =&gt;
+                    e.CustomWorkTimes[0].WorkTime.EndTime == startTime
+                )
+            );
+    }
+
+    [Test]
+    public async Task Run_ShouldResetCustomWorkHours()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                CustomWorkTimes =
+                [
+                    new SettingsCustomWorkTime()
+                    {
+                        Date = DateTime.Today,
+                        WorkTime = new SettingsWorkTime
+                        {
+                            StartTime = new TimeSpan(8, 0, 0),
+                            EndTime = new TimeSpan(17, 0, 0)
+                        }
+                    }
+                ]
+            });
+
+        // Act
+        var result = await _sut.Run(new WorkHoursOptions
+        {
+            Type = &quot;reset&quot;,
+        });
+
+        // Assert
+        result.ShouldBe(0);
+        await _settingsRepository.Received()
+            .SaveSettings(Arg.Is&lt;Settings&gt;(e =&gt;
+                    e.CustomWorkTimes.Count == 0
+                )
+            );
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,5,20,102,1],[27,5,27,35,1],[28,5,28,6,1],[29,9,29,39,1],[30,9,31,38,1],[33,9,33,72,1],[34,9,46,11,1],[47,5,47,6,1],[55,5,55,6,1],[57,9,57,48,1],[60,9,64,12,1],[67,9,67,28,1],[68,9,72,15,1],[73,5,73,6,1],[77,5,77,6,1],[79,9,79,48,1],[82,9,86,12,1],[89,9,89,28,1],[90,9,94,15,1],[95,5,95,6,1],[99,5,99,6,1],[101,9,116,16,1],[119,9,122,12,1],[125,9,125,28,1],[126,9,130,15,1],[131,5,131,6,1]]);
+    </script>
+  </body>
+</html>

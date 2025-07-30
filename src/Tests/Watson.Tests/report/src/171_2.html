@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\CliTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Shouldly;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers.Abstractions;
+using Watson.Models;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests;
+
+public class CliTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly Cli _sut;
+    private readonly IFrameRepository _frameRepository = Substitute.For&lt;IFrameRepository&gt;();
+
+    #endregion
+
+    #region Constructors
+
+    public CliTests()
+    {
+        var projectRepository = Substitute.For&lt;IProjectRepository&gt;();
+        projectRepository.GetAsync()
+            .Returns([
+                new Project
+                {
+                    Id = &quot;id1&quot;,
+                    Name = &quot;project1&quot;
+                }
+            ]);
+
+        var tagRepository = Substitute.For&lt;ITagRepository&gt;();
+        tagRepository.GetAsync()
+            .Returns([
+                new Tag
+                {
+                    Id = &quot;id1&quot;,
+                    Name = &quot;tag1&quot;
+                }
+            ]);
+
+        _sut = new Cli(new DependencyResolver(
+            projectRepository,
+            _frameRepository,
+            tagRepository,
+            Substitute.For&lt;ITimeHelper&gt;(),
+            Substitute.For&lt;IFrameHelper&gt;(),
+            Substitute.For&lt;ISettingsRepository&gt;(),
+            ConsoleAdapter,
+            new AliasRepository(DbContext, new IdHelper()),
+            Substitute.For&lt;IProcessHelper&gt;()
+        ), Substitute.For&lt;ILogger&lt;Cli&gt;&gt;());
+    }
+
+    #endregion
+
+    #region Tests
+
+    #region Add
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithProject()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;add&quot;, &quot;proj&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;project1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;add&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Add_ShouldComplete_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;add&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    #endregion
+
+    #region Alias
+
+    [Arguments(&quot;c&quot;, &quot;create&quot;)]
+    [Arguments(&quot;s&quot;, &quot;set&quot;)]
+    [Arguments(&quot;a&quot;, &quot;add&quot;)]
+    [Arguments(&quot;r&quot;, &quot;remove&quot;)]
+    [Arguments(&quot;d&quot;, &quot;delete&quot;)]
+    [Test]
+    public async Task Run_Alias_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;alias&quot;, input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Test]
+    public async Task Run_Alias_ShouldExecuteCommandAssociatedWithAlias()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Aliases (Id, Name, Command) VALUES (&#39;id1&#39;, &#39;test&#39;, &#39;status&#39;)&quot;);
+
+        // Act
+        var result = await _sut.Run([&quot;test&quot;]);
+
+        // Assert
+        result.ShouldBe(1);
+        await _frameRepository.Received(1)
+            .GetPreviousFrameAsync(Arg.Any&lt;DateTime&gt;());
+    }
+
+    #endregion
+
+    #region Edit
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithProject()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;edit&quot;, &quot;proj&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;project1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;edit&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Edit_ShouldComplete_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;edit&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    #endregion
+
+    #region Project
+
+    [Arguments(&quot;a&quot;, &quot;add&quot;)]
+    [Arguments(&quot;c&quot;, &quot;create&quot;)]
+    [Arguments(&quot;d&quot;, &quot;delete&quot;)]
+    [Arguments(&quot;r&quot;, &quot;remove&quot;)]
+    [Arguments(&quot;rem&quot;, &quot;remove&quot;)]
+    [Arguments(&quot;ren&quot;, &quot;rename&quot;)]
+    [Arguments(&quot;l&quot;, &quot;list&quot;)]
+    [Test]
+    public async Task Run_Project_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;project&quot;, input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Arguments(&quot;add&quot;)]
+    [Arguments(&quot;create&quot;)]
+    [Arguments(&quot;delete&quot;)]
+    [Arguments(&quot;remove&quot;)]
+    [Arguments(&quot;rename&quot;)]
+    [Test]
+    public async Task Run_Project_ShouldComplete_WithProject(string input)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;project&quot;, input, &quot;proj&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;project1&quot;);
+    }
+
+    #endregion
+
+    #region Start
+
+    [Test]
+    public async Task Run_Start_ShouldComplete_WithProject()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;start&quot;, &quot;proj&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;project1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Start_ShouldComplete_WithTag()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;start&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    [Test]
+    public async Task Run_Start_ShouldComplete_WithManyTags()
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;start&quot;, &quot;project&quot;, &quot;ta&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;tag1&quot;);
+    }
+
+    #endregion
+
+    #region Stats
+
+    [Arguments(&quot;proj&quot;, &quot;projects&quot;)]
+    [Test]
+    public async Task Run_Stats_ShouldComplete_WithStatsType(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;stats&quot;, input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    #endregion
+
+    #region Tag
+
+    [Arguments(&quot;a&quot;, &quot;add&quot;)]
+    [Arguments(&quot;c&quot;, &quot;create&quot;)]
+    [Arguments(&quot;d&quot;, &quot;delete&quot;)]
+    [Arguments(&quot;r&quot;, &quot;remove&quot;)]
+    [Arguments(&quot;rem&quot;, &quot;remove&quot;)]
+    [Arguments(&quot;ren&quot;, &quot;rename&quot;)]
+    [Arguments(&quot;l&quot;, &quot;list&quot;)]
+    [Test]
+    public async Task Run_Tag_ShouldComplete_WithAction(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;tag&quot;, input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    [Arguments(&quot;add&quot;)]
+    [Arguments(&quot;create&quot;)]
+    [Arguments(&quot;delete&quot;)]
+    [Arguments(&quot;remove&quot;)]
+    [Arguments(&quot;rename&quot;)]
+    [Test]
+    public async Task Run_Tag_ShouldComplete_WithProject(string input)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;tag&quot;, input, &quot;proj&quot;);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(&quot;project1&quot;);
+    }
+
+    #endregion
+
+    #region Workhours
+
+    [Arguments(&quot;r&quot;, &quot;reset&quot;)]
+    [Arguments(&quot;s&quot;, &quot;start&quot;)]
+    [Arguments(&quot;e&quot;, &quot;end&quot;)]
+    [Test]
+    public async Task Run_Workhours_ShouldComplete_WithType(string input, string expected)
+    {
+        // Arrange
+        var args = GetCompletionArgs(&quot;workhours&quot;, input);
+
+        // Act
+        var result = await _sut.Run(args);
+
+        // Assert
+        result.ShouldBe(0);
+        GetConsoleOutput().ShouldBe(expected);
+    }
+
+    #endregion
+
+    [Arguments(&quot;help&quot;)]
+    [Arguments(&quot;--help&quot;)]
+    [Test]
+    public async Task Run_Help_ShouldPrintHelp(string input)
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run([input]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        await Verify(output);
+    }
+
+    [Test]
+    public async Task Run_Help_ShouldPrintHelp_WithSubcommand()
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run([&quot;status&quot;, &quot;--help&quot;]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        await Verify(output);
+    }
+
+    [Test]
+    public async Task Run_Version_ShouldPrintVersion()
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.Run([&quot;version&quot;]);
+
+        // Assert
+        result.ShouldBe(0);
+        var output = GetConsoleOutput();
+        await Verify(output);
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private static string[] GetCompletionArgs(params string[] args)
+    {
+        return [Cli.CompletionCommandName, $&quot;{nameof(Watson).ToLower()} {string.Join(&#39; &#39;, args)}&quot;];
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,93,1],[27,5,27,22,1],[28,5,28,6,1],[29,9,29,70,1],[30,9,37,16,1],[39,9,39,62,1],[40,9,47,16,1],[49,9,59,44,1],[60,5,60,6,1],[70,5,70,6,1],[72,9,72,53,1],[75,9,75,43,1],[78,9,78,28,1],[79,9,79,49,1],[80,5,80,6,1],[84,5,84,6,1],[86,9,86,62,1],[89,9,89,43,1],[92,9,92,28,1],[93,9,93,45,1],[94,5,94,6,1],[98,5,98,6,1],[100,9,100,62,1],[103,9,103,43,1],[106,9,106,28,1],[107,9,107,45,1],[108,5,108,6,1],[121,5,121,6,1],[123,9,123,54,1],[126,9,126,43,1],[129,9,129,28,1],[130,9,130,47,1],[131,5,131,6,1],[135,5,135,6,1],[137,9,138,89,1],[141,9,141,47,1],[144,9,144,28,1],[145,9,146,57,1],[147,5,147,6,1],[155,5,155,6,1],[157,9,157,54,1],[160,9,160,43,1],[163,9,163,28,1],[164,9,164,49,1],[165,5,165,6,1],[169,5,169,6,1],[171,9,171,63,1],[174,9,174,43,1],[177,9,177,28,1],[178,9,178,45,1],[179,5,179,6,1],[183,5,183,6,1],[185,9,185,63,1],[188,9,188,43,1],[191,9,191,28,1],[192,9,192,45,1],[193,5,193,6,1],[208,5,208,6,1],[210,9,210,56,1],[213,9,213,43,1],[216,9,216,28,1],[217,9,217,47,1],[218,5,218,6,1],[227,5,227,6,1],[229,9,229,64,1],[232,9,232,43,1],[235,9,235,28,1],[236,9,236,49,1],[237,5,237,6,1],[245,5,245,6,1],[247,9,247,55,1],[250,9,250,43,1],[253,9,253,28,1],[254,9,254,49,1],[255,5,255,6,1],[259,5,259,6,1],[261,9,261,64,1],[264,9,264,43,1],[267,9,267,28,1],[268,9,268,45,1],[269,5,269,6,1],[273,5,273,6,1],[275,9,275,64,1],[278,9,278,43,1],[281,9,281,28,1],[282,9,282,45,1],[283,5,283,6,1],[292,5,292,6,1],[294,9,294,54,1],[297,9,297,43,1],[300,9,300,28,1],[301,9,301,47,1],[302,5,302,6,1],[317,5,317,6,1],[319,9,319,52,1],[322,9,322,43,1],[325,9,325,28,1],[326,9,326,47,1],[327,5,327,6,1],[336,5,336,6,1],[338,9,338,60,1],[341,9,341,43,1],[344,9,344,28,1],[345,9,345,49,1],[346,5,346,6,1],[357,5,357,6,1],[359,9,359,58,1],[362,9,362,43,1],[365,9,365,28,1],[366,9,366,47,1],[367,5,367,6,1],[375,5,375,6,1],[379,9,379,46,1],[382,9,382,28,1],[383,9,383,41,1],[384,9,384,30,1],[385,5,385,6,1],[389,5,389,6,1],[393,9,393,59,1],[396,9,396,28,1],[397,9,397,41,1],[398,9,398,30,1],[399,5,399,6,1],[403,5,403,6,1],[407,9,407,50,1],[410,9,410,28,1],[411,9,411,41,1],[412,9,412,30,1],[413,5,413,6,1],[420,5,420,6,1],[421,9,421,100,1],[422,5,422,6,1]]);
+    </script>
+  </body>
+</html>

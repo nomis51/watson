@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Models\Database\Frame.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.ComponentModel;
+using Watson.Core.Models.Database.Abstractions;
+
+namespace Watson.Core.Models.Database;
+
+[Description(&quot;Frames&quot;)]
+public class Frame : DbModel
+{
+    public long Time { get; set; } = DateTime.Now.Ticks;
+    public string ProjectId { get; set; } = null!;
+    public Project? Project { get; set; }
+    public List&lt;Tag&gt; Tags { get; set; } = [];
+
+    public DateTime TimeAsDateTime =&gt; new(Time);
+
+    public static Frame CreateEmpty(long timestamp)
+    {
+        return new Frame
+        {
+            ProjectId = string.Empty,
+            Time = timestamp
+        };
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,24,9,28,1],[9,29,9,33,1],[9,38,9,56,1],[10,31,10,35,1],[10,36,10,40,1],[10,45,10,50,1],[11,31,11,35,1],[11,36,11,40,1],[12,29,12,33,1],[12,34,12,38,1],[12,43,12,45,1],[14,39,14,48,1],[17,5,17,6,1],[18,9,22,11,1],[23,5,23,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\GithubCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using Watson.Commands.Abstractions;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+[ExcludeFromCodeCoverage]
+public class GithubCommand : Command&lt;GithubOptions&gt;
+{
+    #region Constants
+
+    private static readonly string RepositoryUrl =
+        $&quot;https://github.com/nomis51/{nameof(Watson).ToLower()}&quot;;
+
+    #endregion
+
+    #region Constructors
+
+    public GithubCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override Task&lt;int&gt; Run(GithubOptions options)
+    {
+        ProcessHelper.OpenInBrowser(RepositoryUrl);
+        return Task.FromResult(0);
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,14,66,0],[20,68,20,92,0],[21,5,21,6,0],[22,5,22,6,0],[29,5,29,6,0],[30,9,30,52,0],[31,9,31,35,0],[32,5,32,6,0],[35,5,35,6,0],[36,9,36,35,0],[37,5,37,6,0]]);
+    </script>
+  </body>
+</html>

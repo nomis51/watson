@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\WorkHoursOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;workhours&quot;, HelpText = &quot;Set custom work hours for the day&quot;)]
+public class WorkHoursOptions
+{
+    [Value(0, MetaName = &quot;type&quot;, Required = true, HelpText = &quot;&#39;start&#39; or &#39;end&#39;&quot;)]
+    public string Type { get; set; } = &quot;end&quot;;
+
+    [Value(1, MetaName = &quot;time&quot;, Required = true, HelpText = &quot;The time. Input &#39;reset&#39; to reset to default value&quot;)]
+    public string Time { get; set; } = &quot;reset&quot;;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,26,11,30,1],[11,31,11,35,1],[11,40,11,45,1],[14,26,14,30,1],[14,31,14,35,1],[14,40,14,47,1]]);
+    </script>
+  </body>
+</html>

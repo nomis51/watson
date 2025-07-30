@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Repositories\TagRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories.Abstractions;
+
+namespace Watson.Core.Repositories;
+
+public class TagRepository : Repository&lt;Tag&gt;, ITagRepository
+{
+    #region Constructors
+
+    public TagRepository(IAppDbContext dbContext, IIdHelper idHelper) : base(dbContext, idHelper)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public Task&lt;bool&gt; DoesNameExistAsync(string name)
+    {
+        return DbContext.Connection
+            .QueryFirstOrDefaultAsync&lt;bool&gt;(
+                $&quot;SELECT 1 FROM {TableName} WHERE Name = @Name&quot;,
+                new { Name = name }
+            );
+    }
+
+    public Task&lt;Tag?&gt; GetByNameAsync(string name)
+    {
+        return DbContext.Connection
+            .QueryFirstOrDefaultAsync&lt;Tag&gt;(
+                $&quot;SELECT * FROM {TableName} WHERE Name = @Name&quot;,
+                new { Name = name }
+            );
+    }
+
+    public async Task&lt;bool&gt; EnsureTagsExistsAsync(IEnumerable&lt;string&gt; tags)
+    {
+        foreach (var tag in tags)
+        {
+            var existingTag = await GetByNameAsync(tag);
+            if (existingTag is not null) continue;
+
+            var tagEntity = new Tag { Name = tag };
+            if (await InsertAsync(tagEntity) is null) return false;
+        }
+
+        return true;
+    }
+
+    public Task&lt;bool&gt; RenameAsync(string id, string name)
+    {
+        return UpdateAsync(new Tag
+        {
+            Id = id,
+            Name = name
+        });
+    }
+
+    #endregion
+
+    #region Protected methods
+
+    protected override void InitializeTable()
+    {
+        DbContext.Connection.Execute(
+            $&quot;&quot;&quot;
+             CREATE TABLE IF NOT EXISTS {TableName} (
+                Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                Name TEXT NOT NULL UNIQUE
+             );
+             &quot;&quot;&quot;
+        );
+
+        CreateIndexIfNotExists(
+            $&quot;idx_{TableName}_pk&quot;,
+            $&quot;CREATE UNIQUE INDEX idx_{TableName}_pk ON {TableName} (Id)&quot;
+        );
+    }
+
+    protected override string BuildInsertQuery()
+    {
+        return $&quot;INSERT INTO {TableName} (Id, Name) VALUES (@Id, @Name)&quot;;
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $&quot;UPDATE {TableName} SET Name = @Name WHERE Id = @Id&quot;;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,73,13,98,1],[14,5,14,6,1],[15,5,15,6,1],[22,5,22,6,1],[23,9,27,15,1],[28,5,28,6,1],[31,5,31,6,1],[32,9,36,15,1],[37,5,37,6,1],[40,5,40,6,1],[41,9,41,16,1],[41,18,41,25,1],[41,26,41,28,1],[41,29,41,33,1],[42,9,42,10,1],[43,13,43,57,1],[44,13,44,41,1],[44,42,44,51,1],[46,13,46,52,1],[47,13,47,54,1],[47,55,47,68,0],[48,9,48,10,1],[50,9,50,21,1],[51,5,51,6,1],[54,5,54,6,1],[55,9,59,12,1],[60,5,60,6,1],[67,5,67,6,1],[68,9,75,11,1],[77,9,80,11,1],[81,5,81,6,1],[84,5,84,6,1],[85,9,85,74,1],[86,5,86,6,1],[89,5,89,6,1],[90,9,90,70,1],[91,5,91,6,1]]);
+    </script>
+  </body>
+</html>

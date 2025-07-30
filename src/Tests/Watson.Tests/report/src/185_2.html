@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\CancelCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class CancelCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly CancelCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public CancelCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new CancelCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldCancelLastFrame_WhenItExists()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,1)&quot;);
+        var options = new CancelOptions();
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        frame.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenLastFrameDoesNotExist()
+    {
+        // Arrange
+        var options = new CancelOptions();
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenLastFrameIsAnEmptyFrame()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;&#39;,0)&quot;);
+        var options = new CancelOptions();
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,102,1],[28,5,28,32,1],[29,5,29,6,1],[30,9,30,39,1],[32,9,32,72,1],[33,9,45,11,1],[46,5,46,6,1],[54,5,54,6,1],[56,9,56,112,1],[57,9,57,43,1],[60,9,60,46,1],[63,9,63,28,1],[64,9,64,104,1],[65,9,65,30,1],[66,5,66,6,1],[70,5,70,6,1],[72,9,72,43,1],[75,9,75,46,1],[78,9,78,28,1],[79,5,79,6,1],[83,5,83,6,1],[85,9,85,110,1],[86,9,86,43,1],[89,9,89,46,1],[92,9,92,28,1],[93,5,93,6,1]]);
+    </script>
+  </body>
+</html>

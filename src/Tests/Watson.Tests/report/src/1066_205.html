@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\StartOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;start&quot;, HelpText = &quot;Add a frame at the current time&quot;)]
+public class StartOptions
+{
+    [Value(0, MetaName = &quot;project&quot;, Required = true, HelpText = &quot;Project name&quot;)]
+    public string Project { get; set; } = null!;
+
+    [Value(1, MetaName = &quot;tags&quot;, HelpText = &quot;Optional tags&quot;, Required = false)]
+    public IEnumerable&lt;string&gt; Tags { get; set; } = [];
+
+    private string? _fromTime = null;
+
+    [Option(&#39;f&#39;, &quot;from&quot;, HelpText = &quot;From time&quot;)]
+    public string? FromTime
+    {
+        get =&gt; _fromTime;
+        set =&gt; _fromTime = value;
+    }
+
+    [Option(&#39;a&#39;, &quot;at&quot;, HelpText = &quot;At time (alias for --from)&quot;)]
+    public string? AtTime
+    {
+        get =&gt; _fromTime;
+        set =&gt; _fromTime = value;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,43,11,48,1],[14,53,14,55,1],[16,5,16,38,1],[21,16,21,25,1],[22,16,22,33,1],[28,16,28,25,1],[29,16,29,33,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\AppDbContext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.Data.Sqlite;
+using Watson.Core.Abstractions;
+
+namespace Watson.Core;
+
+public class AppDbContext : IAppDbContext
+{
+    #region Props
+
+    public SqliteConnection Connection { get; }
+
+    #endregion
+
+    #region Constructors
+
+    public AppDbContext(string? connectionString = null)
+    {
+        var filePath = Path.Join(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            $&quot;.{nameof(Watson).ToLower()}&quot;,
+            &quot;data.db&quot;
+        );
+        Connection = new SqliteConnection(
+            string.IsNullOrEmpty(connectionString) ? $&quot;Data Source={filePath};&quot; : connectionString
+        );
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,5,16,57,1],[17,5,17,6,1],[18,9,22,11,1],[23,9,25,11,1],[26,5,26,6,1]]);
+    </script>
+  </body>
+</html>

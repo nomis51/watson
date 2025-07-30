@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Helpers\LoggingHelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using Serilog;
+
+namespace Watson.Helpers;
+
+[ExcludeFromCodeCoverage]
+public static class LoggingHelper
+{
+    #region Public methods
+
+    public static void Configure()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(
+                Path.Join(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    $&quot;.{nameof(Watson).ToLower()}&quot;,
+                    &quot;logs&quot;,
+                    &quot;.txt&quot;
+                ),
+                rollingInterval: RollingInterval.Day
+            )
+            .CreateLogger();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,6,0],[13,9,24,29,0],[25,5,25,6,0]]);
+    </script>
+  </body>
+</html>

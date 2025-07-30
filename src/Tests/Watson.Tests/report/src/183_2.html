@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\AddCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class AddCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly AddCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public AddCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(23, 59, 0)
+                }
+            });
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new AddCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldAddFrameAtNow_WithNoTag()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var project = await DbContext.Connection.QueryFirstAsync&lt;Project&gt;(&quot;SELECT * FROM Projects&quot;);
+        var frame = await DbContext.Connection.QueryFirstAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        var tag = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Tag&gt;(&quot;SELECT * FROM Tags&quot;);
+
+        tag.ShouldBeNull();
+        project.Name.ShouldBe(&quot;project&quot;);
+        frame.ProjectId.ShouldBe(project.Id);
+        (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+    }
+
+    [Test]
+    public async Task Run_ShouldAddFrameAtNow_WithTags()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            Tags = [&quot;tag1&quot;, &quot;tag2&quot;]
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var project = await DbContext.Connection.QueryFirstAsync&lt;Project&gt;(&quot;SELECT * FROM Projects&quot;);
+        var frame = await DbContext.Connection.QueryFirstAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        var tags = await DbContext.Connection.QueryAsync&lt;Tag&gt;(&quot;SELECT * FROM Tags&quot;);
+        var tagsLst = tags.ToList();
+        var count = await DbContext.Connection.QueryFirstAsync&lt;int&gt;(
+            $&quot;SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = &#39;{frame.Id}&#39; AND TagId IN (&#39;{string.Join(&quot;&#39;, &#39;&quot;, tagsLst.Select(e =&gt; e.Id))}&#39;)&quot;);
+
+        tagsLst.Count.ShouldBe(2);
+        project.Name.ShouldBe(&quot;project&quot;);
+        frame.ProjectId.ShouldBe(project.Id);
+        count.ShouldBe(2);
+        (DateTime.Now - frame.TimeAsDateTime).TotalSeconds.ShouldBeLessThan(3);
+    }
+
+    [Test]
+    public async Task Run_ShouldAddFrameAtSpecifiedTime_WhenFromTimeSpecified()
+    {
+        // Arrange
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            FromTime = fromTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        await _sut.Run(options);
+
+        // Assert
+        var frame = await DbContext.Connection.QueryFirstAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        (fromTime - frame.TimeAsDateTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenToTimeProvidedWithoutFromTime()
+    {
+        // Arrange
+        var toTime = DateTime.Now.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            ToTime = toTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenToTimeIsBeforeFromTime()
+    {
+        // Arrange
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        var toTime = DateTime.Now.AddMinutes(-2);
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            FromTime = fromTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;),
+            ToTime = toTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenToTimeIsInTheFuture()
+    {
+        // Arrange
+        var toTime = DateTime.Now.AddMinutes(5);
+        var fromTime = DateTime.Now.AddMinutes(-1);
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            ToTime = toTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;),
+            FromTime = fromTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenFromTimeIsInTheFuture()
+    {
+        // Arrange
+        var toTime = DateTime.Now.AddMinutes(7);
+        var fromTime = DateTime.Now.AddMinutes(5);
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            ToTime = toTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;),
+            FromTime = fromTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenProjectNotSpecified()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = &quot;&quot;
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenUnableToParseFromTime()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            FromTime = &quot;invalid&quot;
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenUnableToParseToTime()
+    {
+        // Arrange
+        AddOptions options = new()
+        {
+            Project = &quot;project&quot;,
+            ToTime = &quot;invalid&quot;
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsToday()
+    {
+        // Arrange
+        var hour = DateTime.Now.Hour;
+        var minute = DateTime.Now.Minute - 2;
+        await DbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id, Time, ProjectId) VALUES (&#39;id&#39;, @Time, &#39;id&#39;)&quot;,
+            new
+            {
+                Time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour + 1, 0, 0).Ticks
+            }
+        );
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute, 0).ToString(
+                    &quot;yyyy-MM-dd HH:mm&quot;),
+            ToTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute + 1, 0).ToString(
+                    &quot;yyyy-MM-dd HH:mm&quot;),
+            Project = &quot;project&quot;,
+            Tags = [&quot;tag&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync&lt;string&gt;(&quot;SELECT Id FROM Frames&quot;);
+        var expectedOutput = GenerateSpectreMarkupOutput(
+            $&quot;{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]{hour.ToString().PadLeft(2, &#39;0&#39;)}:{minute.ToString().PadLeft(2, &#39;0&#39;)}[/] to [blue]{hour.ToString().PadLeft(2, &#39;0&#39;)}:{(minute + 1).ToString().PadLeft(2, &#39;0&#39;)}[/] (00h 01m)&quot;
+        );
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenDateIsNotToday()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Frames (Id, Time, ProjectId) VALUES (&#39;id&#39;, @Time, &#39;id&#39;)&quot;,
+            new
+            {
+                Time = new DateTime(2025, 1, 2, 16, 0, 0).Ticks
+            }
+        );
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(2025, 1, 2, 15, 45, 0).ToString(
+                    &quot;yyyy-MM-dd HH:mm&quot;),
+            ToTime =
+                new DateTime(2025, 1, 2, 15, 46, 0).ToString(
+                    &quot;yyyy-MM-dd HH:mm&quot;),
+            Project = &quot;project&quot;,
+            Tags = [&quot;tag&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync&lt;string&gt;(&quot;SELECT Id FROM Frames&quot;);
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;{frameId}: [green]project[/] ([purple]tag[/]) added from [blue]2025-01-02 15:45[/] to [blue]2025-01-02 15:46[/] (00h 01m)&quot;);
+
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldDisplayFrameStatusAfterCreation_WhenFrameIsRunning()
+    {
+        // Arrange
+        var hour = DateTime.Now.Hour;
+        var minute = DateTime.Now.Minute - 1;
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hour, minute, 0).ToString(
+                    &quot;yyyy-MM-dd HH:mm&quot;),
+            Project = &quot;project&quot;,
+            Tags = [&quot;tag&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        var frameId = await DbContext.Connection.QueryFirstAsync&lt;string&gt;(&quot;SELECT Id FROM Frames&quot;);
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;{frameId}: [green]project[/] ([purple]tag[/]) started at [blue]{hour.ToString().PadLeft(2, &#39;0&#39;)}:{minute.ToString().PadLeft(2, &#39;0&#39;)}[/]&quot;);
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenFromTimeIsOutOfWorkHours()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(16, 0, 0)
+                }
+            });
+
+        var options = new AddOptions
+        {
+            FromTime =
+                new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 0, 0)
+                    .ToString(&quot;yyyy-MM-dd HH:mm&quot;),
+            Project = &quot;project&quot;,
+            Tags = [&quot;tag&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,5,23,102,1],[30,5,30,29,1],[31,5,31,6,1],[32,9,32,39,1],[34,9,42,16,1],[44,9,44,72,1],[45,9,57,11,1],[58,5,58,6,1],[66,5,66,6,1],[68,9,71,11,1],[74,9,74,33,1],[77,9,77,101,1],[78,9,78,95,1],[79,9,79,98,1],[81,9,81,28,1],[82,9,82,42,1],[83,9,83,46,1],[84,9,84,80,1],[85,5,85,6,1],[89,5,89,6,1],[91,9,95,11,1],[98,9,98,33,1],[101,9,101,101,1],[102,9,102,95,1],[103,9,103,85,1],[104,9,104,37,1],[105,9,106,133,1],[106,133,106,137,1],[106,137,106,145,1],[108,9,108,35,1],[109,9,109,42,1],[110,9,110,46,1],[111,9,111,27,1],[112,9,112,80,1],[113,5,113,6,1],[117,5,117,6,1],[119,9,119,52,1],[120,9,124,11,1],[127,9,127,33,1],[130,9,130,95,1],[131,9,131,76,1],[132,5,132,6,1],[136,5,136,6,1],[138,9,138,50,1],[139,9,143,11,1],[146,9,146,46,1],[149,9,149,28,1],[150,5,150,6,1],[154,5,154,6,1],[156,9,156,52,1],[157,9,157,50,1],[158,9,163,11,1],[166,9,166,46,1],[169,9,169,28,1],[170,5,170,6,1],[174,5,174,6,1],[176,9,176,49,1],[177,9,177,52,1],[178,9,183,11,1],[186,9,186,46,1],[189,9,189,28,1],[190,5,190,6,1],[194,5,194,6,1],[196,9,196,49,1],[197,9,197,51,1],[198,9,203,11,1],[206,9,206,46,1],[209,9,209,28,1],[210,5,210,6,1],[214,5,214,6,1],[216,9,219,11,1],[222,9,222,46,1],[225,9,225,28,1],[226,5,226,6,1],[230,5,230,6,1],[232,9,236,11,1],[239,9,239,46,1],[242,9,242,28,1],[243,5,243,6,1],[247,5,247,6,1],[249,9,253,11,1],[256,9,256,46,1],[259,9,259,28,1],[260,5,260,6,1],[264,5,264,6,1],[266,9,266,38,1],[267,9,267,46,1],[268,9,274,11,1],[275,9,285,11,1],[288,9,288,46,1],[289,9,289,41,1],[292,9,292,99,1],[293,9,295,11,1],[296,9,296,28,1],[297,9,297,48,1],[298,5,298,6,1],[302,5,302,6,1],[304,9,310,11,1],[311,9,321,11,1],[324,9,324,46,1],[325,9,325,41,1],[328,9,328,99,1],[329,9,331,143,1],[333,9,333,28,1],[334,9,334,48,1],[335,5,335,6,1],[339,5,339,6,1],[341,9,341,38,1],[342,9,342,46,1],[343,9,350,11,1],[353,9,353,46,1],[354,9,354,41,1],[357,9,357,99,1],[358,9,360,157,1],[361,9,361,28,1],[362,9,362,48,1],[363,5,363,6,1],[367,5,367,6,1],[369,9,377,16,1],[379,9,386,11,1],[389,9,389,46,1],[392,9,392,28,1],[393,5,393,6,1]]);
+    </script>
+  </body>
+</html>

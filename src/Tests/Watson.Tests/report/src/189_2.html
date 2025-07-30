@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\ProjectCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class ProjectCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly ProjectCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public ProjectCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new ProjectCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldListProjects()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id1&#39;,&#39;project1&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id2&#39;,&#39;project2&#39;)&quot;);
+        var options = new ProjectOptions
+        {
+            Action = &quot;list&quot;,
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var lines = GetConsoleOutputLines();
+        lines.Count.ShouldBe(2);
+        lines[0].ShouldBe(&quot;id1: project1&quot;);
+        lines[1].ShouldBe(&quot;id2: project2&quot;);
+    }
+
+    [Test]
+    public async Task Run_ShouldDeleteProject()
+    {
+        // Arrange
+        var options = new ProjectOptions
+        {
+            Action = &quot;remove&quot;,
+            Arguments = [&quot;id&quot;],
+        };
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var count = DbContext.Connection.QueryFirst&lt;int&gt;(&quot;SELECT COUNT(*) FROM Projects WHERE Id = &#39;id&#39;&quot;);
+        count.ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Run_ShouldRenameProject()
+    {
+        // Arrange
+        var options = new ProjectOptions()
+        {
+            Action = &quot;rename&quot;,
+            Arguments = [&quot;id&quot;, &quot;newName&quot;],
+        };
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var project =
+            await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Project&gt;(
+                &quot;SELECT * FROM Projects WHERE Name = &#39;newName&#39;&quot;);
+        project.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task Run_ShouldCreateProject_WhenDoesntExists()
+    {
+        // Arrange
+        var options = new ProjectOptions()
+        {
+            Action = &quot;create&quot;,
+            Arguments = [&quot;name&quot;],
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var project =
+            await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Project&gt;(
+                &quot;SELECT * FROM Projects WHERE Name = &#39;name&#39;&quot;);
+        project.ShouldNotBeNull();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,102,1],[28,5,28,33,1],[29,5,29,6,1],[30,9,30,39,1],[32,9,32,72,1],[33,9,45,11,1],[46,5,46,6,1],[54,5,54,6,1],[56,9,56,109,1],[57,9,57,109,1],[58,9,61,11,1],[64,9,64,46,1],[67,9,67,28,1],[68,9,68,45,1],[69,9,69,33,1],[70,9,70,44,1],[71,9,71,44,1],[72,5,72,6,1],[76,5,76,6,1],[78,9,82,11,1],[83,9,83,107,1],[86,9,86,46,1],[89,9,89,28,1],[90,9,90,107,1],[91,9,91,27,1],[92,5,92,6,1],[96,5,96,6,1],[98,9,102,11,1],[103,9,103,107,1],[106,9,106,46,1],[109,9,109,28,1],[110,9,112,66,1],[113,9,113,35,1],[114,5,114,6,1],[118,5,118,6,1],[120,9,124,11,1],[127,9,127,46,1],[130,9,130,28,1],[131,9,133,63,1],[134,9,134,35,1],[135,5,135,6,1]]);
+    </script>
+  </body>
+</html>

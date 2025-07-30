@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Repositories\AliasRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories.Abstractions;
+
+namespace Watson.Core.Repositories;
+
+public class AliasRepository : Repository&lt;Alias&gt;, IAliasRepository
+{
+    #region Constructors
+
+    public AliasRepository(IAppDbContext dbContext, IIdHelper idHelper) : base(dbContext, idHelper)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public Task&lt;Alias?&gt; GetByNameAsync(string name)
+    {
+        return DbContext.Connection
+            .QueryFirstOrDefaultAsync&lt;Alias&gt;(
+                $&quot;SELECT * FROM {TableName} WHERE Name = @Name&quot;,
+                new { Name = name }
+            );
+    }
+
+    #endregion
+
+    #region Protected methods
+
+    protected override void InitializeTable()
+    {
+        DbContext.Connection.Execute(
+            $&quot;&quot;&quot;
+             CREATE TABLE IF NOT EXISTS {TableName} (
+                Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                Name TEXT NOT NULL UNIQUE,
+                Command TEXT NOT NULL
+             );
+             &quot;&quot;&quot;
+        );
+    }
+
+    protected override string BuildInsertQuery()
+    {
+        return $&quot;INSERT INTO {TableName} (Id, Name, Command) VALUES (@Id, @Name, @Command)&quot;;
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $&quot;UPDATE {TableName} SET Command = @Command WHERE Id = @Id&quot;;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,75,13,100,1],[14,5,14,6,1],[15,5,15,6,1],[22,5,22,6,1],[23,9,27,15,1],[28,5,28,6,1],[35,5,35,6,1],[36,9,44,11,1],[45,5,45,6,1],[48,5,48,6,0],[49,9,49,93,0],[50,5,50,6,0],[53,5,53,6,0],[54,9,54,76,0],[55,5,55,6,0]]);
+    </script>
+  </body>
+</html>

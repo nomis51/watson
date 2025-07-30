@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Repositories\FrameRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.ComponentModel;
+using System.Reflection;
+using Dapper;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories.Abstractions;
+
+namespace Watson.Core.Repositories;
+
+public class FrameRepository : Repository&lt;Frame&gt;, IFrameRepository
+{
+    #region Constants
+
+    private const long TicksToUnixEpochDifference = 621355968000000000;
+
+    #endregion
+
+    #region Props
+
+    private static string ProjectTableName =&gt; typeof(Project).GetCustomAttribute&lt;DescriptionAttribute&gt;()!.Description;
+    private static string TagTableName =&gt; typeof(Tag).GetCustomAttribute&lt;DescriptionAttribute&gt;()!.Description;
+
+    private string FrameTagTableName =&gt; string.Join(
+        &quot;_&quot;,
+        TableName,
+        TagTableName
+    );
+
+    #endregion
+
+    #region Constructors
+
+    public FrameRepository(IAppDbContext dbContext, IIdHelper idHelper) : base(dbContext, idHelper)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;Frame?&gt; InsertAsync(Frame model)
+    {
+        var frame = await base.InsertAsync(model);
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
+    }
+
+    public override async Task&lt;Frame?&gt; GetByIdAsync(string id)
+    {
+        var frame = await base.GetByIdAsync(id);
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+
+        return frame;
+    }
+
+    public override async Task&lt;IEnumerable&lt;Frame&gt;&gt; GetAsync()
+    {
+        var frames = await base.GetAsync();
+        var framesList = frames.ToList();
+
+        foreach (var frame in framesList)
+        {
+            await InjectProject(frame);
+            await InjectTags(frame);
+        }
+
+        return framesList;
+    }
+
+    public async Task&lt;Frame?&gt; GetNextFrameAsync(DateTime time)
+    {
+        var timestamp = time.Ticks;
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(
+            $&quot;SELECT * FROM {TableName} WHERE Time &gt; @Time AND DATE((Time - {TicksToUnixEpochDifference}) / 10000000, &#39;unixepoch&#39;) = DATE(&#39;{time.Date:yyyy-MM-dd}&#39;) ORDER BY Time LIMIT 1&quot;,
+            new
+            {
+                Time = timestamp,
+            }
+        );
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
+    }
+
+    public async Task&lt;Frame?&gt; GetPreviousFrameAsync(DateTime time)
+    {
+        var timestamp = time.Ticks;
+        var frame = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Frame&gt;(
+            $&quot;SELECT * FROM {TableName} WHERE Time &lt; @Time ORDER BY Time DESC LIMIT 1&quot;,
+            new { Time = timestamp }
+        );
+        if (frame is null) return null;
+
+        await InjectProject(frame);
+        await InjectTags(frame);
+        return frame;
+    }
+
+    public Task&lt;IEnumerable&lt;Frame&gt;&gt; GetAsync(DateTime fromTime, DateTime toTime)
+    {
+        var fromTimestamp = fromTime.Ticks;
+        var toTimestamp = toTime.Ticks;
+        return DbContext.Connection.QueryAsync&lt;Frame&gt;(
+            $&quot;SELECT * FROM {TableName} WHERE Time &gt;= @FromTimestamp AND Time &lt;= @ToTimestamp ORDER BY Time ASC&quot;,
+            new
+            {
+                FromTimestamp = fromTimestamp,
+                ToTimestamp = toTimestamp
+            }
+        );
+    }
+
+    public async Task&lt;IEnumerable&lt;Frame&gt;&gt; GetAsync(
+        DateTime fromTime,
+        DateTime toTime,
+        List&lt;string&gt; projectIds,
+        List&lt;string&gt; tagIds,
+        List&lt;string&gt; ignoredProjectIds,
+        List&lt;string&gt; ignoredTagIds
+    )
+    {
+        var fromTimestamp = fromTime.Ticks;
+        var toTimestamp = toTime.Ticks;
+        var sql = $&quot;SELECT * FROM {TableName} WHERE Time &gt;= @FromTimestamp AND Time &lt;= @ToTimestamp&quot;;
+
+        if (projectIds.Count != 0)
+        {
+            sql += $&quot; AND ProjectId IN (&#39;{string.Join(&quot;&#39;,&#39;&quot;, projectIds)}&#39;)&quot;;
+        }
+
+        if (ignoredProjectIds.Count != 0)
+        {
+            sql += $&quot; AND ProjectId NOT IN (&#39;{string.Join(&quot;&#39;,&#39;&quot;, ignoredProjectIds)}&#39;)&quot;;
+        }
+
+        if (tagIds.Count != 0)
+        {
+            sql +=
+                $&quot; AND Id IN (SELECT FrameId FROM {FrameTagTableName} WHERE TagId IN (&#39;{string.Join(&quot;&#39;,&#39;&quot;, tagIds)}&#39;))&quot;;
+        }
+
+        if (ignoredTagIds.Count != 0)
+        {
+            sql +=
+                $&quot; AND Id NOT IN (SELECT FrameId FROM {FrameTagTableName} WHERE TagId IN (&#39;{string.Join(&quot;&#39;,&#39;&quot;, ignoredTagIds)}&#39;))&quot;;
+        }
+
+        var frames = await DbContext.Connection.QueryAsync&lt;Frame&gt;(
+            sql,
+            new
+            {
+                FromTimestamp = fromTimestamp,
+                ToTimestamp = toTimestamp,
+            }
+        );
+
+        var framesLst = frames.ToList();
+        foreach (var frame in framesLst)
+        {
+            await InjectProject(frame);
+            await InjectTags(frame);
+        }
+
+        return framesLst;
+    }
+
+    public async Task AssociateTagsAsync(string frameId, IEnumerable&lt;string&gt; tags)
+    {
+        var frame = await GetByIdAsync(frameId);
+        if (frame is null) return;
+
+        var tagModels = await DbContext.Connection.QueryAsync&lt;Tag&gt;(
+            $&quot;SELECT * FROM {TagTableName} WHERE Name IN @Names&quot;,
+            new { Names = tags }
+        );
+
+        foreach (var tagModel in tagModels)
+        {
+            await DbContext.Connection.ExecuteAsync(
+                $&quot;INSERT INTO {FrameTagTableName} (Id, FrameId, TagId) VALUES (@Id, @FrameId, @TagId)&quot;,
+                new { Id = IdHelper.GenerateId(), FrameId = frameId, TagId = tagModel.Id }
+            );
+        }
+    }
+
+    #endregion
+
+    #region Protected methods
+
+    protected override void InitializeTable()
+    {
+        DbContext.Connection.Execute($&quot;&quot;&quot;
+                                      CREATE TABLE IF NOT EXISTS {TableName} (
+                                         Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                                         Time REAL NOT NULL,
+                                         ProjectId TEXT NOT NULL
+                                      );
+                                      &quot;&quot;&quot;);
+
+        CreateIndexIfNotExists(
+            $&quot;idx_{TableName}_pk&quot;,
+            $&quot;CREATE UNIQUE INDEX idx_{TableName}_pk ON {TableName} (Id)&quot;
+        );
+        CreateIndexIfNotExists(
+            $&quot;idx_{TableName}_ProjectId_fk&quot;,
+            $&quot;CREATE INDEX idx_{TableName}_ProjectId_fk ON {TableName} (ProjectId)&quot;
+        );
+
+        DbContext.Connection.Execute($&quot;&quot;&quot;
+                                      CREATE TABLE IF NOT EXISTS {FrameTagTableName} (
+                                         Id TEXT NOT NULL PRIMARY KEY UNIQUE,
+                                         FrameId TEXT NOT NULL,
+                                         TagId TEXT NOT NULL
+                                      );
+                                      &quot;&quot;&quot;);
+
+        CreateIndexIfNotExists(
+            $&quot;idx_{FrameTagTableName}_pk&quot;,
+            $&quot;CREATE UNIQUE INDEX idx_{FrameTagTableName}_pk ON {FrameTagTableName} (Id)&quot;
+        );
+        CreateIndexIfNotExists(
+            $&quot;idx_{FrameTagTableName}_FrameId_fk&quot;,
+            $&quot;CREATE INDEX idx_{FrameTagTableName}_FrameId_fk ON {FrameTagTableName} (FrameId)&quot;
+        );
+        CreateIndexIfNotExists(
+            $&quot;idx_{FrameTagTableName}_TagId_fk&quot;,
+            $&quot;CREATE INDEX idx_{FrameTagTableName}_TagId_fk ON {FrameTagTableName} (TagId)&quot;
+        );
+    }
+
+    protected override string BuildInsertQuery()
+    {
+        return $&quot;INSERT INTO {TableName} (Id, Time, ProjectId) VALUES (@Id, @Time, @ProjectId)&quot;;
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $&quot;UPDATE {TableName} SET Time = @Time, ProjectId = @ProjectId WHERE Id = @Id&quot;;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task InjectProject(Frame frame)
+    {
+        var project = await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Project&gt;(
+            $&quot;SELECT * FROM {ProjectTableName} WHERE Id = @ProjectId&quot;,
+            new { frame.ProjectId }
+        );
+        frame.Project = project;
+    }
+
+    private async Task InjectTags(Frame frame)
+    {
+        var tags = await DbContext.Connection.QueryAsync&lt;Tag&gt;(
+            $&quot;SELECT * FROM {TagTableName} WHERE Id IN (SELECT TagId FROM {FrameTagTableName} WHERE FrameId = @FrameId)&quot;,
+            new { FrameId = frame.Id }
+        );
+        frame.Tags = tags.ToList();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,47,21,118,1],[22,43,22,110,1],[24,41,28,6,1],[34,75,34,100,1],[35,5,35,6,1],[36,5,36,6,1],[43,5,43,6,1],[44,9,44,51,1],[45,9,45,27,1],[45,28,45,40,0],[47,9,47,36,1],[48,9,48,33,1],[49,9,49,22,1],[50,5,50,6,1],[53,5,53,6,1],[54,9,54,49,1],[55,9,55,27,1],[55,28,55,40,1],[57,9,57,36,1],[58,9,58,33,1],[60,9,60,22,1],[61,5,61,6,1],[64,5,64,6,1],[65,9,65,44,1],[66,9,66,42,1],[68,9,68,16,1],[68,18,68,27,1],[68,28,68,30,1],[68,31,68,41,1],[69,9,69,10,1],[70,13,70,40,1],[71,13,71,37,1],[72,9,72,10,1],[74,9,74,27,1],[75,5,75,6,1],[78,5,78,6,1],[79,9,79,36,1],[80,9,86,11,1],[87,9,87,27,1],[87,28,87,40,1],[89,9,89,36,1],[90,9,90,33,1],[91,9,91,22,1],[92,5,92,6,1],[95,5,95,6,1],[96,9,96,36,1],[97,9,100,11,1],[101,9,101,27,1],[101,28,101,40,1],[103,9,103,36,1],[104,9,104,33,1],[105,9,105,22,1],[106,5,106,6,1],[109,5,109,6,1],[110,9,110,44,1],[111,9,111,40,1],[112,9,119,11,1],[120,5,120,6,1],[130,5,130,6,1],[131,9,131,44,1],[132,9,132,40,1],[133,9,133,102,1],[135,9,135,35,1],[136,9,136,10,1],[137,13,137,78,1],[138,9,138,10,1],[140,9,140,42,1],[141,9,141,10,1],[142,13,142,89,1],[143,9,143,10,1],[145,9,145,31,1],[146,9,146,10,1],[147,13,148,121,1],[149,9,149,10,1],[151,9,151,38,1],[152,9,152,10,1],[153,13,154,132,1],[155,9,155,10,1],[157,9,164,11,1],[166,9,166,41,1],[167,9,167,16,1],[167,18,167,27,1],[167,28,167,30,1],[167,31,167,40,1],[168,9,168,10,1],[169,13,169,40,1],[170,13,170,37,1],[171,9,171,10,1],[173,9,173,26,1],[174,5,174,6,1],[177,5,177,6,1],[178,9,178,49,1],[179,9,179,27,1],[179,28,179,35,1],[181,9,184,11,1],[186,9,186,16,1],[186,18,186,30,1],[186,31,186,33,1],[186,34,186,43,1],[187,9,187,10,1],[188,13,191,15,1],[192,9,192,10,1],[193,5,193,6,1],[200,5,200,6,1],[201,9,207,44,1],[209,9,212,11,1],[213,9,216,11,1],[218,9,224,44,1],[226,9,229,11,1],[230,9,233,11,1],[234,9,237,11,1],[238,5,238,6,1],[241,5,241,6,1],[242,9,242,97,1],[243,5,243,6,1],[246,5,246,6,1],[247,9,247,94,1],[248,5,248,6,1],[255,5,255,6,1],[256,9,259,11,1],[260,9,260,33,1],[261,5,261,6,1],[264,5,264,6,1],[265,9,268,11,1],[269,9,269,36,1],[270,5,270,6,1]]);
+    </script>
+  </body>
+</html>

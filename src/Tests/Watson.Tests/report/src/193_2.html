@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\StatusCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Text.RegularExpressions;
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class StatusCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly StatusCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public StatusCommandTests()
+    {
+        var idHelper = new IdHelper();
+        _settingsRepository.GetSettings()
+            .Returns(new Settings());
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new StatusCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldDisplayCurrentFrameStatus()
+    {
+        // Arrange
+        var time = DateTime.Now.Date;
+        time = time.AddDays(-1);
+        time = time.AddTicks(time.TimeOfDay.Add(new TimeSpan(15, 45, 0)).Ticks);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                &quot;id: [green]project[/] ([purple]tag[/]) started at [blue]15:45[/] (1m 15s)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput[..expectedOutput.LastIndexOf(&#39;(&#39;)]);
+        var durationStr = output[output.LastIndexOf(&#39;(&#39;)..];
+#pragma warning disable SYSLIB1045
+        Regex.IsMatch(durationStr, @&quot;\([0-9]{1,2}h [0-9]{1,2}m\)&quot;).ShouldBeTrue();
+#pragma warning restore SYSLIB1045
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenNotFrameAreCurrentlyRunning()
+    {
+        // Arrange
+        var options = new StatusOptions();
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+        GetConsoleOutput().ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Run_ShouldDisplayElapsedUntilNow_WhenFrameIsRunning()
+    {
+        // Arrange
+        var time = DateTime.Now;
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] (00h 00m)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldTakeLunchTimeIntoAccount()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    LunchStartTime = new TimeSpan(DateTime.Now.Hour, 0, 0),
+                    LunchEndTime = new TimeSpan(DateTime.Now.Hour + 1, 0, 0),
+                }
+            });
+        var time = DateTime.Now.AddHours(-1);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedMinutes = (Convert.ToInt32(60 - time.TimeOfDay.Minutes) - 1).ToString().PadLeft(2, &#39;0&#39;);
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] (00h {expectedMinutes}m)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldTakeLunchTimeIntoAccount_WhenFrameStillRunningAfterLunchTime()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    LunchStartTime = new TimeSpan(DateTime.Now.Hour - 1, 0, 0),
+                    LunchEndTime = new TimeSpan(DateTime.Now.Hour, 0, 0),
+                }
+            });
+        var time = DateTime.Now.AddHours(-2);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedDuration =
+            new TimeHelper().FormatDuration(new TimeSpan(0, DateTime.Now.Minute + (60 - DateTime.Now.Minute), 0));
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] ({expectedDuration})&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldOutputNoTagBrackets_WhenNoTagProvided()
+    {
+        // Arrange
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = DateTime.Now.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;id: [green]project[/] started at [blue]{DateTime.Now:HH:mm}[/] (00h 00m)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    [Test]
+    public async Task Run_ShouldDisplayLunchTimeDuration_WhenFrameStillRunningAfterLunchTime()
+    {
+        // Arrange
+        _settingsRepository.GetSettings()
+            .Returns(new Settings
+            {
+                WorkTime =
+                {
+                    LunchStartTime = new TimeSpan(DateTime.Now.Hour - 1, 0, 0),
+                    LunchEndTime = new TimeSpan(DateTime.Now.Hour, 0, 0),
+                }
+            });
+        var time = DateTime.Now.AddHours(-2);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,@Time)&quot;,
+            new { Time = time.Ticks });
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (&#39;id&#39;,&#39;project&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Tags (Id,Name) VALUES (&#39;id&#39;,&#39;tag&#39;)&quot;);
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames_Tags (Id,FrameId,TagId) VALUES (&#39;id&#39;,&#39;id&#39;,&#39;id&#39;)&quot;);
+        var options = new StatusOptions();
+
+        var expectedDuration =
+            new TimeHelper().FormatDuration(new TimeSpan(0, DateTime.Now.Minute + (60 - DateTime.Now.Minute), 0));
+        var expectedOutput =
+            GenerateSpectreMarkupOutput(
+                $&quot;id: [green]project[/] ([purple]tag[/]) started at [blue]{time:HH:mm}[/] ({expectedDuration}) [yellow](+01h 00m lunch)[/]&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+        var output = GetConsoleOutput();
+
+        // Assert
+        result.ShouldBe(0);
+        output.ShouldStartWith(expectedOutput);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,5,22,102,1],[29,5,29,32,1],[30,5,30,6,1],[31,9,31,39,1],[32,9,33,38,1],[35,9,35,72,1],[36,9,48,11,1],[49,5,49,6,1],[57,5,57,6,1],[59,9,59,38,1],[60,9,60,33,1],[61,9,61,81,1],[62,9,63,40,1],[64,9,64,107,1],[65,9,65,99,1],[66,9,66,119,1],[67,9,67,43,1],[69,9,71,94,1],[74,9,74,46,1],[75,9,75,41,1],[78,9,78,28,1],[79,9,79,83,1],[80,9,80,61,1],[82,9,82,83,1],[84,5,84,6,1],[88,5,88,6,1],[90,9,90,43,1],[93,9,93,46,1],[96,9,96,28,1],[97,9,97,44,1],[98,5,98,6,1],[102,5,102,6,1],[104,9,104,33,1],[105,9,106,40,1],[107,9,107,107,1],[108,9,108,99,1],[109,9,109,119,1],[110,9,110,43,1],[112,9,114,103,1],[117,9,117,46,1],[118,9,118,41,1],[121,9,121,28,1],[122,9,122,48,1],[123,5,123,6,1],[127,5,127,6,1],[129,9,137,16,1],[138,9,138,46,1],[139,9,140,40,1],[141,9,141,107,1],[142,9,142,99,1],[143,9,143,119,1],[144,9,144,43,1],[146,9,146,109,1],[147,9,149,118,1],[152,9,152,46,1],[153,9,153,41,1],[156,9,156,28,1],[157,9,157,48,1],[158,5,158,6,1],[162,5,162,6,1],[164,9,172,16,1],[173,9,173,46,1],[174,9,175,40,1],[176,9,176,107,1],[177,9,177,99,1],[178,9,178,119,1],[179,9,179,43,1],[181,9,182,115,1],[183,9,185,114,1],[188,9,188,46,1],[189,9,189,41,1],[192,9,192,28,1],[193,9,193,48,1],[194,5,194,6,1],[198,5,198,6,1],[200,9,201,48,1],[202,9,202,107,1],[203,9,203,43,1],[205,9,207,94,1],[210,9,210,46,1],[211,9,211,41,1],[214,9,214,28,1],[215,9,215,48,1],[216,5,216,6,1],[220,5,220,6,1],[222,9,230,16,1],[231,9,231,46,1],[232,9,233,40,1],[234,9,234,107,1],[235,9,235,99,1],[236,9,236,119,1],[237,9,237,43,1],[239,9,240,115,1],[241,9,243,142,1],[246,9,246,46,1],[247,9,247,41,1],[250,9,250,28,1],[251,9,251,48,1],[252,5,252,6,1]]);
+    </script>
+  </body>
+</html>

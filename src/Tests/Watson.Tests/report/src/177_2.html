@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\SettingsRepositoryTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.IO.Abstractions;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using Shouldly;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories;
+
+namespace Watson.Tests.Tests.Core.Repositories;
+
+public class SettingsRepositoryTests
+{
+    #region Members
+
+    private readonly ILogger&lt;SettingsRepository&gt; _logger = Substitute.For&lt;ILogger&lt;SettingsRepository&gt;&gt;();
+    private readonly IFileSystem _fileSystem = Substitute.For&lt;IFileSystem&gt;();
+    private readonly SettingsRepository _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public SettingsRepositoryTests()
+    {
+        _sut = new SettingsRepository(_fileSystem, _logger);
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task GetSettings_ShouldReturnDefaultSettings_WhenFileDoesNotExist()
+    {
+        // Arrange
+
+        // Act
+        var result = await _sut.GetSettings();
+
+        // Assert
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task GetSettings_ShouldReturnSettings_WhenFileExists()
+    {
+        // Arrange
+        _fileSystem.File.Exists(Arg.Any&lt;string&gt;())
+            .Returns(true);
+        _fileSystem.File.ReadAllTextAsync(Arg.Any&lt;string&gt;())
+            .Returns(JsonSerializer.Serialize(new Settings
+            {
+                WorkTime =
+                {
+                    StartTime = new TimeSpan(9, 0, 0),
+                }
+            }));
+
+        // Act
+        var result = await _sut.GetSettings();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.WorkTime.StartTime.ShouldBe(new TimeSpan(9, 0, 0));
+    }
+
+    [Test]
+    public async Task GetSettings_ShouldLogAndReturnDefault_WhenThrows()
+    {
+        // Arrange
+        _fileSystem.File.Exists(Arg.Any&lt;string&gt;())
+            .Returns(true);
+        _fileSystem.File.ReadAllTextAsync(Arg.Any&lt;string&gt;())
+            .Throws(new Exception(&quot;test&quot;));
+
+        // Act
+        var result = await _sut.GetSettings();
+
+        // Assert
+        result.ShouldNotBeNull();
+        _logger.Received()
+            .Log(
+                LogLevel.Error,
+                Arg.Any&lt;EventId&gt;(),
+                Arg.Any&lt;object&gt;(),
+                Arg.Any&lt;Exception&gt;(),
+                Arg.Any&lt;Func&lt;object, Exception?, string&gt;&gt;()
+            );
+    }
+
+    [Test]
+    public async Task SaveSettings_ShouldSave()
+    {
+        // Arrange
+        var settings = new Settings
+        {
+            WorkTime =
+            {
+                StartTime = new TimeSpan(9, 0, 0),
+            }
+        };
+
+        // Act
+        await _sut.SaveSettings(settings);
+
+        // Assert
+        await _fileSystem.Received()
+            .File.WriteAllTextAsync(Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;());
+    }
+
+    [Test]
+    public async Task SaveSettings_ShouldLogAndThrow_WhenThrows()
+    {
+        // Arrange
+        var settings = new Settings
+        {
+            WorkTime =
+            {
+                StartTime = new TimeSpan(9, 0, 0),
+            }
+        };
+        _fileSystem.File.WriteAllTextAsync(Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;())
+            .Throws(new Exception(&quot;test&quot;));
+
+        // Act
+        await _sut.SaveSettings(settings);
+
+        // Assert
+        _logger.Received()
+            .Log(
+                LogLevel.Error,
+                Arg.Any&lt;EventId&gt;(),
+                Arg.Any&lt;object&gt;(),
+                Arg.Any&lt;Exception&gt;(),
+                Arg.Any&lt;Func&lt;object, Exception?, string&gt;&gt;()
+            );
+    }
+
+    [Test]
+    public async Task GetSettings_ShouldCreateDefaultSettingsFile_WhenFileDoesNotExist()
+    {
+        // Arrange
+        _fileSystem.File.Exists(Arg.Any&lt;string&gt;())
+            .Returns(false);
+
+        // Act
+        var result = await _sut.GetSettings();
+
+        // Assert
+        result.ShouldNotBeNull();
+        await _fileSystem.Received()
+            .File.WriteAllTextAsync(Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;());
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,5,16,106,1],[17,5,17,78,1],[24,5,24,37,1],[25,5,25,6,1],[26,9,26,61,1],[27,5,27,6,1],[35,5,35,6,1],[39,9,39,47,1],[42,9,42,34,1],[43,5,43,6,1],[47,5,47,6,1],[49,9,50,28,1],[51,9,58,17,1],[61,9,61,47,1],[64,9,64,34,1],[65,9,65,67,1],[66,5,66,6,1],[70,5,70,6,1],[72,9,73,28,1],[74,9,75,44,1],[78,9,78,47,1],[81,9,81,34,1],[82,9,89,15,1],[90,5,90,6,1],[94,5,94,6,1],[96,9,102,11,1],[105,9,105,43,1],[108,9,109,75,1],[110,5,110,6,1],[114,5,114,6,1],[116,9,122,11,1],[123,9,124,44,1],[127,9,127,43,1],[130,9,137,15,1],[138,5,138,6,1],[142,5,142,6,1],[144,9,145,29,1],[148,9,148,47,1],[151,9,151,34,1],[152,9,153,75,1],[154,5,154,6,1]]);
+    </script>
+  </body>
+</html>

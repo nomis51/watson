@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\ProjectRepositoryTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Shouldly;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Core.Repositories;
+
+namespace Watson.Tests.Tests.Core.Repositories;
+
+public class ProjectRepositoryTests : IDisposable
+{
+    #region Members
+
+    private readonly IAppDbContext _dbContext;
+    private readonly ProjectRepository _sut;
+    private readonly string _dbFilePath = Path.GetTempFileName();
+
+    #endregion
+
+    #region Constructors
+
+    public ProjectRepositoryTests()
+    {
+        _dbContext = new AppDbContext($&quot;Data Source={_dbFilePath};Cache=Shared;Pooling=False&quot;);
+        _sut = new ProjectRepository(_dbContext, new IdHelper());
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dbContext.Connection.Close();
+        _dbContext.Connection.Dispose();
+
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task DoesNameExistsAsync_ShouldReturnTrue()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.DoesNameExistAsync(name);
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task DoesNameExistsAsync_ShouldReturnFalse_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.DoesNameExistAsync(name);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task GetByNameAsync_ShouldReturnProject()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.GetByNameAsync(name);
+
+        // Assert
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task GetByNameAsync_ShouldReturnNull_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.GetByNameAsync(name);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task EnsureNameExistsAsync_ShouldReturnExistingProject_WhenNameExists()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.EnsureNameExistsAsync(name);
+
+        // Assert
+        result.ShouldNotBeNull();
+        (await _dbContext.Connection.QueryFirstAsync&lt;int&gt;(&quot;SELECT COUNT(*) FROM Projects&quot;))
+            .ShouldBe(1);
+    }
+
+    [Test]
+    public async Task EnsureNameExistsAsync_ShouldReturnNewProject_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.EnsureNameExistsAsync(name);
+
+        // Assert
+        result.ShouldNotBeNull();
+        (await _dbContext.Connection.QueryFirstAsync&lt;int&gt;(&quot;SELECT COUNT(*) FROM Projects&quot;))
+            .ShouldBe(1);
+    }
+
+    [Test]
+    public async Task RenameAsync_ShouldRename()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+        const string newName = &quot;newName&quot;;
+        await _dbContext.Connection.ExecuteAsync(&quot;INSERT INTO Projects (Id,Name) VALUES (@Id,@Name)&quot;, new
+        {
+            Id = &quot;id&quot;,
+            Name = name
+        });
+
+        // Act
+        var result = await _sut.RenameAsync(&quot;id&quot;, newName);
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryFirstAsync&lt;int&gt;(&quot;SELECT COUNT(*) FROM Projects&quot;))
+            .ShouldBe(1);
+        (await _dbContext.Connection.QueryFirstAsync&lt;string&gt;(&quot;SELECT Name FROM Projects&quot;))
+            .ShouldBe(newName);
+    }
+
+    [Test]
+    public async Task RenameAsync_ShouldReturnFalse_WhenNameDoesNotExist()
+    {
+        // Arrange
+        const string name = &quot;name&quot;;
+
+        // Act
+        var result = await _sut.RenameAsync(&quot;id&quot;, name);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,5,16,66,1],[22,5,22,36,1],[23,5,23,6,1],[24,9,24,96,1],[25,9,25,66,1],[26,5,26,6,1],[29,5,29,6,1],[30,9,30,35,1],[31,9,31,39,1],[32,9,32,41,1],[34,9,34,38,1],[35,9,35,10,1],[36,13,36,38,1],[37,9,37,10,1],[38,5,38,6,1],[46,5,46,6,1],[49,9,53,12,1],[56,9,56,58,1],[59,9,59,31,1],[60,5,60,6,1],[64,5,64,6,1],[69,9,69,58,1],[72,9,72,32,1],[73,5,73,6,1],[77,5,77,6,1],[80,9,84,12,1],[87,9,87,54,1],[90,9,90,34,1],[91,5,91,6,1],[95,5,95,6,1],[100,9,100,54,1],[103,9,103,31,1],[104,5,104,6,1],[108,5,108,6,1],[111,9,115,12,1],[118,9,118,61,1],[121,9,121,34,1],[122,9,123,26,1],[124,5,124,6,1],[128,5,128,6,1],[133,9,133,61,1],[136,9,136,34,1],[137,9,138,26,1],[139,5,139,6,1],[143,5,143,6,1],[147,9,151,12,1],[154,9,154,60,1],[157,9,157,31,1],[158,9,159,26,1],[160,9,161,32,1],[162,5,162,6,1],[166,5,166,6,1],[171,9,171,57,1],[174,9,174,32,1],[175,5,175,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\EditOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;edit&quot;, HelpText = &quot;Edit an existing frame&quot;)]
+public class EditOptions
+{
+    [Value(0, MetaName = &quot;project&quot;, Required = true, HelpText = &quot;Project name&quot;)]
+    public string Project { get; set; } = null!;
+
+    [Value(1, MetaName = &quot;tags&quot;, HelpText = &quot;Optional tags&quot;, Required = false)]
+    public IEnumerable&lt;string&gt; Tags { get; set; } = [];
+
+    [Option(&#39;i&#39;, &quot;id&quot;, HelpText = &quot;Frame ID&quot;)]
+    public string? FrameId { get; set; }
+
+    [Option(&#39;f&#39;, &quot;from&quot;, HelpText = &quot;From time&quot;)]
+    public string? FromTime { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,43,11,48,1],[14,53,14,55,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Extensions\ServicesCollectionExtensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.IO.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Watson.Abstractions;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Helpers.Abstractions;
+using Watson.Models;
+using Watson.Models.Abstractions;
+
+namespace Watson.Extensions;
+
+public static class ServicesCollectionExtensions
+{
+    #region Public methods
+
+    public static IServiceCollection AddAppResources(this IServiceCollection services)
+    {
+        ConfigureLogging(services);
+        RegisterServices(services);
+
+        services.AddScoped&lt;IFileSystem, FileSystem&gt;();
+        services.AddSingleton&lt;IConsoleAdapter, ConsoleAdapter&gt;();
+        services.AddSingleton&lt;IProcessHelper, ProcessHelper&gt;();
+        services.AddSingleton&lt;ICli, Cli&gt;();
+        return services;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private static void ConfigureLogging(IServiceCollection services)
+    {
+        services.AddLogging();
+        services.AddSerilog();
+    }
+
+    private static void RegisterServices(IServiceCollection services)
+    {
+        services.AddSingleton&lt;IAppDbContext, AppDbContext&gt;();
+
+        services.AddSingleton&lt;IIdHelper, IdHelper&gt;();
+        services.AddSingleton&lt;ITimeHelper, TimeHelper&gt;();
+        services.AddSingleton&lt;IFrameHelper, FrameHelper&gt;();
+        services.AddSingleton&lt;IDependencyResolver, DependencyResolver&gt;();
+
+        services.AddSingleton&lt;IFrameRepository, FrameRepository&gt;();
+        services.AddSingleton&lt;IProjectRepository, ProjectRepository&gt;();
+        services.AddSingleton&lt;ITagRepository, TagRepository&gt;();
+        services.AddSingleton&lt;ISettingsRepository, SettingsRepository&gt;();
+        services.AddSingleton&lt;IAliasRepository, AliasRepository&gt;();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,5,23,6,0],[24,9,24,36,0],[25,9,25,36,0],[27,9,27,55,0],[28,9,28,66,0],[29,9,29,64,0],[30,9,30,44,0],[31,9,31,25,0],[32,5,32,6,0],[39,5,39,6,0],[40,9,40,31,0],[41,9,41,31,0],[42,5,42,6,0],[45,5,45,6,0],[46,9,46,62,0],[48,9,48,54,0],[49,9,49,58,0],[50,9,50,60,0],[51,9,51,74,0],[53,9,53,68,0],[54,9,54,72,0],[55,9,55,64,0],[56,9,56,74,0],[57,9,57,68,0],[58,5,58,6,0]]);
+    </script>
+  </body>
+</html>

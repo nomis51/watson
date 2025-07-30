@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Repositories\SettingsRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.IO.Abstractions;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Watson.Core.Models.Settings;
+using Watson.Core.Repositories.Abstractions;
+
+namespace Watson.Core.Repositories;
+
+public class SettingsRepository : ISettingsRepository
+{
+    #region Constants
+
+    private const string SettingsFileName = &quot;settings.json&quot;;
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        WriteIndented = true
+    };
+
+    #endregion
+
+    #region Members
+
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger&lt;SettingsRepository&gt; _logger;
+
+    #endregion
+
+    #region Props
+
+    private static string SettingsFilePath =&gt; Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        $&quot;.{nameof(Watson).ToLower()}&quot;,
+        SettingsFileName
+    );
+
+    #endregion
+
+    #region Constructors
+
+    public SettingsRepository(IFileSystem fileSystem, ILogger&lt;SettingsRepository&gt; logger)
+    {
+        _fileSystem = fileSystem;
+        _logger = logger;
+
+        EnsureFoldersExist();
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public async Task&lt;Settings&gt; GetSettings()
+    {
+        try
+        {
+            if (!_fileSystem.File.Exists(SettingsFilePath))
+            {
+                var settings = new Settings();
+                await SaveSettings(settings);
+                return settings;
+            }
+
+            var json = await _fileSystem.File.ReadAllTextAsync(SettingsFilePath);
+
+            try
+            {
+                return JsonSerializer.Deserialize&lt;Settings&gt;(json) ?? new Settings();
+            }
+            catch (Exception e)
+            {
+                await SaveSettings(new Settings());
+                _logger.LogError(e, &quot;Failed to parse settings file&quot;);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, &quot;Failed to read settings file&quot;);
+        }
+
+        var settings2 = new Settings();
+        await SaveSettings(settings2);
+        return settings2;
+    }
+
+    public async Task SaveSettings(Settings settings)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(settings, _jsonSerializerOptions);
+            await _fileSystem.File.WriteAllTextAsync(SettingsFilePath, json);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, &quot;Failed to save settings file&quot;);
+        }
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void EnsureFoldersExist()
+    {
+        var folder = Path.GetDirectoryName(SettingsFilePath)!;
+        if (_fileSystem.Directory.Exists(folder)) return;
+
+        _fileSystem.Directory.CreateDirectory(folder);
+        _fileSystem.File.WriteAllText(SettingsFilePath, JsonSerializer.Serialize(new Settings()));
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,18,7,1],[31,47,35,6,1],[41,5,41,90,1],[42,5,42,6,1],[43,9,43,34,1],[44,9,44,26,1],[46,9,46,30,1],[47,5,47,6,1],[54,5,54,6,1],[56,9,56,10,1],[57,13,57,60,1],[58,13,58,14,1],[59,17,59,47,1],[60,17,60,46,1],[61,17,61,33,1],[64,13,64,82,1],[67,13,67,14,1],[68,17,68,85,1],[70,13,70,32,0],[71,13,71,14,0],[72,17,72,52,0],[73,17,73,70,0],[74,13,74,14,0],[75,9,75,10,0],[76,9,76,28,1],[77,9,77,10,1],[78,13,78,65,1],[79,9,79,10,1],[81,9,81,40,1],[82,9,82,39,1],[83,9,83,26,1],[84,5,84,6,1],[87,5,87,6,1],[89,9,89,10,1],[90,13,90,83,1],[91,13,91,78,1],[92,9,92,10,1],[93,9,93,28,1],[94,9,94,10,1],[95,13,95,65,1],[96,9,96,10,1],[97,5,97,6,1],[104,5,104,6,1],[105,9,105,63,1],[106,9,106,50,1],[106,51,106,58,0],[108,9,108,55,1],[109,9,109,99,1],[110,5,110,6,1]]);
+    </script>
+  </body>
+</html>

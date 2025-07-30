@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson.Core\Helpers\ProcessHelper.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using Watson.Core.Helpers.Abstractions;
+
+namespace Watson.Core.Helpers;
+
+[ExcludeFromCodeCoverage]
+public class ProcessHelper : IProcessHelper
+{
+    #region Public methods
+
+    public void OpenInBrowser(string url)
+    {
+        string command;
+        string arguments;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            command = &quot;cmd&quot;;
+            arguments = $&quot;/C start {url}&quot;;
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            command = &quot;open&quot;;
+            arguments = url;
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            command = &quot;xdg-open&quot;;
+            arguments = url;
+        }
+        else
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            UseShellExecute = true
+        });
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[18,9,18,65,0],[19,9,19,10,0],[20,13,20,29,0],[21,13,21,43,0],[22,9,22,10,0],[23,14,23,68,0],[24,9,24,10,0],[25,13,25,30,0],[26,13,26,29,0],[27,9,27,10,0],[28,14,28,66,0],[29,9,29,10,0],[30,13,30,34,0],[31,13,31,29,0],[32,9,32,10,0],[34,9,34,10,0],[35,13,35,55,0],[38,9,43,12,0],[44,5,44,6,0]]);
+    </script>
+  </body>
+</html>

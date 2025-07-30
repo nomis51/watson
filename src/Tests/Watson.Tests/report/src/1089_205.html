@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\RestartCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class RestartCommand : Command&lt;RestartOptions&gt;
+{
+    #region Constructors
+
+    public RestartCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(RestartOptions options)
+    {
+        if (string.IsNullOrEmpty(options.FrameId))
+        {
+            var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
+            if (lastFrame is null) return 1;
+            if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
+
+            var frame = Frame.CreateEmpty(lastFrame.Time);
+
+            frame = await FrameRepository.InsertAsync(frame);
+            if (frame is null) return 1;
+
+            lastFrame.Time = DateTime.Now.Ticks;
+            return await FrameRepository.UpdateAsync(lastFrame) ? 0 : 1;
+        }
+
+        var existingFrame = await FrameRepository.GetByIdAsync(options.FrameId);
+        if (existingFrame is null) return 1;
+
+        var newFrame = new Frame
+        {
+            Time = DateTime.Now.Ticks,
+            ProjectId = existingFrame.ProjectId
+        };
+
+        var frame1 = await FrameRepository.InsertAsync(newFrame);
+        if (frame1 is null) return 1;
+
+        await FrameRepository.AssociateTagsAsync(newFrame.Id,
+            existingFrame.Tags.Select(e =&gt; e.Name));
+
+        return 0;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,69,12,93,1],[13,5,13,6,1],[14,5,14,6,1],[21,5,21,6,1],[22,9,22,51,1],[23,9,23,10,1],[24,13,24,87,1],[25,13,25,35,1],[25,36,25,45,0],[26,13,26,59,1],[26,60,26,69,0],[28,13,28,59,1],[30,13,30,62,1],[31,13,31,31,1],[31,32,31,41,0],[33,13,33,49,1],[34,13,34,73,1],[37,9,37,81,1],[38,9,38,35,1],[38,36,38,45,0],[40,9,44,11,1],[46,9,46,66,1],[47,9,47,28,1],[47,29,47,38,0],[49,9,50,44,1],[50,44,50,50,1],[50,50,50,53,1],[52,9,52,18,1],[53,5,53,6,1],[56,5,56,6,0],[57,9,57,35,0],[58,5,58,6,0]]);
+    </script>
+  </body>
+</html>

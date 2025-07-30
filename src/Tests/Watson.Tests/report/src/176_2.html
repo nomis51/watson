@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\RepositoryTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Reflection;
+using Dapper;
+using Shouldly;
+using Watson.Core;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers;
+using Watson.Tests.Tests.Core.Repositories.Mocks;
+
+namespace Watson.Tests.Tests.Core.Repositories;
+
+public class RepositoryTests : IDisposable
+{
+    #region Members
+
+    private readonly IAppDbContext _dbContext;
+    private readonly TestRepository _sut;
+
+    private readonly string _dbFilePath = Path.GetTempFileName();
+
+    #endregion
+
+    #region Constructors
+
+    public RepositoryTests()
+    {
+        _dbContext = new AppDbContext($&quot;Data Source={_dbFilePath};Cache=Shared;Pooling=False&quot;);
+        _sut = new TestRepository(_dbContext, new IdHelper());
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _dbContext.Connection.Close();
+        _dbContext.Connection.Dispose();
+
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public void Ctor_ShouldCallInitializeTable()
+    {
+        // Arrange
+        // Act
+        var result = _dbContext.Connection
+            .QueryFirstOrDefault(&quot;SELECT * FROM sqlite_master WHERE type = &#39;table&#39; AND name = &#39;Tests&#39;&quot;);
+
+        // Assert
+        result!.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task GetByAsync_ShouldReturnItem()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tests (Id,Name) VALUES (@Id,@Name)&quot;,
+            new
+            {
+                Id = id,
+                Name = &quot;name&quot;
+            }
+        );
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public async Task GetByAsync_ShouldReturnNull()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task GetAsync_ShouldReturnAllItems()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;&quot;&quot;
+                                        INSERT INTO Tests (Id,Name) VALUES
+                                            (&#39;id1&#39;,&#39;name1&#39;),
+                                            (&#39;id2&#39;,&#39;name2&#39;);
+            &quot;&quot;&quot;);
+
+        // Act
+        var result = await _sut.GetAsync();
+
+        // Assert
+        result.Count().ShouldBe(2);
+    }
+
+    [Test]
+    public async Task InsertAsync_ShouldAssignId()
+    {
+        // Arrange
+        var model = new TestModel { Name = &quot;name&quot; };
+
+        // Act
+        var result = await _sut.InsertAsync(model);
+
+        // Assert
+        result.ShouldNotBeNull();
+        model.Id.ShouldNotBeNullOrEmpty();
+    }
+
+    [Test]
+    public async Task InsertAsync_ShouldUseAsIs_WhenIdAlreadySet()
+    {
+        // Arrange
+        var model = new TestModel { Id = &quot;id&quot;, Name = &quot;name&quot; };
+
+        // Act
+        var result = await _sut.InsertAsync(model);
+
+        // Assert
+        result.ShouldNotBeNull();
+        model.Id.ShouldBe(&quot;id&quot;);
+    }
+
+    [Test]
+    public async Task UpdateAsync_ShouldReturnTrue()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tests (Id,Name) VALUES (@Id,@Name)&quot;,
+            new
+            {
+                Id = id,
+                Name = &quot;name&quot;
+            }
+        );
+
+        // Act
+        var result = await _sut.UpdateAsync(new TestModel { Id = id, Name = &quot;name2&quot; });
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryFirstAsync&lt;TestModel&gt;(&quot;SELECT * FROM Tests WHERE Id = @Id&quot;, new { Id = id }))
+            .Name
+            .ShouldBe(&quot;name2&quot;);
+    }
+
+    [Test]
+    public async Task UpdateAsync_ShouldReturnFalse_WhenIdNotSet()
+    {
+        // Arrange
+        var model = new TestModel { Name = &quot;name&quot; };
+
+        // Act
+        var result = await _sut.UpdateAsync(model);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task DeleteAsync_ShouldDeleteItem()
+    {
+        // Arrange
+        const string id = &quot;id&quot;;
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tests (Id,Name) VALUES (@Id,@Name)&quot;,
+            new
+            {
+                Id = id,
+                Name = &quot;name&quot;
+            }
+        );
+
+        // Act
+        var result = await _sut.DeleteAsync(id);
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryFirstOrDefaultAsync&lt;TestModel&gt;(&quot;SELECT * FROM Tests WHERE Id = @Id&quot;,
+                new { Id = id }))
+            .ShouldBeNull();
+    }
+
+    [Test]
+    public async Task DeleteManyAsync_ShouldDeleteItems()
+    {
+        // Arrange
+        await _dbContext.Connection.ExecuteAsync(
+            &quot;INSERT INTO Tests (Id,Name) VALUES (&#39;id1&#39;,&#39;name1&#39;),(&#39;id2&#39;,&#39;name2&#39;)&quot;);
+
+        // Act
+        var result = await _sut.DeleteManyAsync([&quot;id1&quot;, &quot;id2&quot;]);
+
+        // Assert
+        result.ShouldBeTrue();
+        (await _dbContext.Connection.QueryFirstOrDefaultAsync&lt;TestModel&gt;(&quot;SELECT * FROM Tests WHERE Id = &#39;id1&#39;&quot;))
+            .ShouldBeNull();
+        (await _dbContext.Connection.QueryFirstOrDefaultAsync&lt;TestModel&gt;(&quot;SELECT * FROM Tests WHERE Id = &#39;id2&#39;&quot;))
+            .ShouldBeNull();
+    }
+
+    [Test]
+    public void CreateIndexIfNotExists_ShouldCreateIndex()
+    {
+        // Arrange
+        var sut = _sut.GetType()
+            .GetMethod(&quot;CreateIndexIfNotExists&quot;, BindingFlags.NonPublic | BindingFlags.Instance);
+        sut.ShouldNotBeNull();
+
+        // Act
+        sut.Invoke(_sut, [&quot;TestIndex&quot;, &quot;CREATE INDEX TestIndex ON Tests (Id)&quot;]);
+
+        // Assert
+        var result = _dbContext.Connection.QueryFirstOrDefault&lt;string&gt;(
+            &quot;SELECT name FROM sqlite_master WHERE type=&#39;index&#39; AND name=&#39;TestIndex&#39;&quot;
+        );
+
+        result.ShouldNotBeNull();
+    }
+
+    [Test]
+    public void CreateIndexIfNotExists_ShouldNotCreateIndex_WhenIndexAlreadyExists()
+    {
+        // Arrange
+        var sut = _sut.GetType()
+            .GetMethod(&quot;CreateIndexIfNotExists&quot;, BindingFlags.NonPublic | BindingFlags.Instance);
+        sut.ShouldNotBeNull();
+
+        _dbContext.Connection.Execute(&quot;CREATE INDEX TestIndex ON Tests (Id)&quot;);
+
+        // Act
+        sut.Invoke(_sut, [&quot;TestIndex&quot;, &quot;CREATE INDEX TestIndex ON Tests (Id)&quot;]);
+
+        // Assert
+        var result = _dbContext.Connection.QueryFirstOrDefault&lt;string&gt;(
+            &quot;SELECT name FROM sqlite_master WHERE type=&#39;index&#39; AND name=&#39;TestIndex&#39;&quot;
+        );
+
+        result.ShouldNotBeNull();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,5,18,66,1],[24,5,24,29,1],[25,5,25,6,1],[26,9,26,96,1],[27,9,27,63,1],[28,5,28,6,1],[31,5,31,6,1],[32,9,32,35,1],[33,9,33,39,1],[34,9,34,41,1],[36,9,36,38,1],[37,9,37,10,1],[38,13,38,38,1],[39,9,39,10,1],[40,5,40,6,1],[48,5,48,6,1],[51,9,52,105,1],[55,9,55,35,1],[56,5,56,6,1],[60,5,60,6,1],[63,9,70,11,1],[73,9,73,50,1],[76,9,76,34,1],[77,5,77,6,1],[81,5,81,6,1],[86,9,86,50,1],[89,9,89,31,1],[90,5,90,6,1],[94,5,94,6,1],[96,9,101,18,1],[104,9,104,44,1],[107,9,107,36,1],[108,5,108,6,1],[112,5,112,6,1],[114,9,114,53,1],[117,9,117,52,1],[120,9,120,34,1],[121,9,121,43,1],[122,5,122,6,1],[126,5,126,6,1],[128,9,128,64,1],[131,9,131,52,1],[134,9,134,34,1],[135,9,135,33,1],[136,5,136,6,1],[140,5,140,6,1],[143,9,150,11,1],[153,9,153,88,1],[156,9,156,31,1],[157,9,159,32,1],[160,5,160,6,1],[164,5,164,6,1],[166,9,166,53,1],[169,9,169,52,1],[172,9,172,32,1],[173,5,173,6,1],[177,5,177,6,1],[180,9,187,11,1],[190,9,190,49,1],[193,9,193,31,1],[194,9,196,29,1],[197,5,197,6,1],[201,5,201,6,1],[203,9,204,83,1],[207,9,207,65,1],[210,9,210,31,1],[211,9,212,29,1],[213,9,214,29,1],[215,5,215,6,1],[219,5,219,6,1],[221,9,222,98,1],[223,9,223,31,1],[226,9,226,81,1],[229,9,231,11,1],[233,9,233,34,1],[234,5,234,6,1],[238,5,238,6,1],[240,9,241,98,1],[242,9,242,31,1],[244,9,244,79,1],[247,9,247,81,1],[250,9,252,11,1],[254,9,254,34,1],[255,5,255,6,1]]);
+    </script>
+  </body>
+</html>

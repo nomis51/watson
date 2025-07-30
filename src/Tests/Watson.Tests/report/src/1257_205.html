@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\AddOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;add&quot;, HelpText = &quot;Add a new frame&quot;)]
+public class AddOptions
+{
+    [Value(0, MetaName = &quot;project&quot;, Required = true, HelpText = &quot;Project name&quot;)]
+    public string Project { get; set; } = null!;
+
+    [Value(1, MetaName = &quot;tags&quot;, HelpText = &quot;Optional tags&quot;, Required = false)]
+    public IEnumerable&lt;string&gt; Tags { get; set; } = [];
+
+    [Option(&#39;f&#39;, &quot;from&quot;, HelpText = &quot;From time&quot;)]
+    public string? FromTime { get; set; }
+
+    [Option(&#39;t&#39;, &quot;to&quot;, HelpText = &quot;To time&quot;)]
+    public string? ToTime { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,29,11,33,1],[11,34,11,38,1],[11,43,11,48,1],[14,39,14,43,1],[14,44,14,48,1],[14,53,14,55,1],[17,31,17,35,1],[17,36,17,40,1],[20,29,20,33,1],[20,34,20,38,1]]);
+    </script>
+  </body>
+</html>

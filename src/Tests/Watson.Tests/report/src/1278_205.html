@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\AddCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Models.Settings;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class AddCommand : Command&lt;AddOptions&gt;
+{
+    #region Constructors
+
+    public AddCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(AddOptions options)
+    {
+        if (string.IsNullOrEmpty(options.Project)) return 1;
+        if (!TimeHelper.ParseDateTime(options.FromTime, out var fromTime)) return 1;
+
+        var settings = await SettingsRepository.GetSettings();
+        if (fromTime.HasValue &amp;&amp; (fromTime.Value.TimeOfDay &lt; settings.WorkTime.StartTime ||
+                                  fromTime.Value.TimeOfDay &gt; settings.WorkTime.EndTime))
+        {
+            var customWorkHours = settings.CustomWorkTimes.Find(e =&gt; e.Date.Date == DateTime.Today.Date);
+            if (customWorkHours is null)
+            {
+                customWorkHours = new SettingsCustomWorkTime
+                {
+                    Date = DateTime.Today,
+                    WorkTime = new SettingsWorkTime
+                    {
+                        StartTime = settings.WorkTime.StartTime,
+                        EndTime = settings.WorkTime.EndTime,
+                        LunchStartTime = settings.WorkTime.LunchStartTime,
+                        LunchEndTime = settings.WorkTime.LunchEndTime,
+                        WeekStartDay = settings.WorkTime.WeekStartDay
+                    }
+                };
+
+                settings.CustomWorkTimes.Add(customWorkHours);
+            }
+
+            customWorkHours.WorkTime.StartTime = fromTime.Value.TimeOfDay;
+            await SettingsRepository.SaveSettings(settings);
+        }
+
+        if (!TimeHelper.ParseDateTime(options.ToTime, out var toTime)) return 1;
+        if (toTime.HasValue &amp;&amp; (toTime.Value.TimeOfDay &lt; settings.WorkTime.StartTime ||
+                                toTime.Value.TimeOfDay &gt; settings.WorkTime.EndTime)) return 1;
+
+        if (toTime is not null &amp;&amp; fromTime is null) return 1;
+        if (toTime &lt;= fromTime) return 1;
+        if (toTime &gt;= DateTime.Now) return 1;
+
+        return await CreateFrame(options.Project, fromTime, toTime, options.Tags);
+    }
+
+    public override async Task ProvideCompletions(string[] inputs)
+    {
+        switch (inputs.Length)
+        {
+            case 1:
+            {
+                var projects = await DependencyResolver.ProjectRepository.GetAsync();
+                var project =
+                    projects.FirstOrDefault(e =&gt; e.Name.StartsWith(inputs[0], StringComparison.OrdinalIgnoreCase));
+                if (project is not null)
+                {
+                    Console.WriteLine(project.Name);
+                }
+
+                return;
+            }
+            case &gt;= 2:
+            {
+                var lastArg = inputs.Last();
+                var tags = await DependencyResolver.TagRepository.GetAsync();
+                var tag = tags.FirstOrDefault(e =&gt; e.Name.StartsWith(lastArg, StringComparison.OrdinalIgnoreCase));
+                if (tag is not null)
+                {
+                    Console.WriteLine(tag.Name);
+                }
+
+                break;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task&lt;int&gt; CreateFrame(
+        string project,
+        DateTime? fromTime,
+        DateTime? toTime,
+        IEnumerable&lt;string&gt; tags
+    )
+    {
+        var projectModel = await ProjectRepository.EnsureNameExistsAsync(project);
+        if (projectModel is null) return 1;
+
+        var tagsLst = tags.ToList();
+        if (!await TagRepository.EnsureTagsExistsAsync(tagsLst)) return 1;
+
+        fromTime ??= DateTime.Now;
+        var frame = new Frame
+        {
+            ProjectId = projectModel.Id,
+            Time = fromTime.Value.Ticks
+        };
+
+        frame = await FrameHelper.CreateFrame(frame, toTime);
+        if (frame is null) return 1;
+
+        await FrameRepository.AssociateTagsAsync(frame.Id, tagsLst);
+        frame = await FrameRepository.GetByIdAsync(frame.Id);
+        if (frame is null) return 1;
+
+        var nextFrame = await FrameRepository.GetNextFrameAsync(frame.TimeAsDateTime);
+        if (nextFrame is null)
+        {
+            return await new StatusCommand(DependencyResolver)
+                .Run(new StatusOptions());
+        }
+
+        if (frame.TimeAsDateTime.Date == DateTime.Today)
+        {
+            DisplayFrame(frame, nextFrame);
+            return 0;
+        }
+
+
+        DisplayFrame(frame, nextFrame, true);
+        return 0;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void DisplayFrame(Frame frame, Frame nextFrame, bool fullDate = false)
+    {
+        var fromTime = TimeHelper.FormatTime(frame.TimeAsDateTime.TimeOfDay);
+        var toTime = TimeHelper.FormatTime(nextFrame.TimeAsDateTime.TimeOfDay);
+        Console.MarkupLine(
+            &quot;{0}: [green]{1}[/] ([purple]{2}[/]) added from [blue]{3}[/] to [blue]{4}[/] ({5})&quot;,
+            frame.Id,
+            frame.Project?.Name ?? &quot;-&quot;,
+            string.Join(&quot;, &quot;, frame.Tags.Select(e =&gt; e.Name)),
+            fullDate ? $&quot;{frame.TimeAsDateTime.Date:yyyy-MM-dd} {fromTime}&quot; : fromTime,
+            fullDate ? $&quot;{nextFrame.TimeAsDateTime.Date:yyyy-MM-dd} {toTime}&quot; : toTime,
+            TimeHelper.FormatDuration(nextFrame.TimeAsDateTime - frame.TimeAsDateTime)
+        );
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,65,13,89,1],[14,5,14,6,1],[15,5,15,6,1],[22,5,22,6,1],[23,9,23,51,1],[23,52,23,61,1],[24,9,24,75,1],[24,76,24,85,1],[26,9,26,63,1],[27,9,28,89,1],[29,9,29,10,1],[30,13,30,70,1],[30,70,30,104,0],[30,104,30,106,1],[31,13,31,41,1],[32,13,32,14,1],[33,17,44,19,1],[46,17,46,63,1],[47,13,47,14,1],[49,13,49,75,1],[50,13,50,61,1],[51,9,51,10,1],[53,9,53,71,1],[53,72,53,81,1],[54,9,55,85,1],[55,86,55,95,0],[57,9,57,52,1],[57,53,57,62,1],[58,9,58,32,1],[58,33,58,42,1],[59,9,59,36,1],[59,37,59,46,1],[61,9,61,83,1],[62,5,62,6,1],[65,5,65,6,1],[66,9,66,31,1],[69,13,69,14,1],[70,17,70,86,1],[71,17,72,50,1],[72,50,72,114,1],[72,114,72,116,1],[73,17,73,41,1],[74,17,74,18,1],[75,21,75,53,1],[76,17,76,18,1],[78,17,78,24,1],[81,13,81,14,1],[82,17,82,45,1],[83,17,83,78,1],[84,17,84,52,1],[84,52,84,114,1],[84,114,84,116,1],[85,17,85,37,1],[86,17,86,18,1],[87,21,87,49,1],[88,17,88,18,1],[90,17,90,23,1],[93,5,93,6,1],[105,5,105,6,1],[106,9,106,83,1],[107,9,107,34,1],[107,35,107,44,0],[109,9,109,37,1],[110,9,110,65,1],[110,66,110,75,0],[112,9,112,35,1],[113,9,117,11,1],[119,9,119,62,1],[120,9,120,27,1],[120,28,120,37,0],[122,9,122,69,1],[123,9,123,62,1],[124,9,124,27,1],[124,28,124,37,0],[126,9,126,87,1],[127,9,127,31,1],[128,9,128,10,1],[129,13,130,43,1],[133,9,133,57,1],[134,9,134,10,1],[135,13,135,44,1],[136,13,136,22,1],[140,9,140,46,1],[141,9,141,18,1],[142,5,142,6,1],[149,5,149,6,1],[150,9,150,78,1],[151,9,151,80,1],[152,9,156,54,1],[156,54,156,60,1],[156,60,160,11,1],[161,5,161,6,1]]);
+    </script>
+  </body>
+</html>

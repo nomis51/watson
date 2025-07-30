@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\AliasCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class AliasCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly IAliasRepository _aliasRepository = Substitute.For&lt;IAliasRepository&gt;();
+    private readonly AliasCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public AliasCommandTests()
+    {
+        var idHelper = new IdHelper();
+        _aliasRepository.InsertAsync(Arg.Any&lt;Alias&gt;())
+            .Returns(e =&gt;
+            {
+                var alias = e.Arg&lt;Alias&gt;();
+                alias.Id = idHelper.GenerateId();
+                return alias;
+            });
+        _aliasRepository.DeleteAsync(Arg.Any&lt;string&gt;())
+            .Returns(true);
+
+        _sut = new AliasCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                Substitute.For&lt;IFrameRepository&gt;(),
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(Substitute.For&lt;IFrameRepository&gt;()),
+                Substitute.For&lt;ISettingsRepository&gt;(),
+                ConsoleAdapter,
+                _aliasRepository,
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldCreateAlias()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [&quot;test&quot;, &quot;status&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _aliasRepository.Received()
+            .InsertAsync(Arg.Is&lt;Alias&gt;(a =&gt;
+                a.Name == &quot;test&quot; &amp;&amp;
+                a.Command == &quot;status&quot;
+            ));
+    }
+
+    [Arguments(&quot;create&quot;)]
+    [Arguments(&quot;add&quot;)]
+    [Arguments(&quot;set&quot;)]
+    [Test]
+    public async Task Run_ShouldCreateAlias_WithExplicitCreateAction(string action)
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [action, &quot;test&quot;, &quot;status&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _aliasRepository.Received()
+            .InsertAsync(Arg.Is&lt;Alias&gt;(a =&gt;
+                a.Name == &quot;test&quot; &amp;&amp;
+                a.Command == &quot;status&quot;
+            ));
+    }
+
+    [Arguments(&quot;delete&quot;)]
+    [Arguments(&quot;remove&quot;)]
+    [Test]
+    public async Task Run_ShouldDeleteAlias(string action)
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [action, &quot;test&quot;]
+        };
+        _aliasRepository.GetByNameAsync(Arg.Any&lt;string&gt;())
+            .Returns(e =&gt; new Alias
+            {
+                Id = &quot;id1&quot;,
+                Name = e.Arg&lt;string&gt;(),
+                Command = &quot;test&quot;
+            });
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _aliasRepository.Received()
+            .GetByNameAsync(&quot;test&quot;);
+        await _aliasRepository.Received()
+            .DeleteAsync(&quot;id1&quot;);
+    }
+
+    [Test]
+    public async Task Run_ShouldFailToRemove_WhenAliasDoesNotExist()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [&quot;remove&quot;, &quot;test&quot;]
+        };
+
+        _aliasRepository.GetByNameAsync(&quot;test&quot;)
+            .Returns(default(Alias));
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+        await _aliasRepository.DidNotReceive()
+            .DeleteAsync(Arg.Any&lt;string&gt;());
+        GetConsoleOutput().ShouldBe(
+            GenerateSpectreMarkupOutput(&quot;[red]Alias not found.[/]&quot;)
+        );
+    }
+
+    [Test]
+    public async Task Run_ShouldFailToCreate_WhenAliasAlreadyExists()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [&quot;create&quot;, &quot;test&quot;, &quot;status&quot;]
+        };
+
+        _aliasRepository.GetByNameAsync(&quot;test&quot;)
+            .Returns(new Alias());
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+        await _aliasRepository.DidNotReceive()
+            .InsertAsync(Arg.Any&lt;Alias&gt;());
+        GetConsoleOutput().ShouldBe(
+            GenerateSpectreMarkupOutput(&quot;[red]Alias already exists.[/]&quot;)
+        );
+    }
+
+    [Test]
+    public async Task Run_ShouldFailToCreate_WhenAliasIsReserved()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [&quot;create&quot;, &quot;status&quot;, &quot;status&quot;]
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+        await _aliasRepository.DidNotReceive()
+            .InsertAsync(Arg.Any&lt;Alias&gt;());
+    }
+
+    [Test]
+    public async Task Run_ShouldCreateAlias_WithOptions()
+    {
+        // Arrange
+        var options = new AliasOptions
+        {
+            Arguments = [&quot;breakfast&quot;, &quot;start&quot;, &quot;cooking&quot;, &quot;bacon&quot;, &quot;--at&quot;, &quot;8&quot;],
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        await _aliasRepository.Received()
+            .InsertAsync(Arg.Is&lt;Alias&gt;(e =&gt;
+                e.Name == &quot;breakfast&quot; &amp;&amp;
+                e.Command == &quot;start cooking bacon --at 8&quot;
+            ));
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,93,1],[28,5,28,31,1],[29,5,29,6,1],[30,9,30,39,1],[31,9,33,13,1],[33,13,33,14,1],[33,14,34,17,1],[34,17,34,44,1],[34,44,35,17,1],[35,17,35,50,1],[35,50,36,17,1],[36,17,36,30,1],[36,30,37,13,1],[37,13,37,14,1],[37,14,37,16,1],[38,9,39,28,1],[41,9,53,11,1],[54,5,54,6,1],[62,5,62,6,1],[64,9,67,11,1],[70,9,70,46,1],[73,9,73,28,1],[74,9,78,16,1],[79,5,79,6,1],[86,5,86,6,1],[88,9,91,11,1],[94,9,94,46,1],[97,9,97,28,1],[98,9,102,16,1],[103,5,103,6,1],[109,5,109,6,1],[111,9,114,11,1],[115,9,116,27,1],[116,27,121,14,1],[121,14,121,16,1],[124,9,124,46,1],[127,9,127,28,1],[128,9,129,37,1],[130,9,131,33,1],[132,5,132,6,1],[136,5,136,6,1],[138,9,141,11,1],[143,9,144,38,1],[147,9,147,46,1],[150,9,150,28,1],[151,9,152,45,1],[153,9,155,11,1],[156,5,156,6,1],[160,5,160,6,1],[162,9,165,11,1],[167,9,168,35,1],[171,9,171,46,1],[174,9,174,28,1],[175,9,176,44,1],[177,9,179,11,1],[180,5,180,6,1],[184,5,184,6,1],[186,9,189,11,1],[192,9,192,46,1],[195,9,195,28,1],[196,9,197,44,1],[198,5,198,6,1],[202,5,202,6,1],[204,9,207,11,1],[210,9,210,46,1],[213,9,213,28,1],[214,9,218,16,1],[219,5,219,6,1]]);
+    </script>
+  </body>
+</html>

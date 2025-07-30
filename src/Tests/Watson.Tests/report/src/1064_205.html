@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Models\CommandLine\RemoveOptions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Diagnostics.CodeAnalysis;
+using CommandLine;
+
+namespace Watson.Models.CommandLine;
+
+[ExcludeFromCodeCoverage]
+[Verb(&quot;remove&quot;, HelpText = &quot;Remove a frame&quot;)]
+public class RemoveOptions
+{
+    [Value(1, MetaName = &quot;frameId&quot;, Required = true, HelpText = &quot;Frame ID&quot;)]
+    public string FrameId { get; set; } = null!;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,43,11,48,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\ConfigCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Core.Extensions;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class ConfigCommand : Command&lt;ConfigOptions&gt;
+{
+    #region Constructors
+
+    public ConfigCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(ConfigOptions options)
+    {
+        if (string.IsNullOrEmpty(options.Key)) return 1;
+        if (options.Action.Equals(&quot;get&quot;, StringComparison.OrdinalIgnoreCase))
+        {
+            return await GetConfig(options.Key);
+        }
+
+        if (options.Action.Equals(&quot;set&quot;, StringComparison.OrdinalIgnoreCase))
+        {
+            return await SetConfig(options.Key, options.Value);
+        }
+
+        return 1;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task&lt;int&gt; SetConfig(string key, string? value)
+    {
+        var settings = await SettingsRepository.GetSettings();
+        if (!settings.SetJsonPathValue(key, ConvertToValueType(value, key))) return 1;
+
+        await SettingsRepository.SaveSettings(settings);
+        return 0;
+    }
+
+    private async Task&lt;int&gt; GetConfig(string key)
+    {
+        var settings = await SettingsRepository.GetSettings();
+        if (!settings.GetJsonPathValue(key, out var value)) return 1;
+
+        Console.MarkupLine(&quot;{0}: {1}&quot;, key, value ?? &quot;[grey](null)[/]&quot;);
+        return 0;
+    }
+
+    private static object? ConvertToValueType(string? input, string key)
+    {
+        if (string.IsNullOrEmpty(input)) return null;
+
+        return key switch
+        {
+            &quot;workTime.startTime&quot; =&gt; TimeSpan.Parse(input),
+            &quot;workTime.endTime&quot; =&gt; TimeSpan.Parse(input),
+            &quot;workTime.lunchStartTime&quot; =&gt; TimeSpan.Parse(input),
+            &quot;workTime.lunchEndTime&quot; =&gt; TimeSpan.Parse(input),
+            &quot;workTime.weekStartDay&quot; =&gt; (DayOfWeek)Enum.Parse(typeof(DayOfWeek), input, true),
+            _ =&gt; null
+        };
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,68,12,92,1],[13,5,13,6,1],[14,5,14,6,1],[21,5,21,6,1],[22,9,22,47,1],[22,48,22,57,0],[23,9,23,78,1],[24,9,24,10,1],[25,13,25,49,1],[28,9,28,78,1],[29,9,29,10,1],[30,13,30,64,1],[33,9,33,18,0],[34,5,34,6,1],[37,5,37,6,0],[38,9,38,35,0],[39,5,39,6,0],[46,5,46,6,1],[47,9,47,63,1],[48,9,48,77,1],[48,78,48,87,1],[50,9,50,57,1],[51,9,51,18,1],[52,5,52,6,1],[55,5,55,6,1],[56,9,56,63,1],[57,9,57,60,1],[57,61,57,70,1],[59,9,59,73,1],[60,9,60,18,1],[61,5,61,6,1],[64,5,64,6,1],[65,9,65,41,1],[65,42,65,54,0],[67,9,69,37,1],[69,37,69,58,1],[69,58,70,35,1],[70,35,70,56,0],[70,56,71,42,1],[71,42,71,63,0],[71,63,72,40,1],[72,40,72,61,0],[72,61,73,40,1],[73,40,73,93,0],[73,93,74,18,1],[74,18,74,22,1],[74,22,75,11,1],[76,5,76,6,1]]);
+    </script>
+  </body>
+</html>

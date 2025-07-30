@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\CancelCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Watson.Commands.Abstractions;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class CancelCommand : Command&lt;CancelOptions&gt;
+{
+    #region Constructors
+
+    public CancelCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(CancelOptions options)
+    {
+        var lastFrame = await FrameRepository.GetPreviousFrameAsync(DateTime.Now);
+        if (lastFrame is null) return 1;
+        if (string.IsNullOrEmpty(lastFrame.ProjectId)) return 1;
+
+        return await FrameRepository.DeleteAsync(lastFrame.Id) ? 0 : 1;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,68,11,92,1],[12,5,12,6,1],[13,5,13,6,1],[20,5,20,6,1],[21,9,21,83,1],[22,9,22,31,1],[22,32,22,41,1],[23,9,23,55,1],[23,56,23,65,1],[25,9,25,72,1],[26,5,26,6,1],[29,5,29,6,0],[30,9,30,35,0],[31,5,31,6,0]]);
+    </script>
+  </body>
+</html>

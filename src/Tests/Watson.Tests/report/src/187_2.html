@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Commands\EditCommandTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using NSubstitute;
+using Shouldly;
+using Watson.Commands;
+using Watson.Core.Helpers;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Core.Repositories;
+using Watson.Core.Repositories.Abstractions;
+using Watson.Helpers;
+using Watson.Models;
+using Watson.Models.CommandLine;
+using Watson.Tests.Abstractions;
+
+namespace Watson.Tests.Tests.Commands;
+
+public class EditCommandTests : CommandWithConsoleTest
+{
+    #region Members
+
+    private readonly ISettingsRepository _settingsRepository = Substitute.For&lt;ISettingsRepository&gt;();
+    private readonly EditCommand _sut;
+
+    #endregion
+
+    #region Constructors
+
+    public EditCommandTests()
+    {
+        var idHelper = new IdHelper();
+
+        var frameRepository = new FrameRepository(DbContext, idHelper);
+        _sut = new EditCommand(
+            new DependencyResolver(
+                new ProjectRepository(DbContext, idHelper),
+                frameRepository,
+                new TagRepository(DbContext, idHelper),
+                new TimeHelper(),
+                new FrameHelper(frameRepository),
+                _settingsRepository,
+                ConsoleAdapter,
+                Substitute.For&lt;IAliasRepository&gt;(),
+                Substitute.For&lt;IProcessHelper&gt;()
+            )
+        );
+    }
+
+    #endregion
+
+    #region Tests
+
+    [Test]
+    public async Task Run_ShouldEditProject()
+    {
+        // Arrange
+        var time = new DateTime(2022, 1, 1, 15, 45, 0);
+        var options = new EditOptions
+        {
+            FrameId = &quot;id&quot;,
+            Project = &quot;newName&quot;,
+            Tags = [&quot;newTag&quot;],
+            FromTime = time.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,1)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var project =
+            await DbContext.Connection.QueryFirstOrDefaultAsync&lt;Project&gt;(
+                &quot;SELECT * FROM Projects WHERE Name = &#39;newName&#39;&quot;);
+        project.ShouldNotBeNull();
+        var frame = await DbContext.Connection.QueryFirstAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        frame.ProjectId.ShouldBe(project.Id);
+        frame.TimeAsDateTime.ShouldBe(time);
+
+        var tags = await DbContext.Connection.QueryAsync&lt;Tag&gt;(&quot;SELECT * FROM Tags&quot;);
+        var tagsLst = tags.ToList();
+        var count = await DbContext.Connection.QueryFirstAsync&lt;int&gt;(
+            $&quot;SELECT COUNT(*) FROM Frames_Tags WHERE FrameId = &#39;{frame.Id}&#39; AND TagId IN (&#39;{string.Join(&quot;&#39;, &#39;&quot;, tagsLst.Select(e =&gt; e.Id))}&#39;)&quot;);
+        count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenFrameDoesNotExist()
+    {
+        // Arrange
+        var options = new EditOptions
+        {
+            FrameId = &quot;id&quot;,
+            Project = &quot;newName&quot;
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldFail_WhenNowFrameDoesNotExist()
+    {
+        // Arrange
+        var options = new EditOptions
+        {
+            Project = &quot;newName&quot;
+        };
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Run_ShouldUpdateTime_WhenFromTimeIsSpecified()
+    {
+        // Arrange
+        var fromTime = DateTime.Now.AddMinutes(-5);
+        var options = new EditOptions
+        {
+            FrameId = &quot;id&quot;,
+            Project = &quot;newName&quot;,
+            FromTime = fromTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)
+        };
+        await DbContext.Connection.ExecuteAsync(&quot;INSERT INTO Frames (Id,ProjectId,Time) VALUES (&#39;id&#39;,&#39;id&#39;,1)&quot;);
+
+        // Act
+        var result = await _sut.Run(options);
+
+        // Assert
+        result.ShouldBe(0);
+        var frame = await DbContext.Connection.QueryFirstAsync&lt;Frame&gt;(&quot;SELECT * FROM Frames&quot;);
+        (frame.TimeAsDateTime - fromTime).TotalMinutes.ShouldBeLessThan(1);
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,102,1],[28,5,28,30,1],[29,5,29,6,1],[30,9,30,39,1],[32,9,32,72,1],[33,9,45,11,1],[46,5,46,6,1],[54,5,54,6,1],[56,9,56,56,1],[57,9,63,11,1],[64,9,64,112,1],[67,9,67,46,1],[70,9,70,28,1],[71,9,73,66,1],[74,9,74,35,1],[75,9,75,95,1],[76,9,76,46,1],[77,9,77,45,1],[79,9,79,85,1],[80,9,80,37,1],[81,9,82,133,1],[82,133,82,137,1],[82,137,82,145,1],[83,9,83,27,1],[84,5,84,6,1],[88,5,88,6,1],[90,9,94,11,1],[97,9,97,46,1],[100,9,100,28,1],[101,5,101,6,1],[105,5,105,6,1],[107,9,110,11,1],[113,9,113,46,1],[116,9,116,28,1],[117,5,117,6,1],[121,5,121,6,1],[123,9,123,52,1],[124,9,129,11,1],[130,9,130,112,1],[133,9,133,46,1],[136,9,136,28,1],[137,9,137,95,1],[138,9,138,76,1],[139,5,139,6,1]]);
+    </script>
+  </body>
+</html>

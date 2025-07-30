@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Watson\Commands\LogCommand.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Spectre.Console;
+using Watson.Commands.Abstractions;
+using Watson.Core.Models.Database;
+using Watson.Models.Abstractions;
+using Watson.Models.CommandLine;
+
+namespace Watson.Commands;
+
+public class LogCommand : Command&lt;LogOptions&gt;
+{
+    #region Constructors
+
+    public LogCommand(IDependencyResolver dependencyResolver) : base(dependencyResolver)
+    {
+    }
+
+    #endregion
+
+    #region Public methods
+
+    public override async Task&lt;int&gt; Run(LogOptions options)
+    {
+        DateTime? fromTime = null;
+        DateTime? toTime = null;
+
+        if (!string.IsNullOrEmpty(options.FromTime) || !string.IsNullOrEmpty(options.ToTime))
+        {
+            if (!TimeHelper.ParseDateTime(options.FromTime, out fromTime))
+            {
+                return 1;
+            }
+
+            if (!TimeHelper.ParseDateTime(options.ToTime, out toTime))
+            {
+                return 1;
+            }
+        }
+        else if (options.Year)
+        {
+            fromTime = new DateTime(DateTime.Now.Year, 1, 1);
+            toTime = new DateTime(DateTime.Now.Year, 12, 31, 23, 59, 59);
+        }
+        else if (options.Month)
+        {
+            fromTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month,
+                DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month), 23, 59, 59);
+        }
+        else if (options.Week)
+        {
+            var settings = await SettingsRepository.GetSettings();
+
+            var date = DateTime.Now;
+            while (date.DayOfWeek != settings.WorkTime.WeekStartDay)
+            {
+                date = date.AddDays(-1);
+            }
+
+            fromTime = date;
+            toTime = date.AddDays(6);
+        }
+        else if (options.LastWeek)
+        {
+            var settings = await SettingsRepository.GetSettings();
+
+            var date = DateTime.Now;
+            while (date.DayOfWeek != settings.WorkTime.WeekStartDay)
+            {
+                date = date.AddDays(-1);
+            }
+
+            fromTime = date.AddDays(-7);
+            toTime = date.AddDays(-1);
+        }
+        else if (options.Yesterday)
+        {
+            fromTime = DateTime.Now.Date.AddDays(-1);
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
+                .AddDays(-1);
+        }
+        else if (options.All)
+        {
+            fromTime = DateTime.MinValue;
+            toTime = DateTime.MaxValue;
+        }
+        else if (options.Day &gt;= 0)
+        {
+            fromTime = DateTime.Now.Date.AddDays(-Math.Abs(options.Day));
+            toTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59)
+                .AddDays(-Math.Abs(options.Day));
+        }
+
+        if (!fromTime.HasValue || !toTime.HasValue) return 1;
+
+        var frames = await RetrieveFrames(
+            fromTime.Value,
+            toTime.Value,
+            options.Projects?.Split(&#39;,&#39;, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            [],
+            options.Tags?.Split(&#39;,&#39;, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? [],
+            options.IgnoredProjects?.Split(&#39;,&#39;,
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            [],
+            options.IgnoredTags?.Split(&#39;,&#39;, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ??
+            []
+        );
+
+        await DisplayFrames(frames, options.Reverse);
+        return 0;
+    }
+
+    public override Task ProvideCompletions(string[] inputs)
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private async Task DisplayFrames(IEnumerable&lt;Frame&gt; frames, bool reversed)
+    {
+        var settings = await SettingsRepository.GetSettings();
+        var endTime = settings.GetTodaysWorkTime().EndTime;
+        var lunchTimeDuration = settings.GetTodaysWorkTime().LunchEndTime - settings.GetTodaysWorkTime().LunchStartTime;
+
+        if (DateTime.Now.TimeOfDay &gt; settings.GetTodaysWorkTime().EndTime)
+        {
+            endTime = settings.GetTodaysWorkTime().EndTime;
+        }
+
+        var groupedFrames = frames.GroupBy(e =&gt; e.TimeAsDateTime.Date);
+
+        if (reversed)
+        {
+            groupedFrames = groupedFrames.Reverse();
+        }
+
+        foreach (var group in groupedFrames)
+        {
+            var groupFrames = group.OrderBy(e =&gt; e.Time)
+                .ToList();
+            var totalTime = TimeHelper.GetDuration(groupFrames, endTime) - lunchTimeDuration;
+            Console.WriteLine(
+                &quot;{0} ({1})&quot;,
+                TimeHelper.FormatDate(group.Key),
+                $&quot;{totalTime.Hours}h {totalTime.Minutes}m&quot;
+            );
+
+            var grid = new Grid();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+            grid.AddColumn();
+
+            for (var i = 0; i &lt; groupFrames.Count; ++i)
+            {
+                var frame = groupFrames[i];
+                var toTime = i + 1 &lt; groupFrames.Count
+                    ? new DateTime(groupFrames[i + 1].Time).TimeOfDay
+                    : frame.TimeAsDateTime.Date == DateTime.Today &amp;&amp;
+                      groupFrames[i].TimeAsDateTime.TimeOfDay &lt; endTime &amp;&amp;
+                      DateTime.Now.TimeOfDay &lt; endTime
+                        ? DateTime.Now.TimeOfDay
+                        : endTime;
+                var fromTime = new DateTime(frame.Time).TimeOfDay;
+                var duration = toTime - fromTime;
+
+                if (fromTime &lt; settings.GetTodaysWorkTime().LunchStartTime &amp;&amp;
+                    toTime &gt; settings.GetTodaysWorkTime().LunchEndTime)
+                {
+                    duration -= settings.GetTodaysWorkTime().LunchEndTime - settings.GetTodaysWorkTime().LunchStartTime;
+                }
+                else if (fromTime &gt; settings.GetTodaysWorkTime().LunchStartTime &amp;&amp;
+                         fromTime &lt; settings.GetTodaysWorkTime().LunchEndTime)
+                {
+                    duration -= settings.GetTodaysWorkTime().LunchEndTime - fromTime;
+                }
+                else if (toTime &gt; settings.GetTodaysWorkTime().LunchStartTime &amp;&amp;
+                         toTime &lt; settings.GetTodaysWorkTime().LunchEndTime)
+                {
+                    duration -= toTime - settings.GetTodaysWorkTime().LunchStartTime;
+                }
+
+                grid.AddRow(
+                    new Text(frame.Id),
+                    new Text($&quot;{TimeHelper.FormatTime(fromTime)} to {TimeHelper.FormatTime(toTime)}&quot;),
+                    new Markup($&quot;[blue]{TimeHelper.FormatDuration(duration)}[/]&quot;),
+                    new Markup($&quot;[green]{frame.Project?.Name ?? &quot;-&quot;}[/]&quot;),
+                    new Markup(
+                        frame.Tags.Count == 0
+                            ? string.Empty
+                            : $&quot;([purple]{string.Join(&quot;[/], [purple]&quot;, frame.Tags.Select(e =&gt; e.Name))}[/])&quot;
+                    )
+                );
+            }
+
+            var panel = new Panel(grid);
+            panel.NoBorder();
+            panel.PadLeft(5);
+            Console.Write(panel);
+            Console.WriteLine();
+        }
+    }
+
+    private async Task&lt;IEnumerable&lt;Frame&gt;&gt; RetrieveFrames(
+        DateTime fromTime,
+        DateTime toTime,
+        IEnumerable&lt;string&gt; projects,
+        IEnumerable&lt;string&gt; tags,
+        IEnumerable&lt;string&gt; ignoredProjects,
+        IEnumerable&lt;string&gt; ignoredTags
+    )
+    {
+        List&lt;string&gt; projectIds = [];
+
+        foreach (var name in projects)
+        {
+            var project = await ProjectRepository.GetByNameAsync(name);
+            if (project is null) continue;
+
+            projectIds.Add(project.Id);
+        }
+
+        List&lt;string&gt; tagIds = [];
+
+        foreach (var name in tags)
+        {
+            var tag = await TagRepository.GetByNameAsync(name);
+            if (tag is null) continue;
+
+            tagIds.Add(tag.Id);
+        }
+
+        List&lt;string&gt; ignoredProjectIds = [];
+
+        foreach (var name in ignoredProjects)
+        {
+            var project = await ProjectRepository.GetByNameAsync(name);
+            if (project is null) continue;
+
+            ignoredProjectIds.Add(project.Id);
+        }
+
+        List&lt;string&gt; ignoredTagIds = [];
+
+        foreach (var name in ignoredTags)
+        {
+            var tag = await TagRepository.GetByNameAsync(name);
+            if (tag is null) continue;
+
+            ignoredTagIds.Add(tag.Id);
+        }
+
+        return await FrameRepository.GetAsync(
+            fromTime,
+            toTime,
+            projectIds,
+            tagIds,
+            ignoredProjectIds,
+            ignoredTagIds
+        );
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,65,13,89,1],[14,5,14,6,1],[15,5,15,6,1],[22,5,22,6,1],[23,9,23,35,1],[24,9,24,33,1],[26,9,26,94,1],[27,9,27,10,0],[28,13,28,75,0],[29,13,29,14,0],[30,17,30,26,0],[33,13,33,71,0],[34,13,34,14,0],[35,17,35,26,0],[37,9,37,10,0],[38,14,38,31,1],[39,9,39,10,0],[40,13,40,62,0],[41,13,41,74,0],[42,9,42,10,0],[43,14,43,32,1],[44,9,44,10,0],[45,13,45,79,0],[46,13,47,90,0],[48,9,48,10,0],[49,14,49,31,1],[50,9,50,10,0],[51,13,51,67,0],[53,13,53,37,0],[54,13,54,69,0],[55,13,55,14,0],[56,17,56,41,0],[57,13,57,14,0],[59,13,59,29,0],[60,13,60,38,0],[61,9,61,10,0],[62,14,62,35,1],[63,9,63,10,0],[64,13,64,67,0],[66,13,66,37,0],[67,13,67,69,0],[68,13,68,14,0],[69,17,69,41,0],[70,13,70,14,0],[72,13,72,41,0],[73,13,73,39,0],[74,9,74,10,0],[75,14,75,36,1],[76,9,76,10,0],[77,13,77,54,0],[78,13,79,30,0],[80,9,80,10,0],[81,14,81,30,1],[82,9,82,10,0],[83,13,83,42,0],[84,13,84,40,0],[85,9,85,10,0],[86,14,86,35,1],[87,9,87,10,1],[88,13,88,74,1],[89,13,90,50,1],[91,9,91,10,1],[93,9,93,52,1],[93,53,93,62,0],[95,9,106,11,1],[108,9,108,54,1],[109,9,109,18,1],[110,5,110,6,1],[113,5,113,6,0],[114,9,114,35,0],[115,5,115,6,0],[122,5,122,6,1],[123,9,123,63,1],[124,9,124,60,1],[125,9,125,121,1],[127,9,127,75,1],[128,9,128,10,1],[129,13,129,60,1],[130,9,130,10,1],[132,9,132,49,1],[132,49,132,70,1],[132,70,132,72,1],[134,9,134,22,1],[135,9,135,10,0],[136,13,136,53,0],[137,9,137,10,0],[139,9,139,16,1],[139,18,139,27,1],[139,28,139,30,1],[139,31,139,44,1],[140,9,140,10,1],[141,13,141,50,1],[141,50,141,56,1],[141,56,142,27,1],[143,13,143,94,1],[144,13,148,15,1],[150,13,150,35,1],[151,13,151,30,1],[152,13,152,30,1],[153,13,153,30,1],[154,13,154,30,1],[155,13,155,30,1],[157,18,157,27,1],[157,29,157,50,1],[157,52,157,55,1],[158,13,158,14,1],[159,17,159,44,1],[160,17,166,35,1],[167,17,167,67,1],[168,17,168,50,1],[170,17,171,72,1],[172,17,172,18,1],[173,21,173,121,1],[174,17,174,18,1],[175,22,176,79,1],[177,17,177,18,0],[178,21,178,86,0],[179,17,179,18,0],[180,22,181,77,1],[182,17,182,18,0],[183,21,183,86,0],[184,17,184,18,0],[186,17,194,95,1],[194,95,194,101,1],[194,101,196,19,1],[197,13,197,14,1],[199,13,199,41,1],[200,13,200,30,1],[201,13,201,30,1],[202,13,202,34,1],[203,13,203,33,1],[204,9,204,10,1],[205,5,205,6,1],[215,5,215,6,1],[216,9,216,38,1],[218,9,218,16,1],[218,18,218,26,0],[218,27,218,29,1],[218,30,218,38,1],[219,9,219,10,0],[220,13,220,72,0],[221,13,221,33,0],[221,34,221,43,0],[223,13,223,40,0],[224,9,224,10,0],[226,9,226,34,1],[228,9,228,16,1],[228,18,228,26,0],[228,27,228,29,1],[228,30,228,34,1],[229,9,229,10,0],[230,13,230,64,0],[231,13,231,29,0],[231,30,231,39,0],[233,13,233,32,0],[234,9,234,10,0],[236,9,236,45,1],[238,9,238,16,1],[238,18,238,26,0],[238,27,238,29,1],[238,30,238,45,1],[239,9,239,10,0],[240,13,240,72,0],[241,13,241,33,0],[241,34,241,43,0],[243,13,243,47,0],[244,9,244,10,0],[246,9,246,41,1],[248,9,248,16,1],[248,18,248,26,0],[248,27,248,29,1],[248,30,248,41,1],[249,9,249,10,0],[250,13,250,64,0],[251,13,251,29,0],[251,30,251,39,0],[253,13,253,39,0],[254,9,254,10,0],[256,9,263,11,1],[264,5,264,6,1]]);
+    </script>
+  </body>
+</html>

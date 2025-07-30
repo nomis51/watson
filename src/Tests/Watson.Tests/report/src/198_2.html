@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Abstractions\CommandWithConsoleTest.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using NSubstitute;
+using Spectre.Console;
+using Spectre.Console.Rendering;
+using Watson.Helpers.Abstractions;
+
+namespace Watson.Tests.Abstractions;
+
+public abstract class CommandWithConsoleTest : CommandTest, IDisposable
+{
+    #region Members
+
+    protected readonly IConsoleAdapter ConsoleAdapter = Substitute.For&lt;IConsoleAdapter&gt;();
+    private readonly List&lt;string&gt; _consoleOutput = [];
+
+    #endregion
+
+    #region Constructors
+
+    protected CommandWithConsoleTest()
+    {
+        ConsoleAdapter.When(e =&gt; e.MarkupLine(Arg.Any&lt;string&gt;()))
+            .Do(e =&gt; _consoleOutput.Add(
+                GenerateSpectreMarkupOutput(e.Arg&lt;string&gt;())
+            ));
+
+        ConsoleAdapter.When(e =&gt; e.MarkupLine(Arg.Any&lt;string&gt;(), Arg.Any&lt;object[]&gt;()))
+            .Do(e =&gt; _consoleOutput.Add(
+                GenerateSpectreMarkupOutput(e.Arg&lt;string&gt;(), e.Arg&lt;object[]&gt;())
+            ));
+
+        ConsoleAdapter.When(e =&gt; e.WriteLine(Arg.Any&lt;string&gt;()))
+            .Do(e =&gt; _consoleOutput.Add(e.Arg&lt;string&gt;()));
+
+        ConsoleAdapter.When(e =&gt; e.WriteLine(Arg.Any&lt;string&gt;(), Arg.Any&lt;object[]&gt;()))
+            .Do(e =&gt; _consoleOutput.Add(string.Format(e.Arg&lt;string&gt;(), e.Arg&lt;object[]&gt;())));
+
+        ConsoleAdapter.When(e =&gt; e.Write(Arg.Any&lt;IRenderable&gt;()))
+            .Do(e =&gt; _consoleOutput.Add(
+                GenerateSpectreRenderableOutput(e.Arg&lt;IRenderable&gt;())
+            ));
+    }
+
+    public new void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        base.Dispose();
+    }
+
+    #endregion
+
+    #region Protected methods
+
+    protected List&lt;string&gt; GetConsoleOutputLines()
+    {
+        return _consoleOutput;
+    }
+
+    protected string GetConsoleOutput()
+    {
+        return string.Join(Environment.NewLine, _consoleOutput);
+    }
+
+    protected static string GenerateSpectreMarkupOutput(string input, params object[]? args)
+    {
+        using var writer = new StringWriter();
+        var ansiConsole = AnsiConsole.Create(new AnsiConsoleSettings());
+        var originalOut = ansiConsole.Profile.Out;
+        ansiConsole.Profile.Out = new AnsiConsoleOutput(writer);
+
+        if (args is not null)
+        {
+            ansiConsole.MarkupLine(input, args);
+        }
+        else
+        {
+            ansiConsole.MarkupLine(input);
+        }
+
+        ansiConsole.Profile.Out = originalOut;
+        return writer.ToString().Trim();
+    }
+
+    protected static string GenerateSpectreRenderableOutput(IRenderable renderable)
+    {
+        using var writer = new StringWriter();
+        var ansiConsole = AnsiConsole.Create(new AnsiConsoleSettings());
+        var originalOut = ansiConsole.Profile.Out;
+        ansiConsole.Profile.Out = new AnsiConsoleOutput(writer);
+        ansiConsole.Write(renderable);
+        ansiConsole.Profile.Out = originalOut;
+        return writer.ToString().Trim();
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,91,1],[13,5,13,55,1],[19,5,19,39,1],[20,5,20,6,1],[21,9,21,34,1],[21,34,21,65,1],[21,65,22,22,1],[22,22,24,14,1],[24,14,24,16,1],[26,9,26,34,1],[26,34,26,86,1],[26,86,27,22,1],[27,22,29,14,1],[29,14,29,16,1],[31,9,31,34,1],[31,34,31,64,1],[31,64,32,22,1],[32,22,32,57,1],[32,57,32,59,1],[34,9,34,34,1],[34,34,34,85,1],[34,85,35,22,1],[35,22,35,91,1],[35,91,35,93,1],[37,9,37,34,1],[37,34,37,65,1],[37,65,38,22,1],[38,22,40,14,1],[40,14,40,16,1],[41,5,41,6,1],[44,5,44,6,1],[45,9,45,35,1],[46,9,46,24,1],[47,5,47,6,1],[54,5,54,6,1],[55,9,55,31,1],[56,5,56,6,1],[59,5,59,6,1],[60,9,60,65,1],[61,5,61,6,1],[64,5,64,6,1],[65,9,65,47,1],[66,9,66,73,1],[67,9,67,51,1],[68,9,68,65,1],[70,9,70,30,1],[71,9,71,10,1],[72,13,72,49,1],[73,9,73,10,1],[75,9,75,10,0],[76,13,76,43,0],[77,9,77,10,0],[79,9,79,47,1],[80,9,80,41,1],[81,5,81,6,1],[84,5,84,6,1],[85,9,85,47,1],[86,9,86,73,1],[87,9,87,51,1],[88,9,88,65,1],[89,9,89,39,1],[90,9,90,47,1],[91,9,91,41,1],[92,5,92,6,1]]);
+    </script>
+  </body>
+</html>

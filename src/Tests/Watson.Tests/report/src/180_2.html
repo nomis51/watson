@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>C:\Users\nomis51\GitHub\watson\src\Tests\Watson.Tests\Tests\Core\Repositories\Mocks\TestRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Dapper;
+using Watson.Core.Abstractions;
+using Watson.Core.Helpers.Abstractions;
+using Watson.Core.Repositories;
+
+namespace Watson.Tests.Tests.Core.Repositories.Mocks;
+
+public class TestRepository : Repository&lt;TestModel&gt;
+{
+    #region Constructors
+
+    public TestRepository(IAppDbContext dbContext, IIdHelper idHelper)
+        : base(dbContext, idHelper)
+    {
+    }
+
+    #endregion
+
+    #region Protected methods
+
+    protected override void InitializeTable()
+    {
+        DbContext.Connection.Execute(
+            $&quot;&quot;&quot;
+                         CREATE TABLE IF NOT EXISTS {TableName} (
+                             Id TEXT PRIMARY KEY,
+                             Name TEXT NOT NULL
+                         );
+             &quot;&quot;&quot;
+        );
+    }
+
+    protected override string BuildInsertQuery()
+    {
+        return $&quot;INSERT INTO {TableName} (Id,Name) VALUES (@Id,@Name)&quot;;
+    }
+
+    protected override string BuildUpdateQuery()
+    {
+        return $&quot;UPDATE {TableName} SET Name = @Name WHERE Id = @Id&quot;;
+    }
+
+    #endregion
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,11,13,36,1],[14,5,14,6,1],[15,5,15,6,1],[22,5,22,6,1],[23,9,30,11,1],[31,5,31,6,1],[34,5,34,6,1],[35,9,35,72,1],[36,5,36,6,1],[39,5,39,6,1],[40,9,40,70,1],[41,5,41,6,1]]);
+    </script>
+  </body>
+</html>
